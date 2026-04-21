@@ -1,17 +1,19 @@
-// ULMS Feasibility Spike — main process
-// Throwaway code. No tests, no types, no polish. Answers one question:
-// "Can a sequential pipeline of AI agents coordinate via a status field in
-//  a shared blackboard file, each running in its own long-lived PTY?"
+// ULMS Education Spike v2 — main process
+// Throwaway code. Verifies: can four domain-agnostic methodology skills,
+// given only user-supplied material + dimensions, produce usable exam items
+// for ANY domain?
 
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const { spawn, execSync } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
+const yaml = require('js-yaml');
 
 // ===== Paths =====
 const ROOT = __dirname;
 const WORKSPACE = path.join(ROOT, 'workspace');
 const BLACKBOARD = path.join(WORKSPACE, 'blackboard.json');
+const INPUTS_DIR = path.join(WORKSPACE, 'inputs');
 
 // ===== Resolve `claude` binary =====
 function resolveClaudeBinary() {
@@ -26,36 +28,61 @@ function resolveClaudeBinary() {
 const CLAUDE_BIN = resolveClaudeBinary();
 
 // ===== Spawn config =====
-const AGENT_TIMEOUT_MS = 180_000;
-const MAX_BUDGET_PER_CALL = '0.10';
+const AGENT_TIMEOUT_MS = 300_000; // 5 min — v2 prompts do more work
+const MAX_BUDGET_PER_CALL = '0.50'; // per-agent cap, looser than v1
 const MODEL = process.env.ULMS_MODEL || 'haiku';
 const AGENTS = ['agent_1', 'agent_2', 'agent_3', 'agent_4'];
+const AGENT_SLUGS = {
+  agent_1: 'agent-1-extractor',
+  agent_2: 'agent-2-mapper',
+  agent_3: 'agent-3-designer',
+  agent_4: 'agent-4-reviewer',
+};
+
+// ===== Staged user inputs (held in memory until workflow starts) =====
+const stagedInputs = {
+  material: null,              // { filename, content, content_type }
+  dimensions: null,            // array of { dim_id, name, description }
+  assessment_params: null,     // { target_item_count, difficulty_distribution, item_types }
+  domain_guidance: null,       // string | null
+};
 
 // ===== Blackboard helpers =====
+function emptyBlackboard() {
+  return {
+    workflow: {
+      current_step: 0,
+      total_steps: 4,
+      steps: AGENTS,
+      status: 'pending',
+    },
+    user_input: {
+      material: stagedInputs.material,
+      competency_dimensions: stagedInputs.dimensions || [],
+      domain_guidance: stagedInputs.domain_guidance || null,
+      assessment_params: stagedInputs.assessment_params || {
+        target_item_count: 6,
+        difficulty_distribution: { easy: 0.34, medium: 0.5, hard: 0.16 },
+        item_types: { mc_single: 0.5, fill: 0.3, ordering: 0.2 },
+      },
+    },
+    data: {
+      knowledge_units: null,
+      mapping: null,
+      items: null,
+      review: null,
+    },
+    log: [],
+    costs: {
+      total_usd: 0,
+      by_agent: {},
+    },
+  };
+}
+
 async function resetBlackboard() {
   await fs.mkdir(WORKSPACE, { recursive: true });
-  await fs.writeFile(
-    BLACKBOARD,
-    JSON.stringify(
-      {
-        workflow: {
-          current_step: 0,
-          total_steps: 4,
-          steps: AGENTS,
-          status: 'pending',
-        },
-        data: {
-          agent_1_output: null,
-          agent_2_output: null,
-          agent_3_output: null,
-          agent_4_output: null,
-        },
-        log: [],
-      },
-      null,
-      2,
-    ),
-  );
+  await fs.writeFile(BLACKBOARD, JSON.stringify(emptyBlackboard(), null, 2));
 }
 
 async function readBlackboard() {
@@ -63,52 +90,113 @@ async function readBlackboard() {
   return JSON.parse(raw);
 }
 
-// ===== Prompts (intentionally boring) =====
-function buildPromptForAgent(agentName) {
-  const prompts = {
-    agent_1: `You are Agent 1. Follow these steps exactly:
+// ===== Input loaders =====
+// Copy into inputs/ so they're self-contained with the run snapshot.
+async function ensureInputsDir() {
+  await fs.mkdir(INPUTS_DIR, { recursive: true });
+}
 
-1. Use the Read tool on "blackboard.json" in the current directory.
-2. Set data.agent_1_output = {"message": "Hello, I am Agent 1", "timestamp": "<current ISO-8601 UTC time>"}.
-3. Change workflow.current_step from 0 to 1.
-4. Append to log: {"agent": "agent_1", "action": "completed", "at": "<same timestamp>"}.
-5. Use the Write tool to save the full updated JSON back to "blackboard.json".
-6. Reply with one short sentence confirming done, then stop.
-
-Preserve all other fields exactly. Do NOT add extra fields.`,
-
-    agent_2: `You are Agent 2. Follow these steps exactly:
-
-1. Use the Read tool on "blackboard.json".
-2. If data.agent_1_output is null, reply "ERROR: agent_1_output missing" and stop.
-3. Compute N = character count of data.agent_1_output.message.
-4. Set data.agent_2_output = {"message": "Agent 2 saw Agent 1's message", "received_length": N}.
-5. Change workflow.current_step from 1 to 2.
-6. Append to log: {"agent": "agent_2", "action": "completed", "at": "<current ISO-8601 UTC time>"}.
-7. Use the Write tool to save the full updated JSON.
-8. Reply with one short confirmation sentence, then stop.`,
-
-    agent_3: `You are Agent 3. Follow these steps exactly:
-
-1. Use the Read tool on "blackboard.json".
-2. Set data.agent_3_output = {"character_count": <len(data.agent_1_output.message)>, "computed_by": "agent_3"}.
-3. Change workflow.current_step from 2 to 3.
-4. Append to log: {"agent": "agent_3", "action": "completed", "at": "<current ISO-8601 UTC time>"}.
-5. Use the Write tool to save the full updated JSON.
-6. Reply with one short confirmation sentence, then stop.`,
-
-    agent_4: `You are Agent 4. Follow these steps exactly:
-
-1. Use the Read tool on "blackboard.json".
-2. Verify data.agent_1_output, agent_2_output, agent_3_output are all non-null.
-3. Set data.agent_4_output = {"summary": "All three agents finished", "checks_passed": true, "agent_1_message_length": <data.agent_2_output.received_length>, "agent_3_count": <data.agent_3_output.character_count>}.
-4. Change workflow.current_step from 3 to 4.
-5. Change workflow.status from "pending" to "completed".
-6. Append to log: {"agent": "agent_4", "action": "completed", "at": "<current ISO-8601 UTC time>"}.
-7. Use the Write tool to save the full updated JSON.
-8. Reply with one short confirmation sentence, then stop.`,
+async function loadMaterial(srcPath) {
+  await ensureInputsDir();
+  const content = await fs.readFile(srcPath, 'utf-8');
+  const filename = path.basename(srcPath);
+  const destPath = path.join(INPUTS_DIR, filename);
+  await fs.writeFile(destPath, content);
+  const ext = path.extname(filename).toLowerCase();
+  stagedInputs.material = {
+    filename,
+    content,
+    content_type: ext === '.md' ? 'markdown' : 'text',
   };
-  return prompts[agentName];
+  return { filename, char_count: content.length };
+}
+
+async function loadDimensions(srcPath) {
+  await ensureInputsDir();
+  const text = await fs.readFile(srcPath, 'utf-8');
+  const parsed = yaml.load(text);
+  if (!parsed || !Array.isArray(parsed.dimensions)) {
+    throw new Error('dimensions YAML must have a top-level `dimensions` array');
+  }
+  stagedInputs.dimensions = parsed.dimensions;
+  if (parsed.assessment_params) {
+    stagedInputs.assessment_params = parsed.assessment_params;
+  }
+  const filename = path.basename(srcPath);
+  await fs.writeFile(path.join(INPUTS_DIR, filename), text);
+  return {
+    filename,
+    dimension_count: parsed.dimensions.length,
+    has_assessment_params: !!parsed.assessment_params,
+  };
+}
+
+async function loadGuidance(srcPath) {
+  if (!srcPath) {
+    stagedInputs.domain_guidance = null;
+    return { loaded: false };
+  }
+  await ensureInputsDir();
+  const content = await fs.readFile(srcPath, 'utf-8');
+  stagedInputs.domain_guidance = content;
+  const filename = path.basename(srcPath);
+  await fs.writeFile(path.join(INPUTS_DIR, filename), content);
+  return { loaded: true, filename, char_count: content.length };
+}
+
+function clearGuidance() {
+  stagedInputs.domain_guidance = null;
+}
+
+// ===== Prompts — single-line slash invocation (Step 0 verified) =====
+function buildPromptForAgent(agentName) {
+  const slug = AGENT_SLUGS[agentName];
+  return `/${slug}`;
+}
+
+// ===== Schema sanity checks (warn-only) =====
+// After each agent exits, verify the key shape is present. Doesn't retry.
+function schemaCheck(agentName, board) {
+  const warns = [];
+  const data = board.data || {};
+  if (agentName === 'agent_1') {
+    if (!Array.isArray(data.knowledge_units) || data.knowledge_units.length === 0) {
+      warns.push('data.knowledge_units missing or empty');
+    } else {
+      for (const [i, ku] of data.knowledge_units.entries()) {
+        if (!ku.ku_id) warns.push(`ku[${i}] missing ku_id`);
+        if (!ku.source_excerpt) warns.push(`ku[${i}] missing source_excerpt (Iron Law B risk)`);
+      }
+    }
+  } else if (agentName === 'agent_2') {
+    const m = data.mapping;
+    if (!m) warns.push('data.mapping missing');
+    else {
+      if (!m.blueprint || !Array.isArray(m.blueprint.slot_specs)) {
+        warns.push('mapping.blueprint.slot_specs missing');
+      }
+      if (!m.ku_to_dimensions) warns.push('mapping.ku_to_dimensions missing');
+    }
+  } else if (agentName === 'agent_3') {
+    if (!Array.isArray(data.items) || data.items.length === 0) {
+      warns.push('data.items missing or empty');
+    } else {
+      for (const [i, item] of data.items.entries()) {
+        if (!item.item_id) warns.push(`item[${i}] missing item_id`);
+        if (!item.core || item.core.answer === undefined) {
+          warns.push(`item[${i}] missing core.answer`);
+        }
+      }
+    }
+  } else if (agentName === 'agent_4') {
+    const r = data.review;
+    if (!r) warns.push('data.review missing');
+    else {
+      if (!Array.isArray(r.per_item)) warns.push('review.per_item missing');
+      if (!r.summary) warns.push('review.summary missing');
+    }
+  }
+  return warns;
 }
 
 // ===== UI bridge =====
@@ -121,11 +209,6 @@ function sendUI(channel, payload) {
 }
 
 // ===== Spawn one agent =====
-// Runs `claude --print --output-format stream-json --verbose <...>` with the
-// prompt piped on stdin. Uses child_process.spawn (no PTY) so claude's
-// isatty(stdin) returns false and --print takes the non-interactive fast
-// path. Stdout is both parsed as newline-delimited JSON (for the Overview
-// tab) and forwarded raw (for the per-agent terminal tab).
 function spawnAgent(agentName) {
   return new Promise((resolve, reject) => {
     const prompt = buildPromptForAgent(agentName);
@@ -163,8 +246,6 @@ function spawnAgent(agentName) {
 
     proc.stdout.on('data', (chunk) => {
       const data = chunk.toString();
-
-      // Forward raw stdout to the per-agent terminal tab.
       sendUI('agent:pty', { agent: agentName, data });
 
       lineBuf += data;
@@ -222,8 +303,16 @@ function stopWorkflow() {
   }
 }
 
+function inputsReady() {
+  return !!(stagedInputs.material && stagedInputs.dimensions && stagedInputs.dimensions.length > 0);
+}
+
 async function runWorkflow() {
   if (isRunning) return;
+  if (!inputsReady()) {
+    sendUI('workflow:error', { error: 'material and dimensions must be loaded first' });
+    return;
+  }
   isRunning = true;
 
   try {
@@ -237,10 +326,20 @@ async function runWorkflow() {
       const { result } = await spawnAgent(agentName);
       results.push(result);
 
+      // Update costs in blackboard + emit warnings
       const board = await readBlackboard();
+      board.costs = board.costs || { total_usd: 0, by_agent: {} };
+      board.costs.by_agent[agentName] = result?.total_cost_usd || 0;
+      board.costs.total_usd = Object.values(board.costs.by_agent).reduce((s, v) => s + v, 0);
+      await fs.writeFile(BLACKBOARD, JSON.stringify(board, null, 2));
+
       sendUI('board:updated', board);
 
-      // Status-based sanity check: blackboard must reflect this agent's turn.
+      const warns = schemaCheck(agentName, board);
+      if (warns.length) {
+        sendUI('schema:warn', { agent: agentName, warnings: warns });
+      }
+
       const expectedStep = i + 1;
       if (board.workflow.current_step < expectedStep) {
         throw new Error(
@@ -272,8 +371,8 @@ async function runWorkflow() {
 // ===== Electron lifecycle =====
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1100,
-    height: 820,
+    width: 1200,
+    height: 860,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -292,6 +391,8 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow();
+
+  // Workflow control
   ipcMain.handle('workflow:start', async () => {
     runWorkflow().catch((err) => console.error('runWorkflow error:', err));
   });
@@ -299,12 +400,71 @@ app.whenReady().then(() => {
     stopWorkflow();
   });
   ipcMain.handle('board:read', async () => {
+    try { return await readBlackboard(); } catch { return null; }
+  });
+
+  // Input loaders — return a status snapshot the renderer uses to gate the
+  // Start button.
+  ipcMain.handle('inputs:pick-and-load-material', async () => {
+    const res = await dialog.showOpenDialog(mainWindow, {
+      filters: [{ name: 'Material', extensions: ['md', 'txt', 'markdown'] }],
+      properties: ['openFile'],
+    });
+    if (res.canceled || !res.filePaths[0]) return { status: 'canceled' };
     try {
-      return await readBlackboard();
-    } catch {
-      return null;
+      const info = await loadMaterial(res.filePaths[0]);
+      return { status: 'ok', ...info };
+    } catch (err) {
+      return { status: 'error', error: err.message };
     }
   });
+
+  ipcMain.handle('inputs:pick-and-load-dimensions', async () => {
+    const res = await dialog.showOpenDialog(mainWindow, {
+      filters: [{ name: 'Dimensions YAML', extensions: ['yaml', 'yml'] }],
+      properties: ['openFile'],
+    });
+    if (res.canceled || !res.filePaths[0]) return { status: 'canceled' };
+    try {
+      const info = await loadDimensions(res.filePaths[0]);
+      return { status: 'ok', ...info };
+    } catch (err) {
+      return { status: 'error', error: err.message };
+    }
+  });
+
+  ipcMain.handle('inputs:pick-and-load-guidance', async () => {
+    const res = await dialog.showOpenDialog(mainWindow, {
+      filters: [{ name: 'Guidance', extensions: ['md', 'markdown', 'txt'] }],
+      properties: ['openFile'],
+    });
+    if (res.canceled || !res.filePaths[0]) return { status: 'canceled' };
+    try {
+      const info = await loadGuidance(res.filePaths[0]);
+      return { status: 'ok', ...info };
+    } catch (err) {
+      return { status: 'error', error: err.message };
+    }
+  });
+
+  ipcMain.handle('inputs:clear-guidance', async () => {
+    clearGuidance();
+    return { status: 'ok' };
+  });
+
+  ipcMain.handle('inputs:status', async () => ({
+    material: stagedInputs.material
+      ? { filename: stagedInputs.material.filename, char_count: stagedInputs.material.content.length }
+      : null,
+    dimensions: stagedInputs.dimensions
+      ? { count: stagedInputs.dimensions.length, ids: stagedInputs.dimensions.map((d) => d.dim_id) }
+      : null,
+    guidance: stagedInputs.domain_guidance
+      ? { char_count: stagedInputs.domain_guidance.length }
+      : null,
+    assessment_params: stagedInputs.assessment_params,
+    ready: inputsReady(),
+  }));
 });
 
 app.on('window-all-closed', () => {

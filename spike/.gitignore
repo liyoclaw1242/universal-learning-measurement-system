@@ -1,4 +1,5 @@
 node_modules/
-workspace/
+workspace/blackboard.json
+workspace/inputs/
 .DS_Store
 *.log

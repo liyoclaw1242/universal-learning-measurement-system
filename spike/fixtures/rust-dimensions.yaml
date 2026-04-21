@@ -1,0 +1,27 @@
+dimensions:
+  - dim_id: ownership_concept
+    name: 所有權概念理解
+    description: 理解 Rust 中「每個值有唯一擁有者」的核心規則
+
+  - dim_id: memory_model
+    name: 記憶體模型理解
+    description: 理解 stack 與 heap 的差異，以及不同型別存放位置的規則
+
+  - dim_id: code_prediction
+    name: 程式碼行為預測
+    description: 給定 Rust 程式碼片段，預測其編譯與執行結果
+
+  - dim_id: scope_reasoning
+    name: 作用域推理
+    description: 追蹤變數在進入與離開作用域時的有效性與資源狀態
+
+assessment_params:
+  target_item_count: 6
+  difficulty_distribution:
+    easy: 0.34
+    medium: 0.5
+    hard: 0.16
+  item_types:
+    mc_single: 0.5
+    fill: 0.3
+    ordering: 0.2

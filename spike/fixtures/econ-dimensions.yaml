@@ -1,0 +1,27 @@
+dimensions:
+  - dim_id: core_concept
+    name: 核心經濟概念理解
+    description: 理解「稀缺性」「資源」「需求」「選擇」等構成經濟學基礎的概念及其相互關係
+
+  - dim_id: tradeoff_reasoning
+    name: 取捨推理
+    description: 能辨識並分析資源配置中的取捨關係、優先次序與機會成本
+
+  - dim_id: scenario_analysis
+    name: 情境分析
+    description: 給定真實世界情境（家庭、社群、國家），能套用經濟學視角解釋現象或預測選擇的後果
+
+  - dim_id: system_thinking
+    name: 系統思考
+    description: 理解個體決策、市場機制（分工、交易）、社會整體資源配置三個層級之間的關聯
+
+assessment_params:
+  target_item_count: 6
+  difficulty_distribution:
+    easy: 0.34
+    medium: 0.5
+    hard: 0.16
+  item_types:
+    mc_single: 0.5
+    fill: 0.3
+    ordering: 0.2

@@ -2,81 +2,208 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ULMS Spike</title>
+<title>ULMS Education Spike v2</title>
 <style>
-  body { font-family: -apple-system, Menlo, monospace; padding: 20px; background: #f5f5f7; color: #1d1d1f; margin: 0; }
+  :root {
+    --fg: #1d1d1f; --muted: #86868b; --line: #d2d2d7;
+    --blue: #0071e3; --green: #7cb342; --yellow: #fbc02d; --red: #c62828;
+    --bg: #f5f5f7; --card: #fff; --dark: #1d1d1f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, Menlo, monospace;
+    padding: 20px; background: var(--bg); color: var(--fg); margin: 0;
+  }
   h1 { margin: 0 0 4px 0; font-size: 20px; }
-  .subtitle { color: #86868b; font-size: 12px; margin-bottom: 16px; }
-  button { padding: 8px 16px; font-size: 13px; cursor: pointer; border-radius: 6px; border: 1px solid #0071e3; background: #0071e3; color: white; margin-right: 6px; }
-  button.secondary { background: #e5e5ea; color: #1d1d1f; border-color: #d2d2d7; }
+  .subtitle { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+  button {
+    padding: 8px 14px; font-size: 13px; cursor: pointer;
+    border-radius: 6px; border: 1px solid var(--blue);
+    background: var(--blue); color: white; margin-right: 6px;
+  }
+  button.secondary { background: #e5e5ea; color: var(--fg); border-color: var(--line); }
+  button.ghost { background: transparent; color: var(--fg); border-color: var(--line); }
   button:disabled { background: #aaa; border-color: #aaa; cursor: not-allowed; }
-  .env { color: #86868b; font-size: 11px; margin-top: 6px; font-family: Menlo, monospace; }
-  .step { padding: 8px 12px; margin: 4px 0; border: 1px solid #d2d2d7; background: white; border-radius: 6px; font-size: 13px; }
-  .step.active { background: #fff9c4; border-color: #fbc02d; }
-  .step.done   { background: #dcedc8; border-color: #7cb342; }
-  .step.error  { background: #ffcdd2; border-color: #c62828; }
-  h3 { margin: 14px 0 6px 0; font-size: 12px; color: #424245; text-transform: uppercase; letter-spacing: 0.5px; }
-  pre { background: #1d1d1f; color: #a0d468; padding: 10px; overflow: auto; border-radius: 6px; font-size: 11px; margin: 4px 0; white-space: pre-wrap; word-break: break-all; }
-  #board   { max-height: 220px; }
+  .env { color: var(--muted); font-size: 11px; margin-top: 4px; font-family: Menlo, monospace; }
+
+  /* Input slots */
+  .input-row {
+    display: flex; gap: 10px; margin: 14px 0 6px 0; flex-wrap: wrap;
+  }
+  .slot {
+    flex: 1; min-width: 220px;
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px;
+    background: var(--card); display: flex; flex-direction: column; gap: 6px;
+  }
+  .slot .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .slot .status { font-size: 12px; color: var(--fg); min-height: 18px; }
+  .slot.loaded { border-color: var(--green); background: #f1f8e9; }
+  .slot.optional { border-style: dashed; }
+  .slot-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* Controls + steps */
+  .controls { display: flex; gap: 6px; margin: 8px 0 14px 0; flex-wrap: wrap; }
+  .step {
+    padding: 6px 10px; margin: 2px 0; border: 1px solid var(--line);
+    background: var(--card); border-radius: 6px; font-size: 12px;
+  }
+  .step.active { background: #fff9c4; border-color: var(--yellow); }
+  .step.done   { background: #dcedc8; border-color: var(--green); }
+  .step.error  { background: #ffcdd2; border-color: var(--red); }
+  .steps-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+
+  /* Collapsible board */
+  details {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 6px; padding: 6px 10px; margin-bottom: 10px;
+  }
+  summary { cursor: pointer; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  details[open] summary { margin-bottom: 6px; }
+
+  h3 { margin: 12px 0 6px 0; font-size: 12px; color: #424245; text-transform: uppercase; letter-spacing: 0.5px; }
+  pre {
+    background: var(--dark); color: #a0d468; padding: 10px;
+    overflow: auto; border-radius: 6px; font-size: 11px;
+    margin: 4px 0; white-space: pre-wrap; word-break: break-all;
+  }
+  #board   { max-height: 260px; }
   #summary { max-height: 140px; color: #dce775; }
+  #warnings { color: #ffab91; min-height: 0; }
+
+  /* Item cards */
+  .items-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .item-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 8px; padding: 12px;
+  }
+  .item-card.accept { border-left: 4px solid var(--green); }
+  .item-card.needs_revision { border-left: 4px solid var(--yellow); }
+  .item-card.reject { border-left: 4px solid var(--red); }
+  .item-head {
+    display: flex; justify-content: space-between;
+    gap: 10px; margin-bottom: 6px; flex-wrap: wrap;
+  }
+  .item-id { font-size: 11px; color: var(--muted); font-family: Menlo, monospace; }
+  .item-meta { font-size: 11px; color: var(--muted); }
+  .verdict { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+  .verdict.accept { background: #dcedc8; color: #33691e; }
+  .verdict.needs_revision { background: #fff9c4; color: #f57f17; }
+  .verdict.reject { background: #ffcdd2; color: #b71c1c; }
+  .stem { font-size: 13px; line-height: 1.45; margin: 6px 0; white-space: pre-wrap; }
+  .options { list-style: none; padding: 0; margin: 4px 0; font-size: 12px; }
+  .options li { padding: 3px 6px; border-radius: 4px; }
+  .options li.correct { background: #e8f5e9; color: #2e7d32; font-weight: 600; }
+  .explanation { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .checks { display: flex; gap: 8px; font-size: 10px; flex-wrap: wrap; margin-top: 6px; }
+  .check-badge { padding: 2px 6px; border-radius: 3px; background: #e5e5ea; }
+  .check-badge.pass { background: #dcedc8; color: #33691e; }
+  .check-badge.fail { background: #ffcdd2; color: #b71c1c; }
+  .code-block {
+    background: #f7f7f9; padding: 6px 10px; border-radius: 4px;
+    font-family: Menlo, monospace; font-size: 11px;
+    white-space: pre-wrap; margin: 4px 0;
+  }
 
   /* Tabs */
-  .tabs { display: flex; gap: 4px; margin-top: 16px; border-bottom: 2px solid #d2d2d7; padding-bottom: 0; }
+  .tabs {
+    display: flex; gap: 4px; margin-top: 14px;
+    border-bottom: 2px solid var(--line); padding-bottom: 0;
+  }
   .tab {
-    padding: 8px 14px; cursor: pointer; font-size: 12px; border: 1px solid transparent;
-    border-radius: 6px 6px 0 0; background: #e5e5ea; color: #424245;
+    padding: 7px 12px; cursor: pointer; font-size: 12px;
+    border: 1px solid transparent; border-radius: 6px 6px 0 0;
+    background: #e5e5ea; color: #424245;
     margin-bottom: -2px; position: relative; top: 2px;
   }
-  .tab.active { background: #1d1d1f; color: #fff; border-color: #1d1d1f; }
-  .tab .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: #999; vertical-align: middle; }
-  .tab .dot.active { background: #fbc02d; animation: pulse 1s infinite; }
-  .tab .dot.done   { background: #7cb342; }
-  .tab .dot.error  { background: #c62828; }
+  .tab.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+  .tab .dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 6px; background: #999; vertical-align: middle;
+  }
+  .tab .dot.active { background: var(--yellow); animation: pulse 1s infinite; }
+  .tab .dot.done   { background: var(--green); }
+  .tab .dot.error  { background: var(--red); }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
   .tab-pane { display: none; }
   .tab-pane.active { display: block; }
   .terminal {
-    background: #0a0a0a; color: #d0d0d0; padding: 12px; border-radius: 0 6px 6px 6px;
+    background: #0a0a0a; color: #d0d0d0; padding: 10px;
+    border-radius: 0 6px 6px 6px;
     font-family: Menlo, monospace; font-size: 11px; line-height: 1.35;
     white-space: pre-wrap; word-break: break-all; overflow: auto;
-    height: 440px; margin: 0;
+    height: 400px; margin: 0;
   }
 </style>
 </head>
 <body>
-  <h1>ULMS Feasibility Spike</h1>
-  <div class="subtitle">Throwaway. Four fake agents pass a blackboard between them — each in its own PTY.</div>
-
-  <button id="startBtn">Start Workflow</button>
-  <button id="stopBtn" class="secondary" disabled>Stop</button>
+  <h1>ULMS Education Spike v2</h1>
+  <div class="subtitle">Four domain-agnostic methodology skills + your material + your dimensions → exam items.</div>
   <div class="env" id="envInfo"></div>
 
-  <div id="steps" style="margin-top: 14px;">
-    <div class="step" id="step-agent_1">Step 1 / 4 — agent_1 — <em>pending</em></div>
-    <div class="step" id="step-agent_2">Step 2 / 4 — agent_2 — <em>pending</em></div>
-    <div class="step" id="step-agent_3">Step 3 / 4 — agent_3 — <em>pending</em></div>
-    <div class="step" id="step-agent_4">Step 4 / 4 — agent_4 — <em>pending</em></div>
+  <!-- Input slots -->
+  <div class="input-row">
+    <div class="slot" id="slot-material">
+      <div class="label">Material (必填)</div>
+      <div class="status" id="status-material">未載入</div>
+      <div class="slot-actions">
+        <button class="secondary" id="btnMaterial">選擇 .md / .txt</button>
+      </div>
+    </div>
+    <div class="slot" id="slot-dimensions">
+      <div class="label">Dimensions YAML (必填)</div>
+      <div class="status" id="status-dimensions">未載入</div>
+      <div class="slot-actions">
+        <button class="secondary" id="btnDimensions">選擇 .yaml</button>
+      </div>
+    </div>
+    <div class="slot optional" id="slot-guidance">
+      <div class="label">Domain guidance (可選)</div>
+      <div class="status" id="status-guidance">未提供</div>
+      <div class="slot-actions">
+        <button class="secondary" id="btnGuidance">選擇 .md</button>
+        <button class="ghost" id="btnClearGuidance">清除</button>
+      </div>
+    </div>
   </div>
 
-  <h3>Blackboard</h3>
-  <pre id="board">(not started)</pre>
+  <div class="controls">
+    <button id="startBtn" disabled>開始生成考卷</button>
+    <button id="stopBtn" class="secondary" disabled>Stop</button>
+  </div>
 
-  <h3>Summary</h3>
-  <pre id="summary"></pre>
+  <div class="steps-row">
+    <div class="step" id="step-agent_1">① agent-1 extractor — <em>pending</em></div>
+    <div class="step" id="step-agent_2">② agent-2 mapper — <em>pending</em></div>
+    <div class="step" id="step-agent_3">③ agent-3 designer — <em>pending</em></div>
+    <div class="step" id="step-agent_4">④ agent-4 reviewer — <em>pending</em></div>
+  </div>
 
-  <!-- Tabs: Overview (parsed log) + one raw terminal per agent -->
+  <pre id="warnings"></pre>
+
+  <h3>生成題目</h3>
+  <div class="items-grid" id="itemsGrid"><em style="color:var(--muted);font-size:12px">(尚未產出)</em></div>
+
+  <details>
+    <summary>Summary</summary>
+    <pre id="summary"></pre>
+  </details>
+
+  <details>
+    <summary>Blackboard raw JSON</summary>
+    <pre id="board">(not started)</pre>
+  </details>
+
+  <!-- Tabs: Overview (parsed log) + one terminal per agent -->
   <div class="tabs" id="tabs">
     <div class="tab active" data-pane="overview"><span class="dot"></span>Overview</div>
-    <div class="tab" data-pane="agent_1"><span class="dot" id="dot-agent_1"></span>agent_1</div>
-    <div class="tab" data-pane="agent_2"><span class="dot" id="dot-agent_2"></span>agent_2</div>
-    <div class="tab" data-pane="agent_3"><span class="dot" id="dot-agent_3"></span>agent_3</div>
-    <div class="tab" data-pane="agent_4"><span class="dot" id="dot-agent_4"></span>agent_4</div>
+    <div class="tab" data-pane="agent_1"><span class="dot" id="dot-agent_1"></span>agent-1</div>
+    <div class="tab" data-pane="agent_2"><span class="dot" id="dot-agent_2"></span>agent-2</div>
+    <div class="tab" data-pane="agent_3"><span class="dot" id="dot-agent_3"></span>agent-3</div>
+    <div class="tab" data-pane="agent_4"><span class="dot" id="dot-agent_4"></span>agent-4</div>
   </div>
 
-  <div class="tab-pane active" id="pane-overview">
-    <pre class="terminal" id="logs"></pre>
-  </div>
+  <div class="tab-pane active" id="pane-overview"><pre class="terminal" id="logs"></pre></div>
   <div class="tab-pane" id="pane-agent_1"><pre class="terminal" id="term-agent_1"></pre></div>
   <div class="tab-pane" id="pane-agent_2"><pre class="terminal" id="term-agent_2"></pre></div>
   <div class="tab-pane" id="pane-agent_3"><pre class="terminal" id="term-agent_3"></pre></div>

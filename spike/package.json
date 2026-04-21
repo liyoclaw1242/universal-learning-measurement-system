@@ -12,6 +12,7 @@
     "@electron/rebuild": "^4.0.3",
     "chokidar": "^3.6.0",
     "electron": "^30.0.0",
+    "js-yaml": "^4.1.1",
     "node-pty": "^1.1.0"
   }
 }
