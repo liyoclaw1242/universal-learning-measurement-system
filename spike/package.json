@@ -1,0 +1,17 @@
+{
+  "name": "ulms-spike",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Technical feasibility spike for ULMS. Throwaway code — do not extend.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "reset": "rm -rf workspace"
+  },
+  "dependencies": {
+    "@electron/rebuild": "^4.0.3",
+    "chokidar": "^3.6.0",
+    "electron": "^30.0.0",
+    "node-pty": "^1.1.0"
+  }
+}

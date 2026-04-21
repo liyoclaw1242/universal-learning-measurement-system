@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ULMS Spike</title>
+<style>
+  body { font-family: -apple-system, Menlo, monospace; padding: 20px; background: #f5f5f7; color: #1d1d1f; margin: 0; }
+  h1 { margin: 0 0 4px 0; font-size: 20px; }
+  .subtitle { color: #86868b; font-size: 12px; margin-bottom: 16px; }
+  button { padding: 8px 16px; font-size: 13px; cursor: pointer; border-radius: 6px; border: 1px solid #0071e3; background: #0071e3; color: white; margin-right: 6px; }
+  button.secondary { background: #e5e5ea; color: #1d1d1f; border-color: #d2d2d7; }
+  button:disabled { background: #aaa; border-color: #aaa; cursor: not-allowed; }
+  .env { color: #86868b; font-size: 11px; margin-top: 6px; font-family: Menlo, monospace; }
+  .step { padding: 8px 12px; margin: 4px 0; border: 1px solid #d2d2d7; background: white; border-radius: 6px; font-size: 13px; }
+  .step.active { background: #fff9c4; border-color: #fbc02d; }
+  .step.done   { background: #dcedc8; border-color: #7cb342; }
+  .step.error  { background: #ffcdd2; border-color: #c62828; }
+  h3 { margin: 14px 0 6px 0; font-size: 12px; color: #424245; text-transform: uppercase; letter-spacing: 0.5px; }
+  pre { background: #1d1d1f; color: #a0d468; padding: 10px; overflow: auto; border-radius: 6px; font-size: 11px; margin: 4px 0; white-space: pre-wrap; word-break: break-all; }
+  #board   { max-height: 220px; }
+  #summary { max-height: 140px; color: #dce775; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-top: 16px; border-bottom: 2px solid #d2d2d7; padding-bottom: 0; }
+  .tab {
+    padding: 8px 14px; cursor: pointer; font-size: 12px; border: 1px solid transparent;
+    border-radius: 6px 6px 0 0; background: #e5e5ea; color: #424245;
+    margin-bottom: -2px; position: relative; top: 2px;
+  }
+  .tab.active { background: #1d1d1f; color: #fff; border-color: #1d1d1f; }
+  .tab .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: #999; vertical-align: middle; }
+  .tab .dot.active { background: #fbc02d; animation: pulse 1s infinite; }
+  .tab .dot.done   { background: #7cb342; }
+  .tab .dot.error  { background: #c62828; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+  .terminal {
+    background: #0a0a0a; color: #d0d0d0; padding: 12px; border-radius: 0 6px 6px 6px;
+    font-family: Menlo, monospace; font-size: 11px; line-height: 1.35;
+    white-space: pre-wrap; word-break: break-all; overflow: auto;
+    height: 440px; margin: 0;
+  }
+</style>
+</head>
+<body>
+  <h1>ULMS Feasibility Spike</h1>
+  <div class="subtitle">Throwaway. Four fake agents pass a blackboard between them — each in its own PTY.</div>
+
+  <button id="startBtn">Start Workflow</button>
+  <button id="stopBtn" class="secondary" disabled>Stop</button>
+  <div class="env" id="envInfo"></div>
+
+  <div id="steps" style="margin-top: 14px;">
+    <div class="step" id="step-agent_1">Step 1 / 4 — agent_1 — <em>pending</em></div>
+    <div class="step" id="step-agent_2">Step 2 / 4 — agent_2 — <em>pending</em></div>
+    <div class="step" id="step-agent_3">Step 3 / 4 — agent_3 — <em>pending</em></div>
+    <div class="step" id="step-agent_4">Step 4 / 4 — agent_4 — <em>pending</em></div>
+  </div>
+
+  <h3>Blackboard</h3>
+  <pre id="board">(not started)</pre>
+
+  <h3>Summary</h3>
+  <pre id="summary"></pre>
+
+  <!-- Tabs: Overview (parsed log) + one raw terminal per agent -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-pane="overview"><span class="dot"></span>Overview</div>
+    <div class="tab" data-pane="agent_1"><span class="dot" id="dot-agent_1"></span>agent_1</div>
+    <div class="tab" data-pane="agent_2"><span class="dot" id="dot-agent_2"></span>agent_2</div>
+    <div class="tab" data-pane="agent_3"><span class="dot" id="dot-agent_3"></span>agent_3</div>
+    <div class="tab" data-pane="agent_4"><span class="dot" id="dot-agent_4"></span>agent_4</div>
+  </div>
+
+  <div class="tab-pane active" id="pane-overview">
+    <pre class="terminal" id="logs"></pre>
+  </div>
+  <div class="tab-pane" id="pane-agent_1"><pre class="terminal" id="term-agent_1"></pre></div>
+  <div class="tab-pane" id="pane-agent_2"><pre class="terminal" id="term-agent_2"></pre></div>
+  <div class="tab-pane" id="pane-agent_3"><pre class="terminal" id="term-agent_3"></pre></div>
+  <div class="tab-pane" id="pane-agent_4"><pre class="terminal" id="term-agent_4"></pre></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
