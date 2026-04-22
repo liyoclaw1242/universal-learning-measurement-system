@@ -418,10 +418,15 @@ function spawnGeminiReviewer() {
     const prompt = loadReviewerSkillForGemini();
     sendUI('gemini:started', {});
 
+    // Non-interactive invocation. Gemini CLI does NOT have Claude's
+    // `--print` flag; instead, piping stdin + using `-o stream-json`
+    // together triggers headless mode. `-p "<prompt>"` is the
+    // alternative (prompt as argv), but for long prompts we prefer
+    // stdin. Verified in spike v3 Step 0 on CLI v0.37.0.
     const args = [
       '-y',                                // YOLO mode: auto-approve tools
       '-o', 'stream-json',
-      '--include-directories', WORKSPACE,  // ensure file tools can touch workspace
+      '--include-directories', WORKSPACE,  // let file tools touch workspace
     ];
 
     const proc = spawn(GEMINI_BIN, args, {
