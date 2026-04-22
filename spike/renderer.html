@@ -89,6 +89,12 @@
   .verdict.accept { background: #dcedc8; color: #33691e; }
   .verdict.needs_revision { background: #fff9c4; color: #f57f17; }
   .verdict.reject { background: #ffcdd2; color: #b71c1c; }
+  .verdict-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-size: 10px; }
+  .verdict-row .label-mini { color: var(--muted); font-size: 10px; }
+  .verdict-row .verdict { font-size: 10px; padding: 1px 6px; }
+  .agreement-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin: 0 4px; vertical-align: middle; }
+  .agreement-dot.agree { background: var(--green); }
+  .agreement-dot.disagree { background: #e91e63; }
   .stem { font-size: 13px; line-height: 1.45; margin: 6px 0; white-space: pre-wrap; }
   .options { list-style: none; padding: 0; margin: 4px 0; font-size: 12px; }
   .options li { padding: 3px 6px; border-radius: 4px; }
@@ -137,8 +143,8 @@
 </style>
 </head>
 <body>
-  <h1>ULMS Education Spike v2</h1>
-  <div class="subtitle">Four domain-agnostic methodology skills + your material + your dimensions → exam items.</div>
+  <h1>ULMS Education Spike v2 + v3</h1>
+  <div class="subtitle">Four domain-agnostic skills → exam items → optional Gemini second-opinion reviewer for dual-reviewer cross-check.</div>
   <div class="env" id="envInfo"></div>
 
   <!-- Input slots -->
@@ -170,6 +176,8 @@
   <div class="controls">
     <button id="startBtn" disabled>開始生成考卷</button>
     <button id="stopBtn" class="secondary" disabled>Stop</button>
+    <button id="secondOpinionBtn" class="secondary" disabled title="Workflow 完成後才能啟用">Run Gemini Second Opinion</button>
+    <button id="stopGeminiBtn" class="ghost" disabled>Stop Gemini</button>
   </div>
 
   <div class="steps-row">
@@ -184,9 +192,14 @@
   <h3>生成題目</h3>
   <div class="items-grid" id="itemsGrid"><em style="color:var(--muted);font-size:12px">(尚未產出)</em></div>
 
-  <details>
+  <details open>
     <summary>Summary</summary>
     <pre id="summary"></pre>
+  </details>
+
+  <details>
+    <summary>Dual-Reviewer Agreement</summary>
+    <pre id="agreementSummary">(尚未執行 second opinion)</pre>
   </details>
 
   <details>
@@ -194,13 +207,14 @@
     <pre id="board">(not started)</pre>
   </details>
 
-  <!-- Tabs: Overview (parsed log) + one terminal per agent -->
+  <!-- Tabs: Overview (parsed log) + one terminal per agent + gemini -->
   <div class="tabs" id="tabs">
     <div class="tab active" data-pane="overview"><span class="dot"></span>Overview</div>
     <div class="tab" data-pane="agent_1"><span class="dot" id="dot-agent_1"></span>agent-1</div>
     <div class="tab" data-pane="agent_2"><span class="dot" id="dot-agent_2"></span>agent-2</div>
     <div class="tab" data-pane="agent_3"><span class="dot" id="dot-agent_3"></span>agent-3</div>
-    <div class="tab" data-pane="agent_4"><span class="dot" id="dot-agent_4"></span>agent-4</div>
+    <div class="tab" data-pane="agent_4"><span class="dot" id="dot-agent_4"></span>agent-4 (claude)</div>
+    <div class="tab" data-pane="gemini"><span class="dot" id="dot-gemini"></span>gemini (2nd opinion)</div>
   </div>
 
   <div class="tab-pane active" id="pane-overview"><pre class="terminal" id="logs"></pre></div>
@@ -208,6 +222,7 @@
   <div class="tab-pane" id="pane-agent_2"><pre class="terminal" id="term-agent_2"></pre></div>
   <div class="tab-pane" id="pane-agent_3"><pre class="terminal" id="term-agent_3"></pre></div>
   <div class="tab-pane" id="pane-agent_4"><pre class="terminal" id="term-agent_4"></pre></div>
+  <div class="tab-pane" id="pane-gemini"><pre class="terminal" id="term-gemini"></pre></div>
 
   <script src="renderer.js"></script>
 </body>

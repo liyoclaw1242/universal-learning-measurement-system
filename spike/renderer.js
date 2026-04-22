@@ -1,4 +1,4 @@
-// ULMS Education Spike v2 — renderer (throwaway)
+// ULMS Education Spike v2 + v3 — renderer (throwaway)
 const { ipcRenderer } = require('electron');
 
 const $ = (id) => document.getElementById(id);
@@ -6,10 +6,13 @@ const AGENTS = ['agent_1', 'agent_2', 'agent_3', 'agent_4'];
 
 const startBtn = $('startBtn');
 const stopBtn = $('stopBtn');
+const secondOpinionBtn = $('secondOpinionBtn');
+const stopGeminiBtn = $('stopGeminiBtn');
 const boardEl = $('board');
 const logsEl = $('logs');
 const envEl = $('envInfo');
 const summaryEl = $('summary');
+const agreementEl = $('agreementSummary');
 const warningsEl = $('warnings');
 const itemsGridEl = $('itemsGrid');
 
@@ -132,9 +135,15 @@ $('btnClearGuidance').addEventListener('click', async () => {
 startBtn.addEventListener('click', async () => {
   startBtn.disabled = true;
   stopBtn.disabled = false;
+  secondOpinionBtn.disabled = true;
+  stopGeminiBtn.disabled = true;
   logsEl.textContent = '';
   boardEl.textContent = '(starting…)';
   summaryEl.textContent = '';
+  agreementEl.textContent = '(尚未執行 second opinion)';
+  const termG = $('term-gemini');
+  if (termG) termG.textContent = '';
+  setGeminiDot('');
   resetStepBadges();
   await ipcRenderer.invoke('workflow:start');
 });
@@ -144,10 +153,36 @@ stopBtn.addEventListener('click', async () => {
   appendLog('\n=== STOP REQUESTED ===\n');
 });
 
+secondOpinionBtn.addEventListener('click', async () => {
+  secondOpinionBtn.disabled = true;
+  stopGeminiBtn.disabled = false;
+  const termGemini = $('term-gemini');
+  if (termGemini) termGemini.textContent = '';
+  setGeminiDot('active');
+  appendLog('\n── Gemini second opinion starting ──\n');
+  await ipcRenderer.invoke('review:second-opinion');
+});
+
+stopGeminiBtn.addEventListener('click', async () => {
+  await ipcRenderer.invoke('review:stop-second-opinion');
+  appendLog('\n=== GEMINI STOP REQUESTED ===\n');
+});
+
+function setGeminiDot(state) {
+  const dot = $('dot-gemini');
+  if (!dot) return;
+  dot.className = 'dot ' + (state || '');
+}
+
 // ===== Item cards =====
 function renderItems(board) {
   const items = board?.data?.items;
-  const review = board?.data?.review;
+  // Three sources of verdict, in priority order:
+  // 1. review_merged (dual reviewer done)  → show both + merged
+  // 2. review_claude (agent-4 done, gemini not yet) → show Claude only
+  // 3. review (edge case: old v2 blackboard or mid-flight)
+  const merged = board?.data?.review_merged;
+  const review = board?.data?.review_claude ?? board?.data?.review;
   if (!Array.isArray(items) || items.length === 0) {
     itemsGridEl.innerHTML = '<em style="color:#86868b;font-size:12px">(尚未產出)</em>';
     return;
@@ -156,15 +191,44 @@ function renderItems(board) {
   if (review?.per_item) {
     for (const r of review.per_item) reviewMap[r.item_id] = r;
   }
+  const mergedMap = {};
+  if (merged?.per_item) {
+    for (const m of merged.per_item) mergedMap[m.item_id] = m;
+  }
 
   itemsGridEl.innerHTML = '';
   for (const item of items) {
+    const mergedRev = mergedMap[item.item_id];
     const rev = reviewMap[item.item_id];
-    const verdict = rev?.verdict ?? 'pending';
+    const verdict = mergedRev?.verdict ?? rev?.verdict ?? 'pending';
     const score = rev?.overall_quality_score;
 
     const card = document.createElement('div');
     card.className = `item-card ${verdict}`;
+
+    let verdictBlock;
+    if (mergedRev) {
+      // Dual-reviewer display
+      const vc = mergedRev.verdict_claude ?? '?';
+      const vg = mergedRev.verdict_gemini ?? '?';
+      const agreeDot = mergedRev.agreement
+        ? '<span class="agreement-dot agree" title="兩位 reviewer 一致"></span>'
+        : '<span class="agreement-dot disagree" title="兩位 reviewer 分歧"></span>';
+      verdictBlock = `
+        <div class="verdict-row">
+          <span class="label-mini">C:</span><span class="verdict ${vc}">${vc}</span>
+          ${agreeDot}
+          <span class="label-mini">G:</span><span class="verdict ${vg}">${vg}</span>
+          <span class="label-mini" style="margin-left:6px">→</span>
+          <span class="verdict ${verdict}" title="合併 verdict（最嚴）">${verdict}</span>
+        </div>
+      `;
+    } else {
+      verdictBlock = `
+        ${score !== undefined ? `<span class="item-meta">quality ${score.toFixed(2)} </span>` : ''}
+        <span class="verdict ${verdict}">${verdict}</span>
+      `;
+    }
 
     const head = `
       <div class="item-head">
@@ -173,10 +237,7 @@ function renderItems(board) {
           <span class="item-meta"> · ${escapeHTML(item.core?.item_type ?? '?')}</span>
           <span class="item-meta"> · difficulty ${item.measurement?.difficulty_estimate ?? '?'}</span>
         </div>
-        <div>
-          ${score !== undefined ? `<span class="item-meta">quality ${score.toFixed(2)} </span>` : ''}
-          <span class="verdict ${verdict}">${verdict}</span>
-        </div>
+        <div>${verdictBlock}</div>
       </div>
     `;
 
@@ -209,7 +270,30 @@ function renderItems(board) {
       : '';
 
     let checks = '';
-    if (rev?.checks) {
+    if (mergedRev) {
+      // Dual-reviewer checks display: per-check agreement badge
+      const checkMap = [
+        ['唯一性', 'answer_uniqueness'],
+        ['構念效度', 'construct_validity'],
+        ['歧義', 'ambiguity'],
+        ['繞題', 'bypass_risk'],
+      ];
+      checks = '<div class="checks">';
+      for (const [label, key] of checkMap) {
+        const agree = mergedRev.checks_agreement?.[key];
+        const icon = agree === true ? '✓=' : agree === false ? '✗≠' : '?';
+        const cls = agree === true ? 'pass' : agree === false ? 'fail' : '';
+        checks += `<span class="check-badge ${cls}">${label} ${icon}</span>`;
+      }
+      checks += '</div>';
+
+      if (mergedRev.claude_concerns?.length) {
+        checks += `<div class="explanation" style="color:#0066cc"><strong>Claude 顧慮:</strong> ${mergedRev.claude_concerns.map(escapeHTML).join(' · ')}</div>`;
+      }
+      if (mergedRev.gemini_concerns?.length) {
+        checks += `<div class="explanation" style="color:#cc5500"><strong>Gemini 顧慮:</strong> ${mergedRev.gemini_concerns.map(escapeHTML).join(' · ')}</div>`;
+      }
+    } else if (rev?.checks) {
       const entries = [
         ['唯一性', rev.checks.answer_uniqueness],
         ['構念效度', rev.checks.construct_validity],
@@ -231,7 +315,9 @@ function renderItems(board) {
 
 // ===== IPC handlers =====
 ipcRenderer.on('env:info', (_, info) => {
-  envEl.textContent = `claude: ${info.claude_bin}  •  model: ${info.model}  •  max budget/agent: $${info.max_budget}  •  workspace: ${info.workspace}`;
+  envEl.textContent =
+    `claude: ${info.claude_bin}  •  gemini: ${info.gemini_bin ?? '(not set)'}  •  ` +
+    `model: ${info.model}  •  max budget/agent: $${info.max_budget}  •  workspace: ${info.workspace}`;
 });
 
 ipcRenderer.on('agent:started', (_, { agent }) => {
@@ -334,6 +420,7 @@ ipcRenderer.on('board:updated', (_, board) => {
 ipcRenderer.on('workflow:completed', (_, payload) => {
   startBtn.disabled = false;
   stopBtn.disabled = true;
+  secondOpinionBtn.disabled = false; // workflow done → second opinion available
   const lines = [
     `=== WORKFLOW COMPLETED ===`,
     `Total cost: $${payload.total_cost_usd.toFixed(4)}`,
@@ -356,6 +443,89 @@ ipcRenderer.on('workflow:error', (_, { error, agent }) => {
   appendLog(msg);
   summaryEl.textContent = msg.trim();
   refreshInputStatus();
+});
+
+// ===== Gemini second opinion handlers =====
+ipcRenderer.on('gemini:started', () => {
+  appendTerm('gemini', '── spawn gemini second opinion ──\n');
+});
+
+ipcRenderer.on('gemini:pty', (_, { data }) => {
+  appendTerm('gemini', data);
+});
+
+ipcRenderer.on('gemini:stream', (_, { msg }) => {
+  const tag = '[gemini]';
+  if (msg.type === 'init') {
+    appendLog(`${tag} session ${msg.session_id?.slice(0, 8) ?? '?'} · model ${msg.model}\n`);
+    return;
+  }
+  if (msg.type === 'message' && msg.role === 'assistant') {
+    if (msg.content) {
+      const preview = msg.content.slice(0, 200);
+      appendLog(`${tag} 💬 ${preview}${msg.content.length > 200 ? '…' : ''}\n`);
+    }
+    return;
+  }
+  if (msg.type === 'result') {
+    const tot = msg.stats?.total_tokens ?? 0;
+    const dur = msg.stats?.duration_ms ?? 0;
+    const tools = msg.stats?.tool_calls ?? 0;
+    appendLog(`${tag} ✔ ${msg.status} · ${tot} tokens · ${tools} tool calls · ${dur}ms\n`);
+    return;
+  }
+  appendLog(`${tag} · ${msg.type}\n`);
+});
+
+ipcRenderer.on('gemini:raw', (_, { line }) => {
+  appendLog(`[gemini] ⚠ raw: ${line.slice(0, 200)}\n`);
+});
+
+ipcRenderer.on('gemini:completed', (_, { exit_code, result }) => {
+  setGeminiDot(exit_code === 0 ? 'done' : 'error');
+  appendTerm('gemini', `\n── gemini exit code ${exit_code} ──\n`);
+  if (exit_code !== 0) {
+    stopGeminiBtn.disabled = true;
+    secondOpinionBtn.disabled = false;
+  }
+});
+
+ipcRenderer.on('second-opinion:completed', (_, payload) => {
+  stopGeminiBtn.disabled = true;
+  secondOpinionBtn.disabled = true; // already done; user can clear to re-run
+  const s = payload.merged_summary;
+  const checkLines = Object.entries(s.per_check_agreement).map(([k, v]) =>
+    `    ${k}: ${v.rate !== null ? (v.rate * 100).toFixed(0) + '%' : 'n/a'} (on ${v.measured_on} items)`,
+  );
+  const lines = [
+    `=== DUAL-REVIEWER DONE ===`,
+    `Total items: ${s.total_items}`,
+    `Verdict agreement: ${(s.verdict_agreement_rate * 100).toFixed(0)}% (${Math.round(s.verdict_agreement_rate * s.total_items)}/${s.total_items})`,
+    ``,
+    `Per-check agreement:`,
+    ...checkLines,
+    ``,
+    `Merged verdict counts (strictest):`,
+    `    accept:         ${s.merged_verdict_counts.accept}`,
+    `    needs_revision: ${s.merged_verdict_counts.needs_revision}`,
+    `    reject:         ${s.merged_verdict_counts.reject}`,
+    ``,
+    s.disagreement_item_ids.length
+      ? `Disagreement items: ${s.disagreement_item_ids.join(', ')}`
+      : `No disagreements — both reviewers aligned on every item.`,
+  ];
+  agreementEl.textContent = lines.join('\n');
+  appendLog(`\n${lines.join('\n')}\n`);
+  renderItems(payload.board);
+});
+
+ipcRenderer.on('second-opinion:error', (_, { error }) => {
+  stopGeminiBtn.disabled = true;
+  secondOpinionBtn.disabled = false;
+  setGeminiDot('error');
+  const msg = `\n=== GEMINI ERROR: ${error} ===\n`;
+  appendLog(msg);
+  agreementEl.textContent = msg.trim();
 });
 
 // Initial load

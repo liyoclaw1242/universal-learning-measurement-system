@@ -1,0 +1,23 @@
+dimensions:
+  - dim_id: zodiac_symbol_recognition
+    name: 星座符號辨識能力
+    description: 能夠準確辨識十二星座的傳統符號、名稱、日期範圍及其元素歸屬的基本辨識與記憶能力。
+  - dim_id: element_classification
+    name: 元素分類推理能力
+    description: 運用火、土、風、水四大元素對星座進行分類，並推理元素特性如何對應星座傳統性格描述的分析能力。
+  - dim_id: trait_differentiation
+    name: 性格特質對比能力
+    description: 比較不同星座或元素群的傳統性格描述，辨識相似性、差異性並舉例說明的推理能力。
+  - dim_id: conceptual_integration
+    name: 星座概念整合能力
+    description: 在簡單情境中整合分類系統、元素屬性與性格特質，進行關聯解釋與初步應用的能力。
+assessment_params:
+  target_item_count: 6
+  difficulty_distribution:
+    easy: 0.34
+    medium: 0.5
+    hard: 0.16
+  item_types:
+    mc_single: 0.5
+    fill: 0.3
+    ordering: 0.2
