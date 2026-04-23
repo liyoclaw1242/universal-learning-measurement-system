@@ -48,6 +48,9 @@ interface RibbonProps {
   onStartWorkflow?: () => void;
   /** Currently-staged material filename (shown in input slot) */
   materialFilename?: string | null;
+  /** Number of source files concatenated into the current material
+   *  (1 = single upload, 2+ = multi-select) */
+  materialSourceCount?: number;
   /** Number of dimensions currently loaded */
   dimensionCount?: number;
   /** Whether guidance is loaded */
@@ -106,6 +109,7 @@ export default function Ribbon(props: RibbonProps) {
         onClearGuidance={props.onClearGuidance}
         onStartWorkflow={props.onStartWorkflow}
         materialFilename={props.materialFilename}
+        materialSourceCount={props.materialSourceCount}
         dimensionCount={props.dimensionCount}
         hasGuidance={props.hasGuidance}
         inputsReady={props.inputsReady}
@@ -274,6 +278,7 @@ interface BodyProps {
   onClearGuidance?: () => void;
   onStartWorkflow?: () => void;
   materialFilename?: string | null;
+  materialSourceCount?: number;
   dimensionCount?: number;
   hasGuidance?: boolean;
   inputsReady?: boolean;
@@ -346,16 +351,21 @@ function InputsBody({
   onPickGuidance,
   onClearGuidance,
   materialFilename,
+  materialSourceCount = 0,
   dimensionCount = 0,
   hasGuidance = false,
 }: BodyProps) {
+  const materialLabel =
+    materialFilename && materialSourceCount > 1
+      ? `${materialFilename} · ${materialSourceCount} files`
+      : materialFilename;
   return (
     <div className="inputs-body">
       <InputSlot
         label="MATERIAL"
         required
-        loadedText={materialFilename ?? null}
-        emptyHint="選擇 .md / .txt · 必填"
+        loadedText={materialLabel ?? null}
+        emptyHint="選擇 .md / .txt（可多選）· 必填"
         onPick={onPickMaterial}
       />
       <InputSlot

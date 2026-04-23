@@ -39,6 +39,7 @@ export default function App() {
 
   const inputsReady = useShellStore((s) => s.inputsReady);
   const loadedMaterialFilename = useShellStore((s) => s.loadedMaterialFilename);
+  const loadedMaterialSourceCount = useShellStore((s) => s.loadedMaterialSourceCount);
   const loadedDimensionCount = useShellStore((s) => s.loadedDimensionCount);
   const loadedGuidance = useShellStore((s) => s.loadedGuidance);
   const geminiRunning = useShellStore((s) => s.geminiRunning);
@@ -123,6 +124,7 @@ export default function App() {
         onClearGuidance={() => void bridge.clearGuidance()}
         onStartWorkflow={() => void bridge.startWorkflow()}
         materialFilename={loadedMaterialFilename}
+        materialSourceCount={loadedMaterialSourceCount}
         dimensionCount={loadedDimensionCount}
         hasGuidance={loadedGuidance}
         inputsReady={inputsReady}

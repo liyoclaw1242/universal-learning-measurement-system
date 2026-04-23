@@ -6,10 +6,21 @@
 
 export type AgentId = 'agent_1' | 'agent_2' | 'agent_3' | 'agent_4';
 
-export interface MaterialInput {
+export interface MaterialSource {
   filename: string;
+  char_count: number;
+}
+
+export interface MaterialInput {
+  /** display label: single filename, or "a.md + b.md" / "a.md + N others" */
+  filename: string;
+  /** concatenated content, with HTML-comment separators between sources
+   *  when `sources.length > 1` */
   content: string;
   content_type: 'text' | 'markdown';
+  /** Optional audit trail of which files were concatenated. Absent for
+   *  single-file upload (back-compat). */
+  sources?: MaterialSource[];
 }
 
 export interface Dimension {

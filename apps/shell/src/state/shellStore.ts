@@ -78,6 +78,9 @@ export interface ShellState {
   /** Status of the currently-loaded inputs (returned by inputs:status IPC) */
   inputsReady: boolean;
   loadedMaterialFilename: string | null;
+  /** Count of source files that were concatenated for the current
+   *  material (1 for single upload, 2+ for multi-select). */
+  loadedMaterialSourceCount: number;
   loadedDimensionCount: number;
   loadedGuidance: boolean;
 
@@ -121,7 +124,12 @@ export interface ShellState {
   _onWorkflowCompleted: () => void;
   _onWorkflowError: (msg: string) => void;
   _onInputsStatus: (status: {
-    material: { filename: string; char_count: number } | null;
+    material: {
+      filename: string;
+      char_count: number;
+      source_count?: number;
+      sources?: Array<{ filename: string; char_count: number }>;
+    } | null;
     dimensions: { count: number; ids: string[] } | null;
     guidance: { char_count: number } | null;
     ready: boolean;
@@ -176,6 +184,7 @@ export const useShellStore = create<ShellState>()(
 
       inputsReady: false,
       loadedMaterialFilename: null,
+      loadedMaterialSourceCount: 0,
       loadedDimensionCount: 0,
       loadedGuidance: false,
       geminiRunning: false,
@@ -302,6 +311,7 @@ export const useShellStore = create<ShellState>()(
         set((st) => ({
           inputsReady: status.ready,
           loadedMaterialFilename: status.material?.filename ?? null,
+          loadedMaterialSourceCount: status.material?.source_count ?? (status.material ? 1 : 0),
           loadedDimensionCount: status.dimensions?.count ?? 0,
           loadedGuidance: !!status.guidance,
           session: {
