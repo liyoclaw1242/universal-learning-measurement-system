@@ -164,12 +164,37 @@ html, body, #root {
   white-space: nowrap;
   flex-shrink: 0;
 }
-.btn:hover    { background: var(--ulms-canvas-2); border-color: var(--ulms-ink-2); }
+.btn:hover:not(:disabled) { background: var(--ulms-canvas-2); border-color: var(--ulms-ink-2); }
 .btn.primary  { background: var(--ulms-ink); color: var(--ulms-surface); border-color: var(--ulms-ink); }
-.btn.primary:hover { background: #000; }
+.btn.primary:hover:not(:disabled) { filter: brightness(0.95); }
 .btn.ghost    { border-style: dashed; color: var(--ulms-ink-2); }
 .btn.danger   { color: var(--ulms-red-ink); border-color: var(--ulms-red-bg); }
 .btn.xs       { font-size: var(--ulms-fs-meta); padding: 2px 6px; white-space: nowrap; }
+
+/* Press state — subtle scale, no colour change (design_system.md) */
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+  transition: transform 0.05s, background 0.12s, border-color 0.12s;
+}
+
+/* Disabled — gray-flat, intentionally harsh (design_system.md):
+   reads as "blocked, not loading". Applies to every .btn variant. */
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  background: var(--ulms-line);
+  border-color: var(--ulms-line);
+  color: var(--ulms-muted);
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+/* Exceptions: .btn.running stays yellow while disabled (it's a
+   "progressing" state, not a "blocked" state). */
+.btn.running:disabled {
+  background: var(--ulms-yellow-bg);
+  border-color: var(--ulms-yellow);
+  color: var(--ulms-yellow-ink);
+}
 
 /* ============================================================
    Ribbon tabs row
@@ -886,3 +911,55 @@ html, body, #root {
 .statusbar .dot { width: 6px; height: 6px; border-radius: 50%; }
 .statusbar .dot.green { background: var(--ulms-green); }
 .statusbar .dot.yellow { background: var(--ulms-yellow); }
+
+/* ============================================================
+   Step 9 — polish: focus rings, reduced motion
+   ============================================================ */
+
+/* Keyboard focus: subtle but unmissable. :focus-visible only triggers
+   on keyboard nav, so mouse users don't see rings.
+   Offset 2px + 2px outline keeps the ring outside the element's own
+   border. Dark rings on light surfaces, light rings on dark. */
+
+.btn:focus-visible,
+.ribbon-tabs .tab:focus-visible,
+.density-toggle button:focus-visible,
+.tabbar .tab:focus-visible,
+.tabbar .tab-add:focus-visible,
+.slot-placeholder:focus-visible,
+.item-row:focus-visible,
+.agent-node:focus-visible,
+.check-head:focus-visible,
+.tabbar .tab .close:focus-visible,
+.warning-toast .dismiss:focus-visible,
+.source-excerpt summary:focus-visible {
+  outline: 2px solid var(--ulms-ink);
+  outline-offset: 2px;
+}
+/* Primary buttons get a contrasting ring */
+.btn.primary:focus-visible {
+  outline-color: var(--ulms-blue);
+}
+/* Terminal prompt caret + bottom status bar are on dark surfaces */
+.statusbar *:focus-visible {
+  outline: 2px solid var(--ulms-canvas);
+  outline-offset: 1px;
+}
+
+/* Reduced-motion: collapse every transition + animation. Colour-based
+   state cues (pulse dot colour, agreement dot colour, step background
+   tint) still communicate; only the motion is gone. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+  }
+  /* The blinking caret in the terminal is purely decorative — hide it
+     instead of slamming it to 0ms which would just freeze it visible */
+  .term-prompt .caret { visibility: hidden; }
+}
