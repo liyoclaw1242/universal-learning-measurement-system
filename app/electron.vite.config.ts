@@ -7,19 +7,23 @@ import path from 'node:path';
 // and preload stay plain TS.
 
 export default defineConfig({
+  // electron-vite bakes in filename conventions:
+  //   out/main/index.js    (matches package.json "main")
+  //   out/preload/preload.mjs
+  //   out/renderer/index.html
+  // We explicitly force main to "index.js" via rollup output, and
+  // match the preload path in electron/main.ts instead of renaming it
+  // (lib fileName option was being overridden by Vite SSR defaults).
   main: {
     build: {
-      lib: {
-        entry: 'electron/main.ts',
-      },
+      lib: { entry: 'electron/main.ts', formats: ['es'] },
       outDir: 'out/main',
+      rollupOptions: { output: { entryFileNames: 'index.js' } },
     },
   },
   preload: {
     build: {
-      lib: {
-        entry: 'electron/preload.ts',
-      },
+      lib: { entry: 'electron/preload.ts', formats: ['es'] },
       outDir: 'out/preload',
     },
   },

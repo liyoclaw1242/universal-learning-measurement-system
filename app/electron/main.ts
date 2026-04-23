@@ -18,7 +18,7 @@ async function createWindow(): Promise<void> {
     minHeight: 640,
     backgroundColor: '#f5f5f7', // --ulms-canvas
     webPreferences: {
-      preload: path.join(__dirname, '../preload/index.mjs'),
+      preload: path.join(__dirname, '../preload/preload.mjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false, // relax for later fs/spawn bridge
