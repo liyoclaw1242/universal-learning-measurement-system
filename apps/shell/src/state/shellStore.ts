@@ -81,6 +81,16 @@ export interface ShellState {
   loadedDimensionCount: number;
   loadedGuidance: boolean;
 
+  /** Gemini second-opinion progress */
+  geminiRunning: boolean;
+  /** Merged review summary, populated after second-opinion:completed */
+  reviewSummary: {
+    total_items: number;
+    verdict_agreement_rate: number;
+    merged_verdict_counts: { accept: number; needs_revision: number; reject: number };
+    disagreement_item_ids: string[];
+  } | null;
+
   // Generic warnings surfaced from the coordinator (schema checks / raw
   // non-JSON lines / rate-limit events). Capped at 40.
   warnings: string[];
@@ -109,6 +119,15 @@ export interface ShellState {
     guidance: { char_count: number } | null;
     ready: boolean;
   }) => void;
+  _onTranslatedItems: (payload: {
+    items: Item[];
+    itemOptions: Record<string, ItemOption[]>;
+    itemChecks: Record<string, ItemChecks>;
+    itemCode: Record<string, string>;
+  }) => void;
+  _onGeminiStarted: () => void;
+  _onGeminiStopped: () => void;
+  _onReviewSummary: (summary: ShellState['reviewSummary']) => void;
   _pushWarning: (msg: string) => void;
 }
 
@@ -144,6 +163,8 @@ export const useShellStore = create<ShellState>()(
       loadedMaterialFilename: null,
       loadedDimensionCount: 0,
       loadedGuidance: false,
+      geminiRunning: false,
+      reviewSummary: null,
       warnings: [],
 
       // ── UI actions ───────────────────────────────────
@@ -272,6 +293,18 @@ export const useShellStore = create<ShellState>()(
         })),
 
       _pushWarning: (msg) => set((st) => ({ warnings: [...st.warnings, msg].slice(-40) })),
+
+      _onTranslatedItems: (p) =>
+        set(() => ({
+          items: p.items,
+          itemOptions: p.itemOptions,
+          itemChecks: p.itemChecks,
+          itemCode: p.itemCode,
+        })),
+
+      _onGeminiStarted: () => set({ geminiRunning: true }),
+      _onGeminiStopped: () => set({ geminiRunning: false }),
+      _onReviewSummary: (summary) => set({ reviewSummary: summary }),
     }),
     {
       name: 'ulms-shell-ui',

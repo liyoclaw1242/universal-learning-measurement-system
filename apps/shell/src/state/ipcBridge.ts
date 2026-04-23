@@ -3,6 +3,7 @@
 // before App mounts; returns a cleanup fn for hot-reload.
 
 import { useShellStore } from './shellStore';
+import { translateBoard, type TranslateInput } from './translateBoard';
 
 // Narrowing helpers for untyped IPC payloads — preload's bridge is
 // intentionally `unknown` on the event side so the renderer can evolve
@@ -66,15 +67,14 @@ export function setupIpcBridge(): () => void {
 
   unsubs.push(
     ulms.onBoardUpdated(({ board }) => {
-      // Step 7a: we mostly ignore the raw board here because the UI's
-      // Item[] mapping is deferred to step 7b. Cost + session.material
-      // are useful so surface those.
       const b = board as {
         user_input?: { material?: { filename?: string; content?: string } };
         costs?: { total_usd?: number };
       } | null;
       if (!b) return;
       const state = useShellStore.getState();
+
+      // Always refresh session cost + material filename
       useShellStore.setState({
         session: {
           ...state.session,
@@ -82,6 +82,10 @@ export function setupIpcBridge(): () => void {
           material: b.user_input?.material?.filename ?? state.session.material,
         },
       });
+
+      // Translate to UI Item[] shape (no-op until agent-3 produces items)
+      const translated = translateBoard(board as TranslateInput);
+      useShellStore.getState()._onTranslatedItems(translated);
     }),
   );
 
@@ -171,6 +175,54 @@ export function setupIpcBridge(): () => void {
     }),
   );
 
+  // ─── Gemini second opinion ───────────────────────────
+
+  unsubs.push(
+    ulms.onGeminiStarted(() => {
+      useShellStore.getState()._onGeminiStarted();
+    }),
+  );
+
+  unsubs.push(
+    ulms.onGeminiCompleted(() => {
+      useShellStore.getState()._onGeminiStopped();
+    }),
+  );
+
+  unsubs.push(
+    ulms.onSecondOpinionCompleted((payload) => {
+      useShellStore.getState()._onGeminiStopped();
+      const p = payload as {
+        merged_summary?: {
+          total_items?: number;
+          verdict_agreement_rate?: number;
+          merged_verdict_counts?: { accept?: number; needs_revision?: number; reject?: number };
+          disagreement_item_ids?: string[];
+        };
+      };
+      const s = p.merged_summary;
+      if (s) {
+        useShellStore.getState()._onReviewSummary({
+          total_items: s.total_items ?? 0,
+          verdict_agreement_rate: s.verdict_agreement_rate ?? 0,
+          merged_verdict_counts: {
+            accept: s.merged_verdict_counts?.accept ?? 0,
+            needs_revision: s.merged_verdict_counts?.needs_revision ?? 0,
+            reject: s.merged_verdict_counts?.reject ?? 0,
+          },
+          disagreement_item_ids: s.disagreement_item_ids ?? [],
+        });
+      }
+    }),
+  );
+
+  unsubs.push(
+    ulms.onSecondOpinionError(({ error }) => {
+      useShellStore.getState()._onGeminiStopped();
+      _pushWarning(`[gemini] ${error}`);
+    }),
+  );
+
   return () => {
     for (const u of unsubs) u();
   };
@@ -206,5 +258,11 @@ export const bridge = {
   },
   async stopWorkflow(): Promise<void> {
     await window.ulms.stopWorkflow();
+  },
+  async startSecondOpinion(): Promise<void> {
+    await window.ulms.startSecondOpinion();
+  },
+  async stopSecondOpinion(): Promise<void> {
+    await window.ulms.stopSecondOpinion();
   },
 };

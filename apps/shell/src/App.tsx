@@ -40,6 +40,7 @@ export default function App() {
   const loadedMaterialFilename = useShellStore((s) => s.loadedMaterialFilename);
   const loadedDimensionCount = useShellStore((s) => s.loadedDimensionCount);
   const loadedGuidance = useShellStore((s) => s.loadedGuidance);
+  const geminiRunning = useShellStore((s) => s.geminiRunning);
 
   const setDensity = useShellStore((s) => s.setDensity);
   const setRibbonTab = useShellStore((s) => s.setRibbonTab);
@@ -72,8 +73,10 @@ export default function App() {
         density={density}
         onTabChange={setRibbonTab}
         onDensityChange={setDensity}
-        onRunSecondOpinion={() => console.log('gemini second opinion (step 7b)')}
-        onExport={() => console.log('export (step 7b)')}
+        onRunSecondOpinion={
+          stage === 'review' && !geminiRunning ? () => void bridge.startSecondOpinion() : undefined
+        }
+        onExport={() => console.log('export (step 7b-2)')}
         onPickMaterial={() => void bridge.pickMaterial()}
         onPickDimensions={() => void bridge.pickDimensions()}
         onPickGuidance={() => void bridge.pickGuidance()}
@@ -122,7 +125,7 @@ export default function App() {
         session={session}
         stage={stage}
         onToggleStage={setStage}
-        versionLabel="ULMS · v0.1 step-7a"
+        versionLabel="ULMS · v0.1 step-7b"
       />
     </div>
   );

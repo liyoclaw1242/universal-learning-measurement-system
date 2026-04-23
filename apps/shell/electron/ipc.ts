@@ -18,6 +18,11 @@ import {
   stopWorkflow,
   isWorkflowRunning,
 } from './coordinator/workflow';
+import {
+  runSecondOpinion,
+  stopSecondOpinion,
+  isSecondOpinionRunning,
+} from './coordinator/gemini';
 
 export function registerIpc(workspaceDir: string): void {
   const blackboardPath = path.join(workspaceDir, 'blackboard.json');
@@ -59,6 +64,19 @@ export function registerIpc(workspaceDir: string): void {
     return { ok: true as const };
   });
 
+  ipcMain.handle('review:second-opinion', async () => {
+    if (isSecondOpinionRunning()) return { ok: false as const, error: 'already running' };
+    runSecondOpinion(workspaceDir).catch((err) => {
+      console.error('runSecondOpinion threw:', err);
+    });
+    return { ok: true as const };
+  });
+
+  ipcMain.handle('review:stop-second-opinion', async () => {
+    stopSecondOpinion();
+    return { ok: true as const };
+  });
+
   ipcMain.handle('board:read', async () => readBlackboard(blackboardPath));
 
   // ─── event forwarders (coordinator → all windows) ────────
@@ -74,6 +92,13 @@ export function registerIpc(workspaceDir: string): void {
     'agent:pty',
     'agent:raw',
     'agent:completed',
+    'gemini:started',
+    'gemini:stream',
+    'gemini:pty',
+    'gemini:raw',
+    'gemini:completed',
+    'second-opinion:completed',
+    'second-opinion:error',
   ] as const;
 
   for (const name of eventNames) {
