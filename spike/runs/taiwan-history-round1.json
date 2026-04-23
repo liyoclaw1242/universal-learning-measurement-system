@@ -1,0 +1,1458 @@
+{
+  "workflow": {
+    "current_step": 4,
+    "total_steps": 4,
+    "steps": [
+      "agent_1",
+      "agent_2",
+      "agent_3",
+      "agent_4"
+    ],
+    "status": "completed"
+  },
+  "user_input": {
+    "material": {
+      "filename": "taiwan-history-material.md",
+      "content": "國小台灣歷史（日治時期）\n日治時期是指1895年至1945年日本統治台灣的五十年時間。這段時期台灣從清朝統治轉變為日本殖民統治，社會各方面都發生了許多變化。根據國小社會課綱，這段歷史主要讓學生了解當時的重要事件、建設、人物，以及社會與教育的改變。\n日治時期的開始與主要事件\n1895年，清朝在甲午戰爭失敗後，與日本簽訂《馬關條約》，將台灣和澎湖割讓給日本。日本接收台灣後，初期面臨台灣民眾的抵抗，其中最著名的是1895年成立的「台灣民主國」，雖然存在時間短暫，但展現了當時台灣人的保衛家園行動。\n日本統治逐漸穩定後，開始推動各項建設。1908年縱貫鐵路全線通車，連接基隆到高雄，大大改善了南北交通。土地調查和林野調查讓土地資源獲得整理，有助於農業發展。糖業和米作成為重要產業，台灣的糖和米大量外銷到日本。衛生方面，日本推行公共衛生政策，興建自來水設施、醫院，並努力控制瘧疾、霍亂等傳染病。\n其他重要建設還包括港口擴建、公路網發展、電力供應以及郵政系統的建立。這些建設讓台灣的交通、產業和生活環境逐漸現代化。\n重要人物與政策推動\n日治時期有幾位重要總督和官員對台灣發展影響較大。例如兒玉源太郎擔任總督時，與民政長官後藤新平合作，推動「生物學原則」的統治政策，重視調查與建設。他們積極興建學校、醫院和基礎設施，讓台灣的行政和建設體系逐步建立。\n後期，日本推行「皇民化運動」，鼓勵台灣人學習日本語言、使用日本姓名、穿和服，並參加神社參拜等活動，目的是加強台灣與日本的認同。1945年第二次世界大戰結束後，日本統治正式結束，台灣回到中國管轄。\n社會與教育變革以及原住民相關政策\n日治時期最大的社會變革之一是教育制度的改變。日本在台灣設立許多「公學校」，讓台灣兒童接受現代基礎教育，課程包括日語、算術、地理和常識等。傳統的私塾和書房逐漸減少，更多孩子有機會上學，女性接受教育的機會也比以前增加。社會生活方面，都市出現新式建築、百貨公司、電影院等，日常生活逐漸出現現代化的樣貌。\n在原住民政策方面，日本設立「理蕃機構」管理山地事務，開闢山地道路，進行資源調查與開發。部分地區推動教育，讓原住民兒童進入學校學習日語和基本知識，也推行生活改善措施，如衛生習慣和農業技術的引進。這些政策一方面開發山地資源，一方面試圖將原住民生活納入統治體系。\n總體來說，日治時期台灣在交通、產業、衛生、教育等方面有了明顯的進步，社會面貌逐漸改變，為後來的發展奠定了一定基礎。",
+      "content_type": "markdown"
+    },
+    "competency_dimensions": [
+      {
+        "dim_id": "historical_event_sequencing",
+        "name": "歷史事件時序能力",
+        "description": "能夠按時間順序辨識、排列日治時期主要事件與建設的基礎時序理解能力。"
+      },
+      {
+        "dim_id": "figure_contribution",
+        "name": "人物貢獻理解能力",
+        "description": "理解重要總督與官員在日治時期建設、教育或政策推動中所扮演角色的分析能力。"
+      },
+      {
+        "dim_id": "social_reform_analysis",
+        "name": "社會與教育變革分析能力",
+        "description": "分析日治時期在教育制度、基礎建設及社會生活方面的變革特點，並說明其相互關係的能力。"
+      },
+      {
+        "dim_id": "policy_impact_evaluation",
+        "name": "政策影響評估能力",
+        "description": "推理原住民政策及皇民化等措施對當時不同族群社會生活的具體影響，並對比早期與後期差異的思考能力。"
+      }
+    ],
+    "domain_guidance": "指導原則\n目標學習者：國小五、六年級學生，已具備基本台灣歷史概念與時間順序先備知識。\n偏好題型：多用時序排列題、情境故事題、建設前後對比題、人物角色題，避免純定義或年代背誦題。\n避免事項：避免加入當代政治評論或價值判斷，專注課綱範圍內的事實描述與中性敘述。\n鼓勵展現：鼓勵學生展示事件時序整理、變革影響分析，以及不同政策對社會生活影響的簡單推理能力。",
+    "assessment_params": {
+      "target_item_count": 6,
+      "difficulty_distribution": {
+        "easy": 0.34,
+        "medium": 0.5,
+        "hard": 0.16
+      },
+      "item_types": {
+        "mc_single": 0.5,
+        "fill": 0.3,
+        "ordering": 0.2
+      }
+    }
+  },
+  "data": {
+    "knowledge_units": [
+      {
+        "ku_id": "ku_001",
+        "name": "馬關條約與台灣割讓",
+        "description": "理解1895年甲午戰爭後台灣與澎湖被割讓給日本的歷史背景與條約簽訂的意義。",
+        "source_excerpt": "1895年，清朝在甲午戰爭失敗後，與日本簽訂《馬關條約》，將台灣和澎湖割讓給日本。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "recall",
+          "understand"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "誤以為台灣割讓的時間或簽訂條約的名稱",
+            "evidence_from_material": "材料明確標示年份為1895年及條約名稱《馬關條約》"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_002",
+        "name": "台灣民主國與早期抵抗",
+        "description": "認識1895年成立的台灣民主國作為台灣人保衛家園的抵抗行動，了解其存在時間短暫但具有歷史意義。",
+        "source_excerpt": "初期面臨台灣民眾的抵抗，其中最著名的是1895年成立的「台灣民主國」，雖然存在時間短暫，但展現了當時台灣人的保衛家園行動。",
+        "prerequisites": [
+          "ku_001"
+        ],
+        "testable_aspects": [
+          "recall",
+          "understand"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "誤認為台灣民主國存在很長時間或成功抵禦日本統治",
+            "evidence_from_material": "材料特別強調『存在時間短暫』，並且表述為『抵抗』而非『成功對抗』"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_003",
+        "name": "縱貫鐵路與南北交通改善",
+        "description": "理解1908年縱貫鐵路全線通車連接基隆到高雄的重要性，以及其對台灣南北交通的改善作用。",
+        "source_excerpt": "1908年縱貫鐵路全線通車，連接基隆到高雄，大大改善了南北交通。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "recall",
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "不清楚鐵路連接的兩個端點城市或完成年份",
+            "evidence_from_material": "材料清楚列出年份1908年及兩端城市基隆與高雄"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_004",
+        "name": "土地調查與林野調查對農業的影響",
+        "description": "理解土地調查和林野調查如何促進土地資源整理，進而有助於農業發展。",
+        "source_excerpt": "土地調查和林野調查讓土地資源獲得整理，有助於農業發展。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "不知道這些調查的實際目的是資源整理和農業促進",
+            "evidence_from_material": "材料明確說明調查的結果是『土地資源獲得整理』及『有助於農業發展』"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_005",
+        "name": "糖米產業與外銷日本",
+        "description": "認識糖業和米作成為日治時期台灣重要產業，並大量外銷日本的經濟現象。",
+        "source_excerpt": "糖業和米作成為重要產業，台灣的糖和米大量外銷到日本。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "recall",
+          "understand"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "誤認為這些產業的銷售對象或重要性",
+            "evidence_from_material": "材料明確指出『糖業和米作成為重要產業』且『大量外銷到日本』"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_006",
+        "name": "日治時期的公共衛生政策與疾病控制",
+        "description": "理解日本在衛生方面的政策包括興建自來水設施、醫院，並主動控制傳傳染病的作為。",
+        "source_excerpt": "日本推行公共衛生政策，興建自來水設施、醫院，並努力控制瘧疾、霍亂等傳染病。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "recall",
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "不清楚具體的衛生建設內容或所控制的疾病種類",
+            "evidence_from_material": "材料列舉了具體的設施（自來水、醫院）和疾病（瘧疾、霍亂）"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_007",
+        "name": "兒玉源太郎與後藤新平的治台政策",
+        "description": "理解兒玉源太郎和後藤新平合作推動『生物學原則』統治政策，強調調查與建設的治理方式。",
+        "source_excerpt": "兒玉源太郎擔任總督時，與民政長官後藤新平合作，推動『生物學原則』的統治政策，重視調查與建設。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "誤解『生物學原則』的含義或不知道這個政策強調什麼",
+            "evidence_from_material": "材料明確說明該政策『重視調查與建設』，透過積極興建學校、醫院和基礎設施體現"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_008",
+        "name": "皇民化運動的內容與目的",
+        "description": "認識日治後期日本推行皇民化運動的具體措施（語言、姓名、服裝、神社參拜）與加強認同的目的。",
+        "source_excerpt": "日本推行『皇民化運動』，鼓勵台灣人學習日本語言、使用日本姓名、穿和服，並參加神社參拜等活動，目的是加強台灣與日本的認同。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "recall",
+          "understand"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "不清楚皇民化運動包含的具體政策內容或其真正目的",
+            "evidence_from_material": "材料明確列舉了語言、姓名、服裝、神社參拜等具體內容，並說明『加強台灣與日本的認同』的目的"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_009",
+        "name": "公學校系統與現代基礎教育",
+        "description": "理解日本在台灣設立公學校的教育制度改革，課程內容包含日語、算術、地理和常識等現代教育科目。",
+        "source_excerpt": "日本在台灣設立許多『公學校』，讓台灣兒童接受現代基礎教育，課程包括日語、算術、地理和常識等。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "recall",
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "誤以為公學校的課程與傳統私塾相同，或不知道新課程內容",
+            "evidence_from_material": "材料強調『現代基礎教育』，並列舉具體課程『日語、算術、地理和常識』，隱含與傳統教育的差異"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_010",
+        "name": "傳統私塾衰退與教育現代化",
+        "description": "理解日治時期傳統私塾和書房逐漸減少的現象，反映教育制度現代化的歷史轉變。",
+        "source_excerpt": "傳統的私塾和書房逐漸減少，更多孩子有機會上學",
+        "prerequisites": [
+          "ku_009"
+        ],
+        "testable_aspects": [
+          "understand"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "不理解傳統教育衰退與現代教育興起之間的因果關係",
+            "evidence_from_material": "材料透過『逐漸減少』與『更多孩子有機會上學』的並列，暗示公學校系統取代了傳統教育"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_011",
+        "name": "女性教育機會的增加",
+        "description": "認識日治時期女性接受教育的機會相比過去明顯增加，代表社會教育制度的進步。",
+        "source_excerpt": "女性接受教育的機會也比以前增加。",
+        "prerequisites": [
+          "ku_009"
+        ],
+        "testable_aspects": [
+          "understand"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "誤認為日治時期女性教育完全與男性平等，或沒有機會上學",
+            "evidence_from_material": "材料使用『比以前增加』的表述，說明這是相對的進步，而非完全平等"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_012",
+        "name": "都市現代化與生活樣貌改變",
+        "description": "理解日治時期都市出現新式建築、百貨公司、電影院等現代設施，代表社會生活逐漸現代化的趨勢。",
+        "source_excerpt": "都市出現新式建築、百貨公司、電影院等，日常生活逐漸出現現代化的樣貌。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "recall",
+          "understand"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "不知道日治時期具體出現了哪些現代建設或機構",
+            "evidence_from_material": "材料列舉了具體例子：新式建築、百貨公司、電影院"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_013",
+        "name": "理蕃機構與山地政策",
+        "description": "理解日本設立理蕃機構的目的，包括開闢山地道路、進行資源調查與開發，以及將原住民納入統治體系。",
+        "source_excerpt": "日本設立『理蕃機構』管理山地事務，開闢山地道路，進行資源調查與開發。這些政策一方面開發山地資源，一方面試圖將原住民生活納入統治體系。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "誤認為理蕃政策純粹是為了幫助原住民，忽略其統治與資源開發的目的",
+            "evidence_from_material": "材料明確說明『一方面開發山地資源，一方面試圖將原住民生活納入統治體系』，顯示政策的雙重目的"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_014",
+        "name": "原住民教育與生活改善措施",
+        "description": "認識日本在山地推動教育政策，讓原住民兒童學習日語和基本知識，並實施生活改善措施的作為。",
+        "source_excerpt": "部分地區推動教育，讓原住民兒童進入學校學習日語和基本知識，也推行生活改善措施，如衛生習慣和農業技術的引進。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "recall",
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "不清楚原住民教育的具體內容或政府推行的生活改善包含哪些方面",
+            "evidence_from_material": "材料列舉了教育內容『日語和基本知識』及生活改善措施『衛生習慣和農業技術』"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_015",
+        "name": "日治時期結束與台灣移交",
+        "description": "理解1945年第二次世界大戰結束後，日本統治台灣正式結束，台灣回歸中國管轄的歷史轉折。",
+        "source_excerpt": "1945年第二次世界大戰結束後，日本統治正式結束，台灣回到中國管轄。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "recall",
+          "understand"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "誤認為日治時期的結束時間或台灣的移交對象",
+            "evidence_from_material": "材料明確指出年份1945年及移交對象『中國管轄』"
+          }
+        ]
+      }
+    ],
+    "review": null,
+    "mapping": {
+      "ku_to_dimensions": {
+        "ku_001": [
+          {
+            "dim_id": "historical_event_sequencing",
+            "weight": 1,
+            "rationale": "馬關條約與台灣割讓是日治時期的明確起點事件(1895年)，直接體現時序理解的基礎節點。"
+          },
+          {
+            "dim_id": "policy_impact_evaluation",
+            "weight": 0.3,
+            "rationale": "清日戰爭結果導致台灣移交，為日本統治政策的前置背景。"
+          }
+        ],
+        "ku_002": [
+          {
+            "dim_id": "historical_event_sequencing",
+            "weight": 0.9,
+            "rationale": "台灣民主國(1895年成立)是日治初期的重要抵抗事件，需與馬關條約同年事件進行時序辨識。"
+          }
+        ],
+        "ku_003": [
+          {
+            "dim_id": "historical_event_sequencing",
+            "weight": 0.7,
+            "rationale": "縱貫鐵路全線通車(1908年)是日治時期的明確建設完成節點，涉及時間認知與南北時序關係。"
+          },
+          {
+            "dim_id": "social_reform_analysis",
+            "weight": 0.6,
+            "rationale": "鐵路完成是日本統治時期基礎建設進步的具體表現，改善交通的社會效果。"
+          }
+        ],
+        "ku_004": [
+          {
+            "dim_id": "policy_impact_evaluation",
+            "weight": 0.8,
+            "rationale": "土地與林野調查的政策目的是整理資源，進而促進農業發展，直接體現政策因果影響分析。"
+          },
+          {
+            "dim_id": "social_reform_analysis",
+            "weight": 0.5,
+            "rationale": "土地調查與農業發展的關係反映社會經濟結構的改變。"
+          }
+        ],
+        "ku_005": [
+          {
+            "dim_id": "social_reform_analysis",
+            "weight": 0.7,
+            "rationale": "糖米產業興盛與外銷日本代表日治時期社會經濟變革的重要特徵。"
+          },
+          {
+            "dim_id": "policy_impact_evaluation",
+            "weight": 0.6,
+            "rationale": "產業政策導致糖米成為台灣重要出口產業，呈現殖民統治的經濟影響。"
+          }
+        ],
+        "ku_006": [
+          {
+            "dim_id": "policy_impact_evaluation",
+            "weight": 0.8,
+            "rationale": "公共衛生政策(自來水、醫院、傳染病控制)是日本統治者推行的具體政策措施，需評估其對不同族群的實際影響。"
+          },
+          {
+            "dim_id": "social_reform_analysis",
+            "weight": 0.7,
+            "rationale": "衛生建設與疾病控制體現了日治時期社會生活條件改善的變革。"
+          }
+        ],
+        "ku_007": [
+          {
+            "dim_id": "figure_contribution",
+            "weight": 1,
+            "rationale": "兒玉源太郎與後藤新平是日治初期的關鍵人物，其『生物學原則』政策直接體現人物對建設與統治策略的主要貢獻。"
+          },
+          {
+            "dim_id": "policy_impact_evaluation",
+            "weight": 0.6,
+            "rationale": "兩位官員推動的『調查與建設』政策影響了日治時期的統治方向與建設策略。"
+          }
+        ],
+        "ku_008": [
+          {
+            "dim_id": "policy_impact_evaluation",
+            "weight": 0.9,
+            "rationale": "皇民化運動涉及語言、姓名、服裝、宗教等多層面政策，需評估其對台灣人與日本人不同族群生活的具體影響與差異。"
+          },
+          {
+            "dim_id": "social_reform_analysis",
+            "weight": 0.7,
+            "rationale": "皇民化政策代表日治後期社會文化的激進變革，涉及日常生活的多方面改變。"
+          }
+        ],
+        "ku_009": [
+          {
+            "dim_id": "social_reform_analysis",
+            "weight": 1,
+            "rationale": "公學校系統是日治時期教育制度改革的核心，引入日語、算術、地理等現代科目，直接體現社會教育變革的實質內容。"
+          },
+          {
+            "dim_id": "policy_impact_evaluation",
+            "weight": 0.5,
+            "rationale": "教育政策導致傳統私塾逐漸衰退，更多兒童（含女性）獲得現代教育機會。"
+          }
+        ],
+        "ku_010": [
+          {
+            "dim_id": "social_reform_analysis",
+            "weight": 0.9,
+            "rationale": "傳統私塾衰退與公學校興起的對比體現了教育制度從傳統向現代的轉變，這是社會變革的核心指標。"
+          },
+          {
+            "dim_id": "historical_event_sequencing",
+            "weight": 0.5,
+            "rationale": "教育制度轉變與公學校系統建立的時間序列反映日治教育現代化的演進。"
+          }
+        ],
+        "ku_011": [
+          {
+            "dim_id": "social_reform_analysis",
+            "weight": 0.8,
+            "rationale": "女性教育機會增加相比清末與傳統社會是進步的社會變革指標，反映日治時期社會教育制度的進步趨勢。"
+          }
+        ],
+        "ku_012": [
+          {
+            "dim_id": "social_reform_analysis",
+            "weight": 0.85,
+            "rationale": "都市出現新式建築、百貨公司、電影院等現代設施直接體現社會生活樣貌的現代化變革，是物質與文化層面的具體表現。"
+          },
+          {
+            "dim_id": "historical_event_sequencing",
+            "weight": 0.4,
+            "rationale": "都市現代化設施的出現代表日治時期社會發展的時間進程。"
+          }
+        ],
+        "ku_013": [
+          {
+            "dim_id": "policy_impact_evaluation",
+            "weight": 0.85,
+            "rationale": "理蕃機構政策具有雙重目的(開發山地資源vs.將原住民納入統治體系)，需評估政策對原住民族群生活與自主性的具體影響與差異。"
+          },
+          {
+            "dim_id": "figure_contribution",
+            "weight": 0.3,
+            "rationale": "理蕃機構的建立與政策執行涉及日治統治者對山地事務的管理策略。"
+          }
+        ],
+        "ku_014": [
+          {
+            "dim_id": "social_reform_analysis",
+            "weight": 0.8,
+            "rationale": "原住民教育(日語、基本知識)與生活改善措施(衛生、農業技術)是日治時期社會改革措施在山地的具體實踐與表現。"
+          },
+          {
+            "dim_id": "policy_impact_evaluation",
+            "weight": 0.7,
+            "rationale": "教育與生活改善政策對原住民族群的實際影響需進一步評估，包括政策意圖與實際結果的差異。"
+          }
+        ],
+        "ku_015": [
+          {
+            "dim_id": "historical_event_sequencing",
+            "weight": 0.9,
+            "rationale": "日治時期結束(1945年二戰結束)與台灣回歸是日治五十年歷史的明確終點，完成時序認知的整體框架。"
+          }
+        ]
+      },
+      "blueprint": {
+        "total_slots": 6,
+        "slot_specs": [
+          {
+            "slot_index": 0,
+            "target_kus": [
+              "ku_001"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "historical_event_sequencing",
+                "weight": 1
+              }
+            ],
+            "target_item_type": "mc_single",
+            "target_difficulty": "easy",
+            "rationale": "測試學生對馬關條約時間點(1895年)的基礎事件回憶。"
+          },
+          {
+            "slot_index": 1,
+            "target_kus": [
+              "ku_005"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "social_reform_analysis",
+                "weight": 0.7
+              },
+              {
+                "dim_id": "historical_event_sequencing",
+                "weight": 0.3
+              }
+            ],
+            "target_item_type": "mc_single",
+            "target_difficulty": "easy",
+            "rationale": "測試學生對日治時期糖米產業發展的基礎理解。"
+          },
+          {
+            "slot_index": 2,
+            "target_kus": [
+              "ku_001",
+              "ku_002",
+              "ku_003",
+              "ku_015"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "historical_event_sequencing",
+                "weight": 1
+              }
+            ],
+            "target_item_type": "ordering",
+            "target_difficulty": "medium",
+            "rationale": "測試學生整理日治時期主要事件的時序能力：馬關條約(1895)→台灣民主國(1895)→縱貫鐵路(1908)→日治結束(1945)。"
+          },
+          {
+            "slot_index": 3,
+            "target_kus": [
+              "ku_009",
+              "ku_010"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "social_reform_analysis",
+                "weight": 0.95
+              }
+            ],
+            "target_item_type": "fill",
+            "target_difficulty": "medium",
+            "rationale": "測試學生對教育變革具體內容的理解：公學校課程、傳統私塾衰退與現代教育興起的因果關係。"
+          },
+          {
+            "slot_index": 4,
+            "target_kus": [
+              "ku_007",
+              "ku_013"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "figure_contribution",
+                "weight": 0.7
+              },
+              {
+                "dim_id": "policy_impact_evaluation",
+                "weight": 0.5
+              }
+            ],
+            "target_item_type": "fill",
+            "target_difficulty": "medium",
+            "rationale": "測試學生對重要人物(兒玉源太郎、後藤新平)與管理機構(理蕃機構)政策的認識與分析。"
+          },
+          {
+            "slot_index": 5,
+            "target_kus": [
+              "ku_008",
+              "ku_013",
+              "ku_014"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "policy_impact_evaluation",
+                "weight": 0.85
+              }
+            ],
+            "target_item_type": "mc_single",
+            "target_difficulty": "hard",
+            "rationale": "測試學生對皇民化運動與原住民政策的雙重目的理解，需推理政策對不同族群生活的具體影響與差異。"
+          }
+        ]
+      },
+      "health_warnings": [
+        "⚠️ 維度『figure_contribution』(人物貢獻理解能力)目前只有2個KU(ku_007, ku_013)支撐，低於建議最少3個KU的可測性門檻。建議：(a)若教材未涉及其他重要人物，可考慮在題目設計中加強對兩位官員貢獻的深度分析；(b)或重新檢視該維度是否涵蓋理蕃機構長官等其他管理人物。",
+        "✓ 覆蓋度檢查通過：所有15個KU都至少對應到一個維度。",
+        "✓ 粒度一致性檢查通過：四個維度的認知層級相對一致(理解與分析層次)。",
+        "⚠️ 重疊檢查：social_reform_analysis與policy_impact_evaluation之間存在高度重疊(7個KU同時對應兩個維度)。但這反映教材本身『政策-社會-變革』的因果鏈特性，而非維度定義問題。建議使用時注意區分：social_reform_analysis著重『生活樣貌與制度變化』，policy_impact_evaluation著重『政策目的與族群影響評估』。"
+      ]
+    },
+    "items": [
+      {
+        "item_id": "item_001",
+        "slot_index": 0,
+        "core": {
+          "item_type": "mc_single",
+          "stem": "清朝在甲午戰爭失敗後，與日本簽訂了哪一個條約，將台灣和澎湖割讓給日本？",
+          "stem_assets": [],
+          "options": [
+            "A. 《南京條約》",
+            "B. 《馬關條約》",
+            "C. 《辛丑條約》",
+            "D. 《五口通商條約》"
+          ],
+          "answer": "B",
+          "explanation": "根據教材，1895年清朝在甲午戰爭失敗後，與日本簽訂《馬關條約》，將台灣和澎湖割讓給日本。《南京條約》、《辛丑條約》、《五口通商條約》都是中國歷史上與列強簽訂的其他條約，但不是台灣割讓的依據。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_001"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "historical_event_sequencing",
+              "weight": 1
+            }
+          ],
+          "difficulty_estimate": 0.25
+        },
+        "diagnostics": {
+          "distractor_analysis": {
+            "A": {
+              "correct": false,
+              "why_wrong": "《南京條約》是鴉片戰爭後簽訂的條約，時間更早，與台灣割讓無關",
+              "maps_to_misconception": "誤認為《南京條約》導致台灣割讓，可能混淆多個不同時期的條約"
+            },
+            "B": {
+              "correct": true
+            },
+            "C": {
+              "correct": false,
+              "why_wrong": "《辛丑條約》是八國聯軍之後簽訂的，時間在馬關條約之後，與台灣割讓無關",
+              "maps_to_misconception": "誤認為辛丑條約涉及台灣割讓，混淆了不同條約簽訂的時間順序和內容"
+            },
+            "D": {
+              "correct": false,
+              "why_wrong": "《五口通商條約》是鴉片戰爭初期的條約，更早且無關台灣割讓",
+              "maps_to_misconception": "誤認為台灣割讓發生在更早的時期，對甲午戰爭的時代背景認知不清"
+            }
+          },
+          "expected_failure_modes": [
+            "若學習者尚未學過甲午戰爭，可能無法將『甲午戰爭失敗』與『馬關條約』連結，容易混淆其他中國近代條約",
+            "若學習者只記得『條約』二字但未記住確切的條約名稱，可能隨意選擇，傾向於較熟悉的條約名"
+          ]
+        },
+        "designer_notes": "本題直接測試ku_001的recall層次。選項皆為中國近代簽訂的真實條約，符合國小課綱範圍，避免明顯錯誤。題幹明確指出『甲午戰爭失敗』作為背景，有助於學生回憶正確的歷史事件連結。難度為easy，適合基礎時序認知的檢測。"
+      },
+      {
+        "item_id": "item_002",
+        "slot_index": 1,
+        "core": {
+          "item_type": "mc_single",
+          "stem": "日治時期，台灣哪些重要產業被大量外銷到日本？",
+          "stem_assets": [],
+          "options": [
+            "A. 茶葉和漆器",
+            "B. 糖業和米作",
+            "C. 煤炭和鹽業",
+            "D. 樟腦和檜木"
+          ],
+          "answer": "B",
+          "explanation": "根據教材，『糖業和米作成為重要產業，台灣的糖和米大量外銷到日本』。茶葉、漆器、煤炭、鹽業、樟腦、檜木雖然也可能是日治時期的產品，但教材特別強調糖業和米作是被大量外銷到日本的重要產業。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_005"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "social_reform_analysis",
+              "weight": 0.7
+            },
+            {
+              "dim_id": "historical_event_sequencing",
+              "weight": 0.3
+            }
+          ],
+          "difficulty_estimate": 0.3
+        },
+        "diagnostics": {
+          "distractor_analysis": {
+            "A": {
+              "correct": false,
+              "why_wrong": "茶葉和漆器雖然是傳統台灣產業，但教材未提及其大量外銷日本",
+              "maps_to_misconception": "誤認為傳統產業就是日治時期主要外銷產業，未能區分日治時期政策導向的產業優先"
+            },
+            "B": {
+              "correct": true
+            },
+            "C": {
+              "correct": false,
+              "why_wrong": "煤炭和鹽業未在教材中被提及為大量外銷日本的主要產業",
+              "maps_to_misconception": "誤認為礦業和資源產業是日治時期最重要的外銷產業，忽略了農業產業的優先地位"
+            },
+            "D": {
+              "correct": false,
+              "why_wrong": "樟腦和檜木雖然是日治初期重要資源，但教材未特別提及為主要外銷產業",
+              "maps_to_misconception": "混淆了日治早期山地資源開發與後期農業產業發展的階段性差異"
+            }
+          },
+          "expected_failure_modes": [
+            "若學習者只記得『日治時期有很多建設和產業發展』但未記住具體產業名稱，容易猜測傳統產業（茶、樟腦）",
+            "若學習者混淆日本統治初期的資源開發（樟腦、檜木）與中期的農業發展（糖米），可能選擇D"
+          ]
+        },
+        "designer_notes": "本題測試ku_005的understand層次，也涉及社會經濟變革分析。選項設計考慮了不同的產業類別（農業、傳統工藝、礦業、山地資源），符合日治時期的真實產業分布。教材明確指出糖米的外銷對象是日本，提供了清晰的答案唯一性。難度為easy，測試學生對日治時期經濟重心的基礎理解。"
+      },
+      {
+        "item_id": "item_003",
+        "slot_index": 2,
+        "core": {
+          "item_type": "ordering",
+          "stem": "請將以下日治時期的重要事件按照時間順序排列，從最早到最晚：",
+          "stem_assets": [],
+          "options": [
+            "1. 台灣民主國成立",
+            "2. 縱貫鐵路全線通車",
+            "3. 馬關條約簽訂",
+            "4. 日治時期結束"
+          ],
+          "answer": "3, 1, 2, 4",
+          "explanation": "根據教材的時間記載：\n- 1895年：『清朝在甲午戰爭失敗後，與日本簽訂《馬關條約》』（事件3，最早）\n- 1895年：『初期面臨台灣民眾的抵抗，其中最著名的是1895年成立的「台灣民主國」』（事件1，同年但在條約後）\n- 1908年：『縱貫鐵路全線通車，連接基隆到高雄』（事件2，13年後）\n- 1945年：『第二次世界大戰結束後，日本統治正式結束，台灣回到中國管轄』（事件4，最晚）\n正確順序是：馬關條約(1895年早期)→台灣民主國(1895年晚期)→縱貫鐵路(1908年)→日治結束(1945年)"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_001",
+            "ku_002",
+            "ku_003",
+            "ku_015"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "historical_event_sequencing",
+              "weight": 1
+            }
+          ],
+          "difficulty_estimate": 0.45
+        },
+        "diagnostics": {
+          "distractor_analysis": {
+            "correct_patterns": [
+              "3, 1, 2, 4：完全正確，展示對四個事件完整的時間理解"
+            ],
+            "common_incorrect_patterns": [
+              {
+                "pattern": "1, 3, 2, 4",
+                "misconception": "誤認為『台灣民主國成立』先於『馬關條約簽訂』，忽略了台灣民主國是在日本接收台灣後才成立的因果關係"
+              },
+              {
+                "pattern": "3, 2, 1, 4",
+                "misconception": "正確排列了條約和鐵路，但誤認為台灣民主國成立於1908年之後，混淆了1895年的同期事件"
+              },
+              {
+                "pattern": "1, 2, 3, 4 或其他排列",
+                "misconception": "完全未掌握事件時序，混淆了多個事件的年份"
+              }
+            ]
+          },
+          "expected_failure_modes": [
+            "若學習者未注意到『日本接收台灣後』的因果關係，可能將台灣民主國排在馬關條約之前",
+            "若學習者只記得年份而未深入理解，可能在1895年同年事件（馬關條約與台灣民主國）之間排序錯誤",
+            "若學習者未充分區分各事件，可能完全混亂地排序"
+          ]
+        },
+        "designer_notes": "本題測試ku_001、ku_002、ku_003、ku_015的understand和apply層次，直接評估historical_event_sequencing維度。選擇ordering題型因為它最適合測試時序能力。難度為medium，需要學生同時記住四個事件的年份並理解其時間先後。特別設計避免了純粹的日期記憶——學生需要理解事件間的因果關係（如條約→抵抗）與建設進展（早期抵抗→中期建設→戰爭結束）。教材提供了清晰的年份標記，支撐這個排序題的設計。"
+      },
+      {
+        "item_id": "item_004",
+        "slot_index": 3,
+        "core": {
+          "item_type": "fill",
+          "stem": "日治時期，日本在台灣設立『___』，讓台灣兒童接受現代基礎教育，課程包括___、___、地理和常識等。傳統的___逐漸減少，更多孩子有機會上學。",
+          "stem_assets": [],
+          "options": null,
+          "answer": [
+            "第一個空白：公學校",
+            "第二個空白：日語",
+            "第三個空白：算術",
+            "第四個空白：私塾（或書房）"
+          ],
+          "explanation": "根據教材：『日本在台灣設立許多「公學校」，讓台灣兒童接受現代基礎教育，課程包括日語、算術、地理和常識等。傳統的私塾和書房逐漸減少，更多孩子有機會上學』。本題透過填空測試學生對教育制度變革的具體內容理解——公學校的名稱、其課程科目，以及被取代的傳統教育機構。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_009",
+            "ku_010"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "social_reform_analysis",
+              "weight": 0.95
+            }
+          ],
+          "difficulty_estimate": 0.45
+        },
+        "diagnostics": {
+          "distractor_analysis": {
+            "correct_answers": [
+              {
+                "position": 1,
+                "answer": "公學校",
+                "why_correct": "教材明確指出『日本在台灣設立許多「公學校」』"
+              },
+              {
+                "position": 2,
+                "answer": "日語",
+                "why_correct": "課程中列出『日語、算術、地理和常識等』，日語是第一個列舉的科目"
+              },
+              {
+                "position": 3,
+                "answer": "算術",
+                "why_correct": "課程中列出『日語、算術、地理和常識等』，算術是現代教育的核心科目"
+              },
+              {
+                "position": 4,
+                "answer": "私塾（或書房）",
+                "why_correct": "教材明確指出『傳統的私塾和書房逐漸減少』"
+              }
+            ]
+          },
+          "expected_failure_modes": [
+            "若學習者不熟悉『公學校』一詞，可能寫『學校』或『學堂』，或誤認為是日本的學校制度名稱",
+            "若學習者只記得其中一部分課程科目，可能為第二、三個空寫『數學』代替『算術』，或遺漏『日語』的優先位置",
+            "若學習者混淆教育現代化過程，可能誤寫『寺子屋』（日本傳統教育）或『書院』（中國傳統教育）而非台灣的私塾",
+            "若學習者未理解因果關係，可能不清楚第四空應填傳統教育機構而非現代機構"
+          ]
+        },
+        "designer_notes": "本題測試ku_009和ku_010的understand層次，著重社會教育變革分析。選擇fill題型因為它能精確測試學生對教育改革具體內容的掌握——不只是『教育現代化』的抽象概念，而是『具體課程名稱』和『被取代的傳統機構』。難度為medium，需要學生記住多個要素並理解新舊教育制度的對比。填空設計避免了純粹背誦，而是測試學生對教材敘述的理解與記憶的整合。教材原文提供了所有必需的資訊，無需額外知識。"
+      },
+      {
+        "item_id": "item_005",
+        "slot_index": 4,
+        "core": {
+          "item_type": "fill",
+          "stem": "日治時期，擔任總督的___與民政長官___合作，推動『生物學原則』的統治政策，重視調查與建設。他們積極興建___等基礎設施。另外，日本設立『___』管理山地事務，開闢山地道路，進行資源調查與開發。",
+          "stem_assets": [],
+          "options": null,
+          "answer": [
+            "第一個空白：兒玉源太郎",
+            "第二個空白：後藤新平",
+            "第三個空白：學校、醫院（或其他基礎設施，如『學校和醫院』）",
+            "第四個空白：理蕃機構"
+          ],
+          "explanation": "根據教材：『兒玉源太郎擔任總督時，與民政長官後藤新平合作，推動「生物學原則」的統治政策，重視調查與建設。他們積極興建學校、醫院和基礎設施，讓台灣的行政和建設體系逐步建立』、『日本設立「理蕃機構」管理山地事務，開闢山地道路，進行資源調查與開發』。本題測試學生對日治時期重要人物與管理機構的認識，以及政策方向的理解。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_007",
+            "ku_013"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "figure_contribution",
+              "weight": 0.7
+            },
+            {
+              "dim_id": "policy_impact_evaluation",
+              "weight": 0.5
+            }
+          ],
+          "difficulty_estimate": 0.5
+        },
+        "diagnostics": {
+          "distractor_analysis": {
+            "correct_answers": [
+              {
+                "position": 1,
+                "answer": "兒玉源太郎",
+                "why_correct": "教材明確指出『兒玉源太郎擔任總督時』"
+              },
+              {
+                "position": 2,
+                "answer": "後藤新平",
+                "why_correct": "教材明確指出『民政長官後藤新平』"
+              },
+              {
+                "position": 3,
+                "answer": "學校、醫院（或學校和醫院、或其他列舉的設施如港口、電力、郵政等）",
+                "why_correct": "教材列舉『積極興建學校、醫院和基礎設施』，以及『港口擴建、公路網發展、電力供應以及郵政系統』"
+              },
+              {
+                "position": 4,
+                "answer": "理蕃機構",
+                "why_correct": "教材明確指出『日本設立「理蕃機構」管理山地事務』"
+              }
+            ]
+          },
+          "expected_failure_modes": [
+            "若學習者未詳細閱讀或記憶人物名稱，可能誤寫其他日治總督名字（如佐久間左馬太）",
+            "若學習者混淆人物角色，可能誤認為後藤新平是總督而兒玉源太郎是民政長官",
+            "若學習者不記得具體基礎設施名稱，可能寫『建築』或『設施』而非具體名稱如『學校』",
+            "若學習者不熟悉『理蕃機構』一詞，可能誤寫『山地管理局』或『原住民管理部門』等非教材提供的用語"
+          ]
+        },
+        "designer_notes": "本題測試ku_007和ku_013的understand和apply層次，評估figure_contribution和policy_impact_evaluation維度。選擇fill題型因為它適合測試具體人名與機構名稱的回憶，同時要求學生理解這些人物與機構在日治統治中的角色。難度為medium，涉及四個填空點，但每個都在教材中明確提及，避免超出課綱範圍。本題特別設計來釐清日治時期『中央統治政策』（生物學原則、建設）與『山地管理政策』（理蕃機構）的不同層面，幫助學生建立完整的政策圖景。"
+      },
+      {
+        "item_id": "item_006",
+        "slot_index": 5,
+        "core": {
+          "item_type": "mc_single",
+          "stem": "日治時期，日本推行『皇民化運動』鼓勵台灣人學習日本語言、使用日本姓名、穿和服、參加神社參拜。同時，日本在山地地區設立『理蕃機構』，開闢山地道路、進行資源調查、推行教育與生活改善。這兩項政策的共同目的最可能是什麼？",
+          "stem_assets": [],
+          "options": [
+            "A. 完全消滅台灣人與原住民的傳統文化和語言",
+            "B. 使台灣與日本完全同化，並強化日本對台灣各地區的管轄與掌控",
+            "C. 提升台灣整體的教育水準和經濟發展水平",
+            "D. 幫助台灣人與原住民獲得自治權和參與政治決策的機會"
+          ],
+          "answer": "B",
+          "explanation": "根據教材，皇民化運動的目的是『加強台灣與日本的認同』，這涉及文化認同、語言與日常生活的日本化。同時，理蕃機構的目的是『開發山地資源』與『將原住民生活納入統治體系』。結合這兩項政策，共同目的是透過文化同化（皇民化）與行政管轄（理蕃）加強日本對台灣全區域的控制與管轄。\n\n選項A過度解讀——政策是推行日本文化而非『完全消滅』台灣文化。\n選項C偏離政策目的——教育與生活改善是手段而非主要目的。\n選項D錯誤——政策反而加強統治者的掌控而非給予被統治者自治權。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_008",
+            "ku_013",
+            "ku_014"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "policy_impact_evaluation",
+              "weight": 0.85
+            }
+          ],
+          "difficulty_estimate": 0.65
+        },
+        "diagnostics": {
+          "distractor_analysis": {
+            "A": {
+              "correct": false,
+              "why_wrong": "誇大了政策的激進性。教材說『鼓勵』而非『強制消滅』，政策是推行日本文化同化而非種族滅絕",
+              "maps_to_misconception": "誤認為日本統治是完全否定傳統文化，忽略了『同化』與『消滅』的差異。學生可能過度解讀歷史事件的負面性"
+            },
+            "B": {
+              "correct": true
+            },
+            "C": {
+              "correct": false,
+              "why_wrong": "雖然教育與生活改善確實是政策的一部分，但教材明確指出皇民化運動的目的是『加強台灣與日本的認同』，理蕃政策是『將原住民生活納入統治體系』——都強調統治與掌控，不是純粹的發展目標",
+              "maps_to_misconception": "誤認為日本政策的主要目的是經濟發展或民眾福祉，忽略了殖民統治的權力與掌控本質。學生可能將手段（教育、生活改善）誤認為政策的真正目的"
+            },
+            "D": {
+              "correct": false,
+              "why_wrong": "完全相反。教材指出政策是『加強台灣與日本的認同』與『將原住民生活納入統治體系』，都體現統治者的掌控意圖，而非賦予被統治者自治權",
+              "maps_to_misconception": "誤認為日本統治最終目的是民主化或權力分享，沒有理解殖民統治的本質是權力集中與掌控"
+            }
+          },
+          "expected_failure_modes": [
+            "若學習者未區分『手段』與『目的』，可能被教育與生活改善的表面優勢所迷惑，選擇C",
+            "若學習者對『同化』與『消滅』的概念不清，可能過度解讀政策為完全否定傳統，選擇A",
+            "若學習者不理解殖民統治的權力性質，可能誤認為日本最終目的是民主化與自治，選擇D",
+            "若學習者只記得零散的政策措施但未整體分析兩項政策的共同邏輯，可能隨意選擇"
+          ]
+        },
+        "designer_notes": "本題測試ku_008、ku_013、ku_014的analyze和evaluate層次，直接評估policy_impact_evaluation維度。難度為hard，因為它要求學生：(1)理解兩個不同的政策措施；(2)識別它們共同的深層目的；(3)區分政策的表面手段（教育、生活改善）與真實目的（文化同化、統治掌控）。題目設計避免了單純的知識回憶，而是要求比較分析與批判性思維。教材提供了足夠的線索——皇民化『目的是加強台灣與日本的認同』與理蕃政策『試圖將原住民生活納入統治體系』——但學生需要整合這些資訊才能得出正確答案。選項B直接反映教材的陳述，而其他選項捕捉了常見的誤解（過度激進化、混淆手段與目的、樂觀主義偏見）。"
+      }
+    ],
+    "review_claude": {
+      "per_item": [
+        {
+          "item_id": "item_001",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true,
+              "concern": "題目通過題幹『甲午戰爭失敗後』的線索，學生可能藉由排除法（其他條約時代）而非直接記憶KU來答題。如果目標是純粹的事件回憶，這個設計可能降低了構念效度的純粹性。"
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": false,
+              "concern": "選項皆為中國近代真實條約。懂一點歷史的學生可以通過『甲午戰爭在何時發生』來推理出條約簽訂的時間範圍，從而排除《南京條約》（太早）和《辛丑條約》（太晚），最後在《馬關條約》和《五口通商條約》之間選擇。這樣的推理繞過了對KU的直接知識考驗。"
+            }
+          },
+          "overall_quality_score": 0.72,
+          "notes": "基礎題設計合理，選項都是真實條約，符合課綱範圍。但題幹提供的『甲午戰爭失敗後』線索使得答題可能更多依賴於歷史推理而非直接記憶。若要加強構念效度，可考慮移除年代線索，或改為『根據教材，《馬關條約》簽訂於何時？』的正向選擇題。"
+        },
+        {
+          "item_id": "item_002",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true,
+              "concern": "基於教材內容，答案唯一且明確。但從歷史事實而言，日治時期樟腦和檜木也是重要出口品。題目仰賴教材來定義『大量外銷』的產業範圍，這是合理的——符合鐵律A（不驗證領域事實）。"
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": false,
+              "concern": "茶葉和樟腦都是台灣傳統產業，可能成為外銷產品。學習者如果知道日治時期推行『農業與資源開發』，可能在『農業產品』（選項A和B都符合）和『資源開採品』（選項C和D都符合）之間猶豫。進一步推理『日本特別需要什麼』時，糖和米（農業）比樟腦和檜木（資源）更常見於日治經濟敘述，可能導致選項長度、詞彙頻率等線索輔助猜測。"
+            }
+          },
+          "overall_quality_score": 0.7,
+          "notes": "題目測試學生對日治經濟重心的理解，選項設計涵蓋農業、傳統工藝、礦業、山地資源四個類別，符合日治時期的真實產業分布。建議可將選項改寫，使得所有選項都是『有可能被外銷』的產業，來強化繞題防護。例如，將選項D改為『樟腦和林產品』而非『樟腦和檜木』，以避免學生透過對『檜木是原住民地區資源』的背景知識來篩選。"
+        },
+        {
+          "item_id": "item_003",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.85,
+          "notes": "排序題設計優秀。題目清楚要求『從最早到最晚』排列，四個事件涵蓋日治時期的關鍵時間點（起點、初期抵抗、中期建設、終點）。教材提供了明確的年份（1895、1895、1908、1945），使得答案完全唯一。排序題型本身防止了通過選項外表（長度、關鍵詞）來繞題。學習者必須理解時間順序和事件因果關係才能作答，構念效度很強。特別值得肯定的是，同年兩個事件（馬關條約和台灣民主國都在1895年）的設置，進一步要求學生區分『條約簽訂』和『民眾抵抗』的先後順序，這是深化時序理解的好設計。"
+        },
+        {
+          "item_id": "item_004",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true,
+              "concern": "第一和第四空的答案非常明確（『公學校』和『私塾/書房』）。第二、三空涉及課程科目——題幹說『課程包括___、___、地理和常識等』，教材原文為『日語、算術、地理和常識等』。理論上學生可能填反順序（『算術、日語』而非『日語、算術』），但這很難發生，因為日語作為統治者推行的語言教育，通常會優先列舉。答案基本唯一。"
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true,
+              "concern": "第二、三空涉及順序歧義的微小風險，但題幹『課程包括___、___、地理和常識等』的結構暗示前兩科應按教材順序填入。"
+            },
+            "bypass_risk": {
+              "pass": true,
+              "concern": "填空題需要具體詞彙。但第一空『公學校』是日治特有術語——學習者可能填『學校』而非『公學校』。第四空『私塾』或『書房』都被教材明確提及，但學習者可能混淆中日教育形式（如誤寫『寺子屋』——日本傳統教育機構）。從繞題風險看，題目有很好的防護。"
+            }
+          },
+          "overall_quality_score": 0.78,
+          "notes": "填空題設計清晰，四個空白分別對應教育改革的四個要素：新機構名稱、課程內容、與傳統的對比。題目很好地測試了學習者對『教育制度從傳統向現代轉變』這一變革的具體理解，而非抽象概念。建議在評分時，『學校』作為『公學校』的近似答案可考慮給予部分分數，以反映學習者的理解程度。"
+        },
+        {
+          "item_id": "item_005",
+          "verdict": "needs_revision",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": false,
+              "concern": "第一、二空（人名）答案明確且唯一。但第三空『他們積極興建___等基礎設施』存在重大答案唯一性問題。教材同時列舉了『學校、醫院』（與兒玉、後藤關聯）和『港口擴建、公路網發展、電力供應以及郵政系統』。題目沒有限定學生應填哪一組，導致合理答案包括：『學校和醫院』、『港口和公路』、『電力和郵政』或任何其他合理組合。這嚴重破壞了答案唯一性。"
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": false,
+              "concern": "第三空的表述『他們積極興建___等基礎設施』不夠具體。『基礎設施』是一個寬泛的概念，可以指交通、能源、教育、衛生等多個領域。教材中列舉了6-7種不同的基礎設施類型，但題目沒有提供足夠的上下文線索來指向特定的答案。學習者面對多個同樣合理的填法，無法確定哪個是『正確』答案。"
+            },
+            "bypass_risk": {
+              "pass": true,
+              "concern": "人名和機構名本身防止了繞題（需要記憶）。但第三空可以通過推理『什麼是基礎設施』來應答，不一定需要對KU的深度知識。"
+            }
+          },
+          "overall_quality_score": 0.62,
+          "notes": "此題存在結構性缺陷。建議修改第三空為更具體的線索，例如：(1) 『他們積極興建學校和___等教育與公衛設施』——這樣限定了設施類別為教育/醫療，答案變為『醫院』；(2) 或改為『他們積極興建學校、___、港口等關鍵基礎設施』——這樣直接提示學生應填某一個缺失的設施類型。當前版本應進行版本修訂，以恢復答案的唯一性。"
+        },
+        {
+          "item_id": "item_006",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true,
+              "concern": "教材明確指出皇民化運動『目的是加強台灣與日本的認同』，理蕃政策『試圖將原住民生活納入統治體系』。選項B（同化和掌控）最直接對應這些敘述。但如果學習者混淆『手段』與『目的』，可能誤選選項C（教育與生活改善確實是政策的具體內容），這導致答案的『唯一性』依賴於學習者對『目的vs手段』的認知水平。在hard題的脈絡下，這種難度是合理的。"
+            },
+            "construct_validity": {
+              "pass": true,
+              "concern": "此題需要學習者進行高階認知：(1)理解兩個不同政策的具體措施；(2)識別這些措施背後的共同目的；(3)區分政策手段（教育、衛生）與政策目的（同化、掌控）。構念效度非常強，真正測試的是政策分析而非單純事實回憶。這是此題最大的優點。"
+            },
+            "ambiguity": {
+              "pass": true,
+              "concern": "題幹相當長且包含多個細節，但『這兩項政策的共同目的最可能是什麼？』的問題陳述很清楚。用『最可能』而非『最直接』暗示需要推理和綜合分析，這與hard題的定位相符。"
+            },
+            "bypass_risk": {
+              "pass": false,
+              "concern": "中等繞題風險。學習者可能因為題幹中明確提及『教育』、『生活改善』、『衛生習慣』、『農業技術』等具體正面措施，而誤認為政策目的就是『教育與經濟發展』（選項C）。這是『將手段誤認為目的』的常見誤解。選項C在表面上看也很合理——政策確實導致了教育和經濟發展。但教材原文的『目的』明確指向同化和掌控，不是發展。另一個繞題路徑是：選項A『完全消滅文化』用了『完全』這樣的絕對詞，容易被排除；選項D『自治與民主』與殖民統治的性質完全矛盾，也容易排除。這樣的『消除法』可能幫助學習者在B和C之間選擇，但不是基於政策分析。"
+            }
+          },
+          "overall_quality_score": 0.75,
+          "notes": "hard題設計優秀，很好地評估了學習者對複雜政策的分析能力。但題幹可進一步強化『目的』與『手段』的區別。建議添加導讀句：『儘管這些政策涉及教育和生活改善，但它們的根本目的是什麼？』這樣可以更明確地指導學習者進行深度分析，減少手段/目的混淆的繞題路徑。當前版本的繞題風險屬於hard題的可接受範圍——因為題目本身就在測試學習者區分表面措施與深層目的的能力。"
+        }
+      ],
+      "summary": {
+        "total_items": 6,
+        "accepted": 4,
+        "needs_revision": 1,
+        "rejected": 0,
+        "average_quality_score": 0.74,
+        "overall_recommendations": [
+          "整體題目設計品質良好，特別是item_003（排序題）和item_006（政策分析題）展現了強構念效度。建議優先處理item_005的第三空答案唯一性問題，此為結構性缺陷。",
+          "item_001和item_002都存在中等『繞題風險』——學習者可能通過歷史推理或背景知識而非直接KU知識作答。建議在後續命題時考慮消除這類線索，或設計更多真正『只能通過該KU』才能答對的情境。",
+          "item_004的教育改革主題設計很好，但建議評分時對『公學校』的近似詞（如『學校』）給予彈性接納，以區分『理解KU但詞彙不精確』與『完全不懂KU』的情況。",
+          "整批題目在『難度分布』上符合預期（2個easy、3個medium、1個hard），在『題型多樣性』上達到目標（3個mc_single、2個fill、1個ordering）。建議未來評估時聚焦於『構念效度的純粹性』——確保答對題目『當且唯當』學習者掌握了該KU，而非透過推理、常識或試題設計漏洞。"
+        ]
+      }
+    },
+    "review_gemini": {
+      "per_item": [
+        {
+          "item_id": "item_001",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.9,
+          "notes": "題目結構嚴謹，干擾選項設計合理，能有效測量基礎歷史事件記憶。"
+        },
+        {
+          "item_id": "item_002",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.85,
+          "notes": "選項涵蓋了當時不同的產業類別，答案依據教材內容具有唯一性。"
+        },
+        {
+          "item_id": "item_003",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.95,
+          "notes": "優秀的時序排列題，特別是同年份事件的排序，能深度檢驗學生的時序邏輯。"
+        },
+        {
+          "item_id": "item_004",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.9,
+          "notes": "填空設計精準對應教育變革的核心要素，無明顯繞題空間。"
+        },
+        {
+          "item_id": "item_005",
+          "verdict": "needs_revision",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": false,
+              "concern": "「興建___等基礎設施」中，教材提及多種建設（港口、公路、電力等），學生若填入非答案列出的項目亦屬合理，存在閱卷爭議。"
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.65,
+          "notes": "建議將第三個空格改為更具指向性的描述，例如「興建學校和___等民生設施」，以鎖定答案為醫院。"
+        },
+        {
+          "item_id": "item_006",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.9,
+          "notes": "高層次分析題，成功區分了「手段」與「目的」，具有很高的測量價值。"
+        }
+      ],
+      "summary": {
+        "total_items": 6,
+        "accepted": 5,
+        "needs_revision": 1,
+        "rejected": 0,
+        "average_quality_score": 0.85,
+        "overall_recommendations": [
+          "整體命題品質極高，題型分布均衡，且嚴格遵守教材內容。",
+          "item_005 的填空唯一性問題是唯一的結構性瑕疵，修正後即可全面上線。",
+          "建議在後續維護中，針對填空題提供更豐富的同義詞庫（如私塾/書房）。"
+        ]
+      }
+    },
+    "review_merged": {
+      "per_item": [
+        {
+          "item_id": "item_001",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": false
+          },
+          "quality_score_claude": 0.72,
+          "quality_score_gemini": 0.9,
+          "claude_concerns": [
+            "題目通過題幹『甲午戰爭失敗後』的線索，學生可能藉由排除法（其他條約時代）而非直接記憶KU來答題。如果目標是純粹的事件回憶，這個設計可能降低了構念效度的純粹性。",
+            "選項皆為中國近代真實條約。懂一點歷史的學生可以通過『甲午戰爭在何時發生』來推理出條約簽訂的時間範圍，從而排除《南京條約》（太早）和《辛丑條約》（太晚），最後在《馬關條約》和《五口通商條約》之間選擇。這樣的推理繞過了對KU的直接知識考驗。"
+          ],
+          "gemini_concerns": []
+        },
+        {
+          "item_id": "item_002",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": false
+          },
+          "quality_score_claude": 0.7,
+          "quality_score_gemini": 0.85,
+          "claude_concerns": [
+            "基於教材內容，答案唯一且明確。但從歷史事實而言，日治時期樟腦和檜木也是重要出口品。題目仰賴教材來定義『大量外銷』的產業範圍，這是合理的——符合鐵律A（不驗證領域事實）。",
+            "茶葉和樟腦都是台灣傳統產業，可能成為外銷產品。學習者如果知道日治時期推行『農業與資源開發』，可能在『農業產品』（選項A和B都符合）和『資源開採品』（選項C和D都符合）之間猶豫。進一步推理『日本特別需要什麼』時，糖和米（農業）比樟腦和檜木（資源）更常見於日治經濟敘述，可能導致選項長度、詞彙頻率等線索輔助猜測。"
+          ],
+          "gemini_concerns": []
+        },
+        {
+          "item_id": "item_003",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.85,
+          "quality_score_gemini": 0.95,
+          "claude_concerns": [],
+          "gemini_concerns": []
+        },
+        {
+          "item_id": "item_004",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.78,
+          "quality_score_gemini": 0.9,
+          "claude_concerns": [
+            "第一和第四空的答案非常明確（『公學校』和『私塾/書房』）。第二、三空涉及課程科目——題幹說『課程包括___、___、地理和常識等』，教材原文為『日語、算術、地理和常識等』。理論上學生可能填反順序（『算術、日語』而非『日語、算術』），但這很難發生，因為日語作為統治者推行的語言教育，通常會優先列舉。答案基本唯一。",
+            "第二、三空涉及順序歧義的微小風險，但題幹『課程包括___、___、地理和常識等』的結構暗示前兩科應按教材順序填入。",
+            "填空題需要具體詞彙。但第一空『公學校』是日治特有術語——學習者可能填『學校』而非『公學校』。第四空『私塾』或『書房』都被教材明確提及，但學習者可能混淆中日教育形式（如誤寫『寺子屋』——日本傳統教育機構）。從繞題風險看，題目有很好的防護。"
+          ],
+          "gemini_concerns": []
+        },
+        {
+          "item_id": "item_005",
+          "verdict": "needs_revision",
+          "verdict_claude": "needs_revision",
+          "verdict_gemini": "needs_revision",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": false,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.62,
+          "quality_score_gemini": 0.65,
+          "claude_concerns": [
+            "第一、二空（人名）答案明確且唯一。但第三空『他們積極興建___等基礎設施』存在重大答案唯一性問題。教材同時列舉了『學校、醫院』（與兒玉、後藤關聯）和『港口擴建、公路網發展、電力供應以及郵政系統』。題目沒有限定學生應填哪一組，導致合理答案包括：『學校和醫院』、『港口和公路』、『電力和郵政』或任何其他合理組合。這嚴重破壞了答案唯一性。",
+            "第三空的表述『他們積極興建___等基礎設施』不夠具體。『基礎設施』是一個寬泛的概念，可以指交通、能源、教育、衛生等多個領域。教材中列舉了6-7種不同的基礎設施類型，但題目沒有提供足夠的上下文線索來指向特定的答案。學習者面對多個同樣合理的填法，無法確定哪個是『正確』答案。",
+            "人名和機構名本身防止了繞題（需要記憶）。但第三空可以通過推理『什麼是基礎設施』來應答，不一定需要對KU的深度知識。"
+          ],
+          "gemini_concerns": [
+            "「興建___等基礎設施」中，教材提及多種建設（港口、公路、電力等），學生若填入非答案列出的項目亦屬合理，存在閱卷爭議。"
+          ]
+        },
+        {
+          "item_id": "item_006",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": false
+          },
+          "quality_score_claude": 0.75,
+          "quality_score_gemini": 0.9,
+          "claude_concerns": [
+            "教材明確指出皇民化運動『目的是加強台灣與日本的認同』，理蕃政策『試圖將原住民生活納入統治體系』。選項B（同化和掌控）最直接對應這些敘述。但如果學習者混淆『手段』與『目的』，可能誤選選項C（教育與生活改善確實是政策的具體內容），這導致答案的『唯一性』依賴於學習者對『目的vs手段』的認知水平。在hard題的脈絡下，這種難度是合理的。",
+            "此題需要學習者進行高階認知：(1)理解兩個不同政策的具體措施；(2)識別這些措施背後的共同目的；(3)區分政策手段（教育、衛生）與政策目的（同化、掌控）。構念效度非常強，真正測試的是政策分析而非單純事實回憶。這是此題最大的優點。",
+            "題幹相當長且包含多個細節，但『這兩項政策的共同目的最可能是什麼？』的問題陳述很清楚。用『最可能』而非『最直接』暗示需要推理和綜合分析，這與hard題的定位相符。",
+            "中等繞題風險。學習者可能因為題幹中明確提及『教育』、『生活改善』、『衛生習慣』、『農業技術』等具體正面措施，而誤認為政策目的就是『教育與經濟發展』（選項C）。這是『將手段誤認為目的』的常見誤解。選項C在表面上看也很合理——政策確實導致了教育和經濟發展。但教材原文的『目的』明確指向同化和掌控，不是發展。另一個繞題路徑是：選項A『完全消滅文化』用了『完全』這樣的絕對詞，容易被排除；選項D『自治與民主』與殖民統治的性質完全矛盾，也容易排除。這樣的『消除法』可能幫助學習者在B和C之間選擇，但不是基於政策分析。"
+          ],
+          "gemini_concerns": []
+        }
+      ],
+      "summary": {
+        "total_items": 6,
+        "reviewers": [
+          "claude",
+          "gemini"
+        ],
+        "verdict_agreement_rate": 1,
+        "per_check_agreement": {
+          "answer_uniqueness": {
+            "rate": 1,
+            "measured_on": 6
+          },
+          "construct_validity": {
+            "rate": 1,
+            "measured_on": 6
+          },
+          "ambiguity": {
+            "rate": 0.8333333333333334,
+            "measured_on": 6
+          },
+          "bypass_risk": {
+            "rate": 0.5,
+            "measured_on": 6
+          }
+        },
+        "merged_verdict_counts": {
+          "accept": 5,
+          "needs_revision": 1,
+          "reject": 0
+        },
+        "disagreement_item_ids": []
+      }
+    }
+  },
+  "log": [
+    {
+      "agent": "agent_1",
+      "action": "completed",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "notes": "Extracted 15 knowledge units from Taiwan Japanese colonial period material"
+    },
+    {
+      "agent": "agent_2",
+      "action": "completed",
+      "timestamp": "2026-04-23T12:00:00Z",
+      "notes": "Mapped 15 KUs to 4 competency dimensions with rationales; designed 6-item blueprint (2 easy, 3 medium, 1 hard); flagged measurability concern on figure_contribution dimension (only 2 KUs)"
+    },
+    {
+      "agent": "agent_3",
+      "action": "completed",
+      "timestamp": "2026-04-23T18:30:00Z",
+      "notes": "Designed 6 assessment items across all slots (2 mc_single easy, 1 ordering medium, 2 fill medium, 1 mc_single hard). All content sourced exclusively from material; each item includes distractor analysis, failure mode diagnosis, and designer rationale. Item-KU coverage: fully addresses all 6 slot specs; difficulty distribution matches 34% easy / 50% medium / 16% hard target; item types: 50% mc_single, 30% fill, 20% ordering as specified."
+    }
+  ],
+  "costs": {
+    "total_usd": 0.60342425,
+    "by_agent": {
+      "agent_1": 0.07377635,
+      "agent_2": 0.10935560000000001,
+      "agent_3": 0.28754485,
+      "agent_4": 0.13274745000000002,
+      "gemini_reviewer": {
+        "tokens": 82913,
+        "input_tokens": 71843,
+        "duration_ms": 53733,
+        "cost_usd_note": "not reported by Gemini CLI; compute from token pricing if needed"
+      }
+    }
+  }
+}
