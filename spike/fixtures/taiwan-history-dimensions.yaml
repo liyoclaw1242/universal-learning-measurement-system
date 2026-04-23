@@ -1,0 +1,23 @@
+dimensions:
+  - dim_id: historical_event_sequencing
+    name: 歷史事件時序能力
+    description: 能夠按時間順序辨識、排列日治時期主要事件與建設的基礎時序理解能力。
+  - dim_id: figure_contribution
+    name: 人物貢獻理解能力
+    description: 理解重要總督與官員在日治時期建設、教育或政策推動中所扮演角色的分析能力。
+  - dim_id: social_reform_analysis
+    name: 社會與教育變革分析能力
+    description: 分析日治時期在教育制度、基礎建設及社會生活方面的變革特點，並說明其相互關係的能力。
+  - dim_id: policy_impact_evaluation
+    name: 政策影響評估能力
+    description: 推理原住民政策及皇民化等措施對當時不同族群社會生活的具體影響，並對比早期與後期差異的思考能力。
+assessment_params:
+  target_item_count: 6
+  difficulty_distribution:
+    easy: 0.34
+    medium: 0.5
+    hard: 0.16
+  item_types:
+    mc_single: 0.5
+    fill: 0.3
+    ordering: 0.2

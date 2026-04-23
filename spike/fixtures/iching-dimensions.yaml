@@ -1,0 +1,23 @@
+dimensions:
+  - dim_id: trigram_identification
+    name: 八卦辨識能力
+    description: 能夠正確識別八個卦的名稱、符號及基本組成結構的基礎辨別能力。
+  - dim_id: line_composition_understanding
+    name: 陰陽爻組成能力
+    description: 能理解並運用陰陽爻的排列邏輯來構成與辨別不同八卦的推理能力。
+  - dim_id: symbolic_attribute_mapping
+    name: 象徵屬性對應能力
+    description: 能夠將各卦的傳統象徵、自然形象與屬性正確連結並對比的分析能力。
+  - dim_id: relational_interpretation
+    name: 卦象關係詮釋能力
+    description: 運用八卦間的相互關係、轉化邏輯進行綜合推理與情境應用的較高階能力。
+assessment_params:
+  target_item_count: 6
+  difficulty_distribution:
+    easy: 0.34
+    medium: 0.5
+    hard: 0.16
+  item_types:
+    mc_single: 0.5
+    fill: 0.3
+    ordering: 0.2
