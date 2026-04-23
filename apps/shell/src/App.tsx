@@ -1,8 +1,9 @@
-// ULMS formal v1 — shell assembly after Step 5.1–5.8
-// Components now live in @ulms/ui. Shell is responsible for composition,
-// state (local useState now, Zustand in step 6), and IPC wiring (step 7).
+// ULMS formal v1 — shell after Step 6 (Zustand).
+// App.tsx composes components from @ulms/ui, reads state from
+// useShellStore, and dispatches actions. Data is still fixture-seeded
+// (happens inside the store); step 7 replaces the seed with IPC.
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   Ribbon,
   StatusBar,
@@ -11,35 +12,43 @@ import {
   OverviewTab,
   ItemDetailTab,
   TerminalTab,
-  type RibbonTab,
-  type Tab,
   type AgentId,
-  type Density,
-  type Stage,
+  type Tab,
 } from '@ulms/ui';
-import {
-  session as fxSession,
-  agents as fxAgents,
-  items as fxItems,
-  dimensions as fxDimensions,
-  streamLog as fxStreamLog,
-  itemChecks as fxItemChecks,
-  itemCode as fxItemCode,
-  itemOptions as fxItemOptions,
-  sourceExcerpt as fxSourceExcerpt,
-} from '@ulms/ui/fixtures';
-
-type CenterTabId = 'overview' | `item_${string}` | `term-${AgentId}` | 'term-unified';
+import { useShellStore } from '@/state/shellStore';
 
 export default function App() {
-  const [stage, setStage] = useState<Stage>('review');
-  const [density, setDensity] = useState<Density>('standard');
-  const [ribbonTab, setRibbonTab] = useState<RibbonTab>('home');
-  const [selectedItemId, setSelectedItemId] = useState<string>('item_003');
-  const [activeAgentId, setActiveAgentId] = useState<AgentId>('agent-2');
-  const [activeCenterTab, setActiveCenterTab] = useState<CenterTabId>('overview');
-  const [openTabIds, setOpenTabIds] = useState<CenterTabId[]>(['overview', 'item_003']);
+  // Subscribe to exactly the fields this component reads. Keeps React
+  // from re-rendering the whole shell on unrelated state changes.
+  const stage = useShellStore((s) => s.stage);
+  const density = useShellStore((s) => s.density);
+  const activeRibbonTab = useShellStore((s) => s.activeRibbonTab);
+  const activeCenterTab = useShellStore((s) => s.activeCenterTab);
+  const openTabIds = useShellStore((s) => s.openTabIds);
+  const selectedItemId = useShellStore((s) => s.selectedItemId);
+  const activeAgentId = useShellStore((s) => s.activeAgentId);
 
+  const session = useShellStore((s) => s.session);
+  const items = useShellStore((s) => s.items);
+  const agents = useShellStore((s) => s.agents);
+  const streamLog = useShellStore((s) => s.streamLog);
+  const dimensions = useShellStore((s) => s.dimensions);
+  const itemChecks = useShellStore((s) => s.itemChecks);
+  const itemCode = useShellStore((s) => s.itemCode);
+  const itemOptions = useShellStore((s) => s.itemOptions);
+  const sourceExcerpt = useShellStore((s) => s.sourceExcerpt);
+
+  const setStage = useShellStore((s) => s.setStage);
+  const setDensity = useShellStore((s) => s.setDensity);
+  const setRibbonTab = useShellStore((s) => s.setRibbonTab);
+  const setActiveCenterTab = useShellStore((s) => s.setActiveCenterTab);
+  const openTab = useShellStore((s) => s.openTab);
+  const closeTab = useShellStore((s) => s.closeTab);
+  const selectItem = useShellStore((s) => s.selectItem);
+  const selectAgent = useShellStore((s) => s.selectAgent);
+  const applyItemOverride = useShellStore((s) => s.applyItemOverride);
+
+  // Derive the Tab[] list for TabBar from openTabIds.
   const centerTabs: Tab[] = useMemo(() => {
     return openTabIds.map<Tab>((id) => {
       if (id === 'overview') return { id, label: 'Overview' };
@@ -52,106 +61,116 @@ export default function App() {
     });
   }, [openTabIds]);
 
-  const openTab = (id: CenterTabId) => {
-    setOpenTabIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-    setActiveCenterTab(id);
-  };
-  const closeTab = (id: CenterTabId) => {
-    if (id === 'overview') return;
-    setOpenTabIds((prev) => {
-      const next = prev.filter((x) => x !== id);
-      if (activeCenterTab === id) {
-        const fallback = next[next.length - 1] ?? 'overview';
-        setActiveCenterTab(fallback as CenterTabId);
-      }
-      return next;
-    });
-  };
-
-  const handleSelectItem = (id: string) => {
-    setSelectedItemId(id);
-    openTab(`item_${id.replace('item_', '')}` as CenterTabId);
-  };
-  const handleSelectAgent = (id: AgentId) => {
-    setActiveAgentId(id);
-    openTab(`term-${id}`);
-  };
-
-  const displaySession = { ...fxSession, status: stageToStatus(stage) };
+  // Session payload shown in chrome. Keep session.status in sync with the
+  // simulated stage so the cost chip / status dot render consistently
+  // until real IPC drives both.
+  const displaySession = { ...session, status: stageToStatus(stage) };
 
   return (
     <div className="shell ulms-root" data-density={density}>
       <Ribbon
         session={displaySession}
         stage={stage}
-        activeTab={ribbonTab}
+        activeTab={activeRibbonTab}
         density={density}
         onTabChange={setRibbonTab}
         onDensityChange={setDensity}
-        onRunSecondOpinion={() => console.log('gemini second opinion (not wired)')}
-        onExport={() => console.log('export (not wired)')}
+        onRunSecondOpinion={() => console.log('gemini second opinion (step 7 wiring)')}
+        onExport={() => console.log('export (step 7 wiring)')}
       />
 
       <NavRail
         stage={stage}
-        items={fxItems}
+        items={items}
         selectedItemId={selectedItemId}
-        onSelectItem={handleSelectItem}
-        agents={fxAgents}
+        onSelectItem={selectItem}
+        agents={agents}
         activeAgentId={activeAgentId}
-        onSelectAgent={handleSelectAgent}
+        onSelectAgent={selectAgent}
       />
 
       <section className="center" aria-label="main workspace">
         <TabBar
           tabs={centerTabs}
           activeTabId={activeCenterTab}
-          onActivate={(id) => setActiveCenterTab(id as CenterTabId)}
-          onClose={(id) => closeTab(id as CenterTabId)}
+          onActivate={setActiveCenterTab}
+          onClose={closeTab}
           onAdd={() => openTab('term-unified')}
         />
-        <div className="tab-body">{renderTabBody(activeCenterTab, { selectedItemId })}</div>
+        <div className="tab-body">
+          {renderTabBody(activeCenterTab, {
+            selectedItemId,
+            items,
+            dimensions,
+            itemChecks,
+            itemCode,
+            itemOptions,
+            sourceExcerpt,
+            streamLog,
+            applyItemOverride,
+          })}
+        </div>
       </section>
 
       <StatusBar
         session={displaySession}
         stage={stage}
-        onToggleStage={(next) => setStage(next)}
-        versionLabel="ULMS · v0.1 step-5"
+        onToggleStage={setStage}
+        versionLabel="ULMS · v0.1 step-6"
       />
     </div>
   );
 }
 
-function stageToStatus(s: Stage) {
+function stageToStatus(s: ReturnType<typeof useShellStore.getState>['stage']) {
   if (s === 'running') return 'running' as const;
   if (s === 'review') return 'review' as const;
   return 'idle' as const;
 }
 
-function renderTabBody(activeId: CenterTabId, ctx: { selectedItemId: string }) {
+// Tab-body router. Pure function of activeCenterTab + store data slices.
+function renderTabBody(
+  activeId: string,
+  ctx: {
+    selectedItemId: string | null;
+    items: ReturnType<typeof useShellStore.getState>['items'];
+    dimensions: ReturnType<typeof useShellStore.getState>['dimensions'];
+    itemChecks: ReturnType<typeof useShellStore.getState>['itemChecks'];
+    itemCode: ReturnType<typeof useShellStore.getState>['itemCode'];
+    itemOptions: ReturnType<typeof useShellStore.getState>['itemOptions'];
+    sourceExcerpt: ReturnType<typeof useShellStore.getState>['sourceExcerpt'];
+    streamLog: ReturnType<typeof useShellStore.getState>['streamLog'];
+    applyItemOverride: ReturnType<typeof useShellStore.getState>['applyItemOverride'];
+  },
+) {
   if (activeId === 'overview') {
-    return <OverviewTab items={fxItems} dimensions={fxDimensions} />;
+    return <OverviewTab items={ctx.items} dimensions={ctx.dimensions} />;
   }
   if (activeId.startsWith('item_')) {
-    const item = fxItems.find((i) => i.id === activeId) ?? fxItems.find((i) => i.id === ctx.selectedItemId);
+    const item =
+      ctx.items.find((i) => i.id === activeId) ??
+      (ctx.selectedItemId ? ctx.items.find((i) => i.id === ctx.selectedItemId) : undefined);
     if (!item) return <EmptyBody label={activeId} />;
     return (
       <ItemDetailTab
         item={item}
-        options={fxItemOptions[item.id]}
-        checks={fxItemChecks[item.id]}
-        sourceExcerpt={fxSourceExcerpt[item.id]}
-        stemCode={fxItemCode[item.id]}
+        options={ctx.itemOptions[item.id]}
+        checks={ctx.itemChecks[item.id]}
+        sourceExcerpt={ctx.sourceExcerpt[item.id]}
+        stemCode={ctx.itemCode[item.id]}
+        onFlag={(id) => ctx.applyItemOverride(id, 'flag')}
+        onReject={(id) => ctx.applyItemOverride(id, 'reject')}
+        onPromote={(id) => ctx.applyItemOverride(id, 'promote')}
+        onShip={(id) => ctx.applyItemOverride(id, 'ship')}
       />
     );
   }
   if (activeId === 'term-unified') {
-    return <TerminalTab agentId="unified" streamLog={fxStreamLog} />;
+    return <TerminalTab agentId="unified" streamLog={ctx.streamLog} />;
   }
   if (activeId.startsWith('term-')) {
     const aid = activeId.replace('term-', '') as AgentId;
-    return <TerminalTab agentId={aid} streamLog={fxStreamLog} />;
+    return <TerminalTab agentId={aid} streamLog={ctx.streamLog} />;
   }
   return <EmptyBody label={activeId} />;
 }
