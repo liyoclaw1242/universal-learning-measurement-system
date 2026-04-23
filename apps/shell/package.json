@@ -11,6 +11,8 @@
     "preview": "electron-vite preview",
     "typecheck": "tsc --noEmit && tsc -p electron/tsconfig.json --noEmit",
     "test": "vitest",
+    "e2e": "electron-vite build && playwright test",
+    "e2e:headed": "electron-vite build && playwright test --headed",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"electron/**/*.ts\""
   },
   "dependencies": {
@@ -26,6 +28,7 @@
     "@types/node": "^22.8.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@playwright/test": "^1.48.2",
     "@vitejs/plugin-react": "^4.3.3",
     "electron": "^33.0.0",
     "electron-vite": "^2.3.0",

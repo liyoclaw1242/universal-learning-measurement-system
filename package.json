@@ -12,6 +12,7 @@
     "shell:build": "npm -w @ulms/shell run build",
     "shell:typecheck": "npm -w @ulms/shell run typecheck",
     "shell:test": "npm -w @ulms/shell run test",
+    "shell:e2e": "npm -w @ulms/shell run e2e",
     "spike": "npm -w @ulms/spike run start",
     "ui:typecheck": "npm -w @ulms/ui run typecheck",
     "ui:storybook": "npm -w @ulms/ui run storybook",
