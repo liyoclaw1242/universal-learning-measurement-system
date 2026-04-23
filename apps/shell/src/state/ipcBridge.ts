@@ -265,4 +265,16 @@ export const bridge = {
   async stopSecondOpinion(): Promise<void> {
     await window.ulms.stopSecondOpinion();
   },
+  async applyItemOverride(
+    itemId: string,
+    override: 'flag' | 'reject' | 'promote' | 'ship' | null,
+  ): Promise<void> {
+    // Optimistic store update, then persist. Store's in-memory apply
+    // happens in App.tsx onFlag/etc; this persists to blackboard.
+    await window.ulms.applyItemOverride(itemId, override);
+  },
+  async exportItems(): Promise<{ ok: boolean; error?: string; paths?: string[] }> {
+    const res = await window.ulms.exportItems();
+    return res as { ok: boolean; error?: string; paths?: string[] };
+  },
 };

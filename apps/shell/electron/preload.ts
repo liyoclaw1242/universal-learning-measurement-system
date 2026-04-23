@@ -30,6 +30,13 @@ const api = {
   startSecondOpinion: () => ipcRenderer.invoke('review:second-opinion'),
   stopSecondOpinion: () => ipcRenderer.invoke('review:stop-second-opinion'),
 
+  // ── review actions (persist user verdicts to blackboard) ─
+  applyItemOverride: (itemId: string, override: 'flag' | 'reject' | 'promote' | 'ship' | null) =>
+    ipcRenderer.invoke('items:override', itemId, override),
+
+  // ── export ───────────────────────────────────────────
+  exportItems: () => ipcRenderer.invoke('export:items'),
+
   // ── event subscriptions ───────────────────────────────
   onWorkflowStarted: (cb: () => void): Unsubscribe =>
     subscribe('workflow:started', () => cb()),

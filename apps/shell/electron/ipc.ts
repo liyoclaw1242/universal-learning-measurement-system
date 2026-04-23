@@ -23,6 +23,8 @@ import {
   stopSecondOpinion,
   isSecondOpinionRunning,
 } from './coordinator/gemini';
+import { applyItemOverride, type UserOverride } from './coordinator/overrides';
+import { exportItems } from './coordinator/export';
 
 export function registerIpc(workspaceDir: string): void {
   const blackboardPath = path.join(workspaceDir, 'blackboard.json');
@@ -78,6 +80,15 @@ export function registerIpc(workspaceDir: string): void {
   });
 
   ipcMain.handle('board:read', async () => readBlackboard(blackboardPath));
+
+  ipcMain.handle('items:override', async (_e, itemId: string, override: UserOverride) => {
+    return applyItemOverride(workspaceDir, itemId, override);
+  });
+
+  ipcMain.handle('export:items', async (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    return exportItems(win, workspaceDir);
+  });
 
   // ─── event forwarders (coordinator → all windows) ────────
 

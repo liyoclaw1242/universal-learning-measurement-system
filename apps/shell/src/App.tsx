@@ -76,7 +76,14 @@ export default function App() {
         onRunSecondOpinion={
           stage === 'review' && !geminiRunning ? () => void bridge.startSecondOpinion() : undefined
         }
-        onExport={() => console.log('export (step 7b-2)')}
+        onExport={async () => {
+          const res = await bridge.exportItems();
+          if (!res.ok && res.error && res.error !== 'canceled') {
+            alert(`Export failed: ${res.error}`);
+          } else if (res.ok && res.paths) {
+            console.log('exported →', res.paths);
+          }
+        }}
         onPickMaterial={() => void bridge.pickMaterial()}
         onPickDimensions={() => void bridge.pickDimensions()}
         onPickGuidance={() => void bridge.pickGuidance()}
@@ -169,10 +176,22 @@ function renderTabBody(
         checks={ctx.itemChecks[item.id]}
         sourceExcerpt={ctx.sourceExcerpt[item.id]}
         stemCode={ctx.itemCode[item.id]}
-        onFlag={(id) => ctx.applyItemOverride(id, 'flag')}
-        onReject={(id) => ctx.applyItemOverride(id, 'reject')}
-        onPromote={(id) => ctx.applyItemOverride(id, 'promote')}
-        onShip={(id) => ctx.applyItemOverride(id, 'ship')}
+        onFlag={(id) => {
+          ctx.applyItemOverride(id, 'flag');
+          void bridge.applyItemOverride(id, 'flag');
+        }}
+        onReject={(id) => {
+          ctx.applyItemOverride(id, 'reject');
+          void bridge.applyItemOverride(id, 'reject');
+        }}
+        onPromote={(id) => {
+          ctx.applyItemOverride(id, 'promote');
+          void bridge.applyItemOverride(id, 'promote');
+        }}
+        onShip={(id) => {
+          ctx.applyItemOverride(id, 'ship');
+          void bridge.applyItemOverride(id, 'ship');
+        }}
       />
     );
   }
