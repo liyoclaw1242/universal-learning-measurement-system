@@ -5,10 +5,10 @@
 //   · blinking `> ` prompt at the bottom (input is wired in step 7)
 
 import { useEffect, useMemo, useRef } from 'react';
-import type { AgentId, LogLine, StreamLog } from '../../types/agent';
+import type { LogLine, StreamLog, StreamSourceId } from '../../types/agent';
 
 interface TerminalTabProps {
-  agentId: AgentId | 'unified';
+  agentId: StreamSourceId;
   streamLog: StreamLog;
   /** optional; forwarded from state in step 6 */
   onSubmitCommand?: (line: string) => void;
@@ -42,7 +42,7 @@ export default function TerminalTab({ agentId, streamLog }: TerminalTabProps) {
   );
 }
 
-function collectLines(agentId: AgentId | 'unified', log: StreamLog): LogLine[] {
+function collectLines(agentId: StreamSourceId, log: StreamLog): LogLine[] {
   if (agentId === 'unified') {
     const merged: LogLine[] = [];
     for (const key of Object.keys(log) as (keyof StreamLog)[]) {

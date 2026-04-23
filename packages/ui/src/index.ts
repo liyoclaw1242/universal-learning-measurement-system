@@ -16,6 +16,7 @@ export type { Tab, TabId } from './components/TabBar';
 export { default as OverviewTab } from './components/OverviewTab';
 export { default as ItemDetailTab } from './components/ItemDetailTab';
 export { default as TerminalTab } from './components/TerminalTab';
+export { default as WarningsTray } from './components/WarningsTray';
 
 // Domain types — re-exported from the single aggregate module.
 export * from './types';

@@ -54,6 +54,17 @@ interface RibbonProps {
   hasGuidance?: boolean;
   /** Whether material + dimensions are both present — Start button gate */
   inputsReady?: boolean;
+
+  // ─── Gemini progress + review summary (step 7c) ───────
+  /** Gemini is currently running — button flips to "評審中" state */
+  geminiRunning?: boolean;
+  /** Elapsed seconds since Gemini started (App.tsx drives this tick) */
+  geminiElapsedS?: number;
+  /** Post-merge summary; displays agreement % badge when present */
+  reviewSummary?: {
+    verdict_agreement_rate: number;
+    merged_verdict_counts: { accept: number; needs_revision: number; reject: number };
+  } | null;
 }
 
 export default function Ribbon(props: RibbonProps) {
@@ -64,6 +75,9 @@ export default function Ribbon(props: RibbonProps) {
         stage={props.stage}
         onRunSecondOpinion={props.onRunSecondOpinion}
         onExport={props.onExport}
+        geminiRunning={props.geminiRunning}
+        geminiElapsedS={props.geminiElapsedS}
+        reviewSummary={props.reviewSummary}
       />
       <RibbonTabs
         activeTab={props.activeTab}
@@ -95,9 +109,20 @@ interface StripProps {
   stage: Stage;
   onRunSecondOpinion?: () => void;
   onExport?: () => void;
+  geminiRunning?: boolean;
+  geminiElapsedS?: number;
+  reviewSummary?: RibbonProps['reviewSummary'];
 }
 
-function RibbonStrip({ session, stage, onRunSecondOpinion, onExport }: StripProps) {
+function RibbonStrip({
+  session,
+  stage,
+  onRunSecondOpinion,
+  onExport,
+  geminiRunning,
+  geminiElapsedS,
+  reviewSummary,
+}: StripProps) {
   const state = costStateOf(session.cost_usd, session.cost_cap);
   const pct = session.cost_cap > 0 ? Math.min(100, (session.cost_usd / session.cost_cap) * 100) : 0;
 
@@ -114,6 +139,18 @@ function RibbonStrip({ session, stage, onRunSecondOpinion, onExport }: StripProp
       </div>
 
       <div className="right">
+        {reviewSummary && (
+          <span
+            className="agreement-chip"
+            title={`accept ${reviewSummary.merged_verdict_counts.accept} · needs_revision ${reviewSummary.merged_verdict_counts.needs_revision} · reject ${reviewSummary.merged_verdict_counts.reject}`}
+          >
+            <span>C = G</span>
+            <span className="agreement-pct">
+              {(reviewSummary.verdict_agreement_rate * 100).toFixed(0)}%
+            </span>
+          </span>
+        )}
+
         <span className="cost-chip" data-state={state}>
           <span className="track">
             <span className="fill" style={{ width: `${pct}%` }} />
@@ -124,10 +161,17 @@ function RibbonStrip({ session, stage, onRunSecondOpinion, onExport }: StripProp
 
         {stage === 'review' && (
           <>
-            <button className="btn" onClick={onRunSecondOpinion} disabled={!onRunSecondOpinion}>
-              <Sparkles size={14} strokeWidth={1.5} />
-              Gemini 2nd opinion
-            </button>
+            {geminiRunning ? (
+              <button className="btn running" disabled aria-live="polite">
+                <span className="pulse-dot" />
+                Gemini 評審中 · {(geminiElapsedS ?? 0).toFixed(0)}s
+              </button>
+            ) : (
+              <button className="btn" onClick={onRunSecondOpinion} disabled={!onRunSecondOpinion}>
+                <Sparkles size={14} strokeWidth={1.5} />
+                Gemini 2nd opinion
+              </button>
+            )}
             <button className="btn primary" onClick={onExport} disabled={!onExport}>
               <Download size={14} strokeWidth={1.5} />
               Export .md + .json

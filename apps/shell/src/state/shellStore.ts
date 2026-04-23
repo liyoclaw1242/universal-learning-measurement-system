@@ -83,6 +83,8 @@ export interface ShellState {
 
   /** Gemini second-opinion progress */
   geminiRunning: boolean;
+  /** Wall-clock when Gemini started (ms since epoch), null when idle */
+  geminiStartedAt: number | null;
   /** Merged review summary, populated after second-opinion:completed */
   reviewSummary: {
     total_items: number;
@@ -128,7 +130,10 @@ export interface ShellState {
   _onGeminiStarted: () => void;
   _onGeminiStopped: () => void;
   _onReviewSummary: (summary: ShellState['reviewSummary']) => void;
+  _onGeminiStreamLine: (tsISO: string, kind: string, text: string) => void;
   _pushWarning: (msg: string) => void;
+  dismissWarning: (index: number) => void;
+  dismissAllWarnings: () => void;
 }
 
 // ─── persisted subset (unchanged from step 6) ───────────
@@ -152,7 +157,7 @@ export const useShellStore = create<ShellState>()(
       session: PLACEHOLDER_SESSION,
       items: [],
       agents: AGENT_ROSTER,
-      streamLog: { 'agent-1': [], 'agent-2': [], 'agent-3': [], 'agent-4': [], unified: 'merge' },
+      streamLog: { 'agent-1': [], 'agent-2': [], 'agent-3': [], 'agent-4': [], unified: 'merge', gemini: [] },
       dimensions: [],
       itemChecks: {},
       itemCode: {},
@@ -164,6 +169,7 @@ export const useShellStore = create<ShellState>()(
       loadedDimensionCount: 0,
       loadedGuidance: false,
       geminiRunning: false,
+      geminiStartedAt: null,
       reviewSummary: null,
       warnings: [],
 
@@ -264,7 +270,7 @@ export const useShellStore = create<ShellState>()(
           warnings: [],
           session: { ...st.session, status: 'running', cost_usd: 0 },
           agents: st.agents.map((a) => ({ ...a, status: 'pending', cost: 0, duration_s: 0, tools: [] })),
-          streamLog: { 'agent-1': [], 'agent-2': [], 'agent-3': [], 'agent-4': [], unified: 'merge' },
+          streamLog: { 'agent-1': [], 'agent-2': [], 'agent-3': [], 'agent-4': [], unified: 'merge', gemini: [] },
         })),
 
       _onWorkflowCompleted: () =>
@@ -302,9 +308,34 @@ export const useShellStore = create<ShellState>()(
           itemCode: p.itemCode,
         })),
 
-      _onGeminiStarted: () => set({ geminiRunning: true }),
-      _onGeminiStopped: () => set({ geminiRunning: false }),
+      _onGeminiStarted: () =>
+        set((st) => ({
+          geminiRunning: true,
+          geminiStartedAt: Date.now(),
+          streamLog: { ...st.streamLog, gemini: [] },
+        })),
+      _onGeminiStopped: () => set({ geminiRunning: false, geminiStartedAt: null }),
       _onReviewSummary: (summary) => set({ reviewSummary: summary }),
+
+      _onGeminiStreamLine: (ts, kind, text) =>
+        set((st) => {
+          const prior = st.streamLog.gemini;
+          const list = Array.isArray(prior) ? prior : [];
+          const k = (['thought', 'tool', 'result', 'summary', 'done', 'warn', 'error'] as const).includes(
+            kind as never,
+          )
+            ? (kind as 'thought' | 'tool' | 'result' | 'summary' | 'done' | 'warn' | 'error')
+            : 'thought';
+          const nextList = [...list, { ts, kind: k, text }].slice(-500);
+          return { streamLog: { ...st.streamLog, gemini: nextList } };
+        }),
+
+      dismissWarning: (idx) =>
+        set((st) => ({
+          warnings: st.warnings.filter((_, i) => i !== idx),
+        })),
+
+      dismissAllWarnings: () => set({ warnings: [] }),
     }),
     {
       name: 'ulms-shell-ui',

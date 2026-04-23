@@ -34,5 +34,8 @@ export interface LogLine {
   text: string;
 }
 
-/** keyed by AgentId; "unified" is a synthetic merged view */
-export type StreamLog = Record<AgentId | 'unified', LogLine[] | 'merge'>;
+/** Streams keyed by source id. "unified" is a synthetic merged view
+ *  of the four claude agents. "gemini" is the independent second-
+ *  opinion reviewer's log (step 7c). */
+export type StreamSourceId = AgentId | 'unified' | 'gemini';
+export type StreamLog = Record<StreamSourceId, LogLine[] | 'merge'>;

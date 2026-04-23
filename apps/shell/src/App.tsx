@@ -2,7 +2,7 @@
 // Inputs + workflow are now wired through the Electron IPC bridge; the
 // Zustand store holds live state updated by coordinator events.
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Ribbon,
   StatusBar,
@@ -11,6 +11,7 @@ import {
   OverviewTab,
   ItemDetailTab,
   TerminalTab,
+  WarningsTray,
   type AgentId,
   type Tab,
 } from '@ulms/ui';
@@ -41,6 +42,11 @@ export default function App() {
   const loadedDimensionCount = useShellStore((s) => s.loadedDimensionCount);
   const loadedGuidance = useShellStore((s) => s.loadedGuidance);
   const geminiRunning = useShellStore((s) => s.geminiRunning);
+  const geminiStartedAt = useShellStore((s) => s.geminiStartedAt);
+  const reviewSummary = useShellStore((s) => s.reviewSummary);
+  const warnings = useShellStore((s) => s.warnings);
+  const dismissWarning = useShellStore((s) => s.dismissWarning);
+  const dismissAllWarnings = useShellStore((s) => s.dismissAllWarnings);
 
   const setDensity = useShellStore((s) => s.setDensity);
   const setRibbonTab = useShellStore((s) => s.setRibbonTab);
@@ -56,6 +62,7 @@ export default function App() {
     return openTabIds.map<Tab>((id) => {
       if (id === 'overview') return { id, label: 'Overview' };
       if (id === 'term-unified') return { id, label: 'unified', glyph: 'cog', closable: true };
+      if (id === 'term-gemini') return { id, label: 'gemini', glyph: 'cog', closable: true };
       if (id.startsWith('term-')) {
         const aid = id.replace('term-', '') as AgentId;
         return { id, label: aid, glyph: 'cog', closable: true };
@@ -63,6 +70,27 @@ export default function App() {
       return { id, label: id, closable: true };
     });
   }, [openTabIds]);
+
+  // Tick elapsed seconds while Gemini is running. 500ms cadence is
+  // enough for the ribbon counter; we throw away the timer when idle.
+  const [geminiElapsedS, setGeminiElapsedS] = useState(0);
+  useEffect(() => {
+    if (!geminiRunning || !geminiStartedAt) {
+      setGeminiElapsedS(0);
+      return;
+    }
+    const id = window.setInterval(() => {
+      setGeminiElapsedS((Date.now() - geminiStartedAt) / 1000);
+    }, 500);
+    return () => window.clearInterval(id);
+  }, [geminiRunning, geminiStartedAt]);
+
+  // Auto-open term-gemini tab on gemini start so the user can watch
+  // its log. Closes are user-controlled.
+  const openTabAction = useShellStore((s) => s.openTab);
+  useEffect(() => {
+    if (geminiRunning) openTabAction('term-gemini');
+  }, [geminiRunning, openTabAction]);
 
   return (
     <div className="shell ulms-root" data-density={density}>
@@ -93,6 +121,9 @@ export default function App() {
         dimensionCount={loadedDimensionCount}
         hasGuidance={loadedGuidance}
         inputsReady={inputsReady}
+        geminiRunning={geminiRunning}
+        geminiElapsedS={geminiElapsedS}
+        reviewSummary={reviewSummary}
       />
 
       <NavRail
@@ -132,7 +163,14 @@ export default function App() {
         session={session}
         stage={stage}
         onToggleStage={setStage}
-        versionLabel="ULMS · v0.1 step-7b"
+        versionLabel="ULMS · v0.1 step-7c"
+      />
+
+      <WarningsTray
+        warnings={warnings}
+        max={3}
+        onDismiss={dismissWarning}
+        onDismissAll={dismissAllWarnings}
       />
     </div>
   );
@@ -197,6 +235,9 @@ function renderTabBody(
   }
   if (activeId === 'term-unified') {
     return <TerminalTab agentId="unified" streamLog={ctx.streamLog} />;
+  }
+  if (activeId === 'term-gemini') {
+    return <TerminalTab agentId="gemini" streamLog={ctx.streamLog} />;
   }
   if (activeId.startsWith('term-')) {
     const aid = activeId.replace('term-', '') as AgentId;

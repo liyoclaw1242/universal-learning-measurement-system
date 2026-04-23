@@ -179,13 +179,69 @@ export function setupIpcBridge(): () => void {
 
   unsubs.push(
     ulms.onGeminiStarted(() => {
-      useShellStore.getState()._onGeminiStarted();
+      const s = useShellStore.getState();
+      s._onGeminiStarted();
+      s._onGeminiStreamLine(nowHMS(), 'summary', '── gemini reviewer starting ──');
     }),
   );
 
   unsubs.push(
-    ulms.onGeminiCompleted(() => {
-      useShellStore.getState()._onGeminiStopped();
+    ulms.onGeminiCompleted((payload) => {
+      const p = payload as { exit_code: number | null; result: { total_tokens?: number; duration_ms?: number } | null };
+      const s = useShellStore.getState();
+      s._onGeminiStopped();
+      if (p.result) {
+        s._onGeminiStreamLine(
+          nowHMS(),
+          'done',
+          `✔ exit ${p.exit_code} · ${p.result.total_tokens ?? 0} tokens · ${((p.result.duration_ms ?? 0) / 1000).toFixed(1)}s`,
+        );
+      }
+    }),
+  );
+
+  unsubs.push(
+    ulms.onGeminiStream(({ msg }) => {
+      const m = msg as {
+        type: string;
+        role?: 'user' | 'assistant';
+        content?: string;
+        delta?: boolean;
+        session_id?: string;
+        model?: string;
+        status?: string;
+      };
+      const s = useShellStore.getState();
+      if (m.type === 'init') {
+        s._onGeminiStreamLine(
+          nowHMS(),
+          'thought',
+          `session ${String(m.session_id ?? '').slice(0, 8)} · model ${m.model ?? '?'}`,
+        );
+        return;
+      }
+      if (m.type === 'message' && m.role === 'assistant' && m.content) {
+        // Deltas come as individual tokens; concat them into one line
+        // would require buffering. For step 7c just surface each delta
+        // as a thought line — rough but informative.
+        s._onGeminiStreamLine(nowHMS(), 'thought', m.content.slice(0, 300));
+        return;
+      }
+      if (m.type === 'message' && m.role === 'user' && m.content) {
+        s._onGeminiStreamLine(nowHMS(), 'tool', `user → ${m.content.slice(0, 160)}`);
+        return;
+      }
+      // Tool results would come in via their own type in future Gemini
+      // CLI versions; we log unknown types as warn to keep visibility.
+      if (m.type !== 'result' && m.type !== 'message') {
+        s._onGeminiStreamLine(nowHMS(), 'warn', `(${m.type})`);
+      }
+    }),
+  );
+
+  unsubs.push(
+    ulms.onGeminiRaw(({ line }) => {
+      useShellStore.getState()._onGeminiStreamLine(nowHMS(), 'warn', line.slice(0, 200));
     }),
   );
 

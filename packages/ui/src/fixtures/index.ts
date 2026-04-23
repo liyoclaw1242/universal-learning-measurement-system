@@ -158,6 +158,7 @@ export const streamLog: StreamLog = {
   ],
   'agent-3': [],
   'agent-4': [],
+  gemini: [],
   unified: 'merge',
 };
 
