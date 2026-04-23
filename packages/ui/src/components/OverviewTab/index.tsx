@@ -3,7 +3,7 @@
 // three target-vs-actual progress bars (recall / application / analysis).
 // Numbers use JetBrains Mono.
 
-import type { Dimension, Item, Difficulty, Bloom } from '@/types/item';
+import type { Dimension, Item, Difficulty, Bloom } from '../../types/item';
 
 interface OverviewTabProps {
   items: Item[];

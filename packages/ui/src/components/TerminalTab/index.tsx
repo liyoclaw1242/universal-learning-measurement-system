@@ -5,7 +5,7 @@
 //   · blinking `> ` prompt at the bottom (input is wired in step 7)
 
 import { useEffect, useMemo, useRef } from 'react';
-import type { AgentId, LogLine, StreamLog } from '@/types/agent';
+import type { AgentId, LogLine, StreamLog } from '../../types/agent';
 
 interface TerminalTabProps {
   agentId: AgentId | 'unified';

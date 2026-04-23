@@ -4,7 +4,7 @@
 // session.status); we keep it here for prototype use and will remove it
 // once stage is driven by real IPC.
 
-import type { Session, Stage } from '@/types/session';
+import type { Session, Stage } from '../../types/session';
 
 type DotColor = 'green' | 'yellow' | 'red';
 

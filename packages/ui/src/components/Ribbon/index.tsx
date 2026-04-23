@@ -7,8 +7,8 @@
 // This is the step 5.1 static version: props-driven, no store wiring.
 // Step 6 swaps the hand-rolled `session` prop for Zustand state.
 
-import type { Session, Stage, Density } from '@/types/session';
-import { costStateOf } from '@/types/session';
+import type { Session, Stage, Density } from '../../types/session';
+import { costStateOf } from '../../types/session';
 import { Download, Sparkles } from 'lucide-react';
 
 export type RibbonTab = 'home' | 'inputs' | 'run' | 'settings' | 'tweaks';

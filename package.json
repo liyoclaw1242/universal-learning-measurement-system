@@ -4,7 +4,8 @@
   "private": true,
   "description": "Universal Learning Measurement System — monorepo root",
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
     "shell:dev": "npm -w @ulms/shell run dev",
@@ -12,6 +13,9 @@
     "shell:typecheck": "npm -w @ulms/shell run typecheck",
     "shell:test": "npm -w @ulms/shell run test",
     "spike": "npm -w @ulms/spike run start",
+    "ui:typecheck": "npm -w @ulms/ui run typecheck",
+    "ui:storybook": "npm -w @ulms/ui run storybook",
+    "ui:build-storybook": "npm -w @ulms/ui run build-storybook",
     "format": "npm -w @ulms/shell run format"
   },
   "engines": {

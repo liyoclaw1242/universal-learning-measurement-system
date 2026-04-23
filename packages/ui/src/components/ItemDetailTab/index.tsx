@@ -15,7 +15,7 @@ import type {
   Item,
   ItemChecks,
   ItemOption,
-} from '@/types/item';
+} from '../../types/item';
 
 interface ItemDetailTabProps {
   item: Item;

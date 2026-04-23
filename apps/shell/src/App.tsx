@@ -1,15 +1,22 @@
 // ULMS formal v1 — shell assembly after Step 5.1–5.8
-// All seven components wired to fixtures data. Zustand store lands in
-// step 6 and replaces this local useState scaffolding.
+// Components now live in @ulms/ui. Shell is responsible for composition,
+// state (local useState now, Zustand in step 6), and IPC wiring (step 7).
 
 import { useState, useMemo } from 'react';
-import Ribbon, { type RibbonTab } from '@/components/Ribbon';
-import StatusBar from '@/components/StatusBar';
-import NavRail from '@/components/NavRail';
-import TabBar, { type Tab } from '@/components/TabBar';
-import OverviewTab from '@/components/OverviewTab';
-import ItemDetailTab from '@/components/ItemDetailTab';
-import TerminalTab from '@/components/TerminalTab';
+import {
+  Ribbon,
+  StatusBar,
+  NavRail,
+  TabBar,
+  OverviewTab,
+  ItemDetailTab,
+  TerminalTab,
+  type RibbonTab,
+  type Tab,
+  type AgentId,
+  type Density,
+  type Stage,
+} from '@ulms/ui';
 import {
   session as fxSession,
   agents as fxAgents,
@@ -20,9 +27,7 @@ import {
   itemCode as fxItemCode,
   itemOptions as fxItemOptions,
   sourceExcerpt as fxSourceExcerpt,
-} from '@/fixtures';
-import type { AgentId } from '@/types/agent';
-import type { Density, Stage } from '@/types/session';
+} from '@ulms/ui/fixtures';
 
 type CenterTabId = 'overview' | `item_${string}` | `term-${AgentId}` | 'term-unified';
 
@@ -35,7 +40,6 @@ export default function App() {
   const [activeCenterTab, setActiveCenterTab] = useState<CenterTabId>('overview');
   const [openTabIds, setOpenTabIds] = useState<CenterTabId[]>(['overview', 'item_003']);
 
-  // Derived tab list in the TabBar — keeps Overview first, then open dynamic tabs.
   const centerTabs: Tab[] = useMemo(() => {
     return openTabIds.map<Tab>((id) => {
       if (id === 'overview') return { id, label: 'Overview' };
@@ -53,7 +57,7 @@ export default function App() {
     setActiveCenterTab(id);
   };
   const closeTab = (id: CenterTabId) => {
-    if (id === 'overview') return; // unclosable
+    if (id === 'overview') return;
     setOpenTabIds((prev) => {
       const next = prev.filter((x) => x !== id);
       if (activeCenterTab === id) {
@@ -73,7 +77,6 @@ export default function App() {
     openTab(`term-${id}`);
   };
 
-  // Session display values — fixture is static; step 7 replaces with IPC.
   const displaySession = { ...fxSession, status: stageToStatus(stage) };
 
   return (
@@ -107,11 +110,7 @@ export default function App() {
           onClose={(id) => closeTab(id as CenterTabId)}
           onAdd={() => openTab('term-unified')}
         />
-        <div className="tab-body">
-          {renderTabBody(activeCenterTab, {
-            selectedItemId,
-          })}
-        </div>
+        <div className="tab-body">{renderTabBody(activeCenterTab, { selectedItemId })}</div>
       </section>
 
       <StatusBar
@@ -135,8 +134,7 @@ function renderTabBody(activeId: CenterTabId, ctx: { selectedItemId: string }) {
     return <OverviewTab items={fxItems} dimensions={fxDimensions} />;
   }
   if (activeId.startsWith('item_')) {
-    const id = activeId;
-    const item = fxItems.find((i) => i.id === id) ?? fxItems.find((i) => i.id === ctx.selectedItemId);
+    const item = fxItems.find((i) => i.id === activeId) ?? fxItems.find((i) => i.id === ctx.selectedItemId);
     if (!item) return <EmptyBody label={activeId} />;
     return (
       <ItemDetailTab

@@ -6,9 +6,9 @@
 // irrelevant; in Review stage the agent tree is historical and hidden.
 
 import { BookOpen, Bot, Flag, ArrowDown, ArrowUp, Check } from 'lucide-react';
-import type { Agent, AgentId, ToolCall } from '@/types/agent';
-import type { Item, Agreement, UserOverride } from '@/types/item';
-import type { Stage } from '@/types/session';
+import type { Agent, AgentId, ToolCall } from '../../types/agent';
+import type { Item, Agreement, UserOverride } from '../../types/item';
+import type { Stage } from '../../types/session';
 
 interface NavRailProps {
   stage: Stage;

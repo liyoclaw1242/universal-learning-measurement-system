@@ -3,10 +3,10 @@
 // in @/types; the hi-fi verdict shorthand ("accept"/"needs_revision"/
 // "reject") is kept verbatim.
 
-import type { Agent, StreamLog } from '@/types/agent';
-import type { Dimension, Item, ItemChecks, ItemOption } from '@/types/item';
-import { agreementOf } from '@/types/item';
-import type { Session } from '@/types/session';
+import type { Agent, StreamLog } from '../types/agent';
+import type { Dimension, Item, ItemChecks, ItemOption } from '../types/item';
+import { agreementOf } from '../types/item';
+import type { Session } from '../types/session';
 
 export const session: Session = {
   id: '7f3a8c2d',
