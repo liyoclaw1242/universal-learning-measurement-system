@@ -71,15 +71,17 @@ function emptyBlackboard() {
         item_types: { mc_single: 0.5, fill: 0.3, ordering: 0.2 },
       },
     },
+    // Initial data schema: ONLY expose fields the agents should write to.
+    // review_claude / review_gemini / review_merged are populated by the
+    // coordinator after agent-4, so we don't include them here — otherwise
+    // agent-4 sees empty fields and "helpfully" fills them with metadata,
+    // defeating the rename logic. Observed in the iching run.
     data: {
       knowledge_units: null,
       mapping: null,
       items: null,
-      review: null,              // Claude reviewer writes here, coordinator then
-                                 // renames to review_claude
-      review_claude: null,       // populated after agent_4 completes
-      review_gemini: null,       // populated after Gemini second opinion
-      review_merged: null,       // computed per D4 verdict-merge rules
+      review: null,              // agent-4 writes here; coordinator renames
+                                 // to review_claude after agent-4 exits
     },
     log: [],
     costs: {
@@ -360,8 +362,12 @@ async function runWorkflow() {
     // v3: rename data.review (Claude's output) to data.review_claude so that
     // Gemini's second opinion can later write into data.review without
     // clobbering. Keeps agent-4-reviewer SKILL.md unchanged (D1).
+    //
+    // Defensive: if agent-4 somehow also populated data.review_claude with
+    // partial metadata (observed in iching run — LLM non-determinism),
+    // we OVERWRITE it with the real review content from data.review.
     const postLoopBoard = await readBlackboard();
-    if (postLoopBoard.data.review && !postLoopBoard.data.review_claude) {
+    if (postLoopBoard.data.review) {
       postLoopBoard.data.review_claude = postLoopBoard.data.review;
       postLoopBoard.data.review = null;
       await fs.writeFile(BLACKBOARD, JSON.stringify(postLoopBoard, null, 2));
