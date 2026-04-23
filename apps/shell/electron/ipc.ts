@@ -1,0 +1,86 @@
+// IPC registration: binds ipcMain handlers that the preload bridge
+// invokes, and forwards coordinatorEvents to every open window's
+// webContents so the renderer store can subscribe.
+
+import path from 'node:path';
+import { ipcMain, BrowserWindow } from 'electron';
+import { readBlackboard } from './coordinator/blackboard';
+import {
+  clearGuidance,
+  getStatus,
+  pickDimensions,
+  pickGuidance,
+  pickMaterial,
+} from './coordinator/inputs';
+import {
+  coordinatorEvents,
+  runWorkflow,
+  stopWorkflow,
+  isWorkflowRunning,
+} from './coordinator/workflow';
+
+export function registerIpc(workspaceDir: string): void {
+  const blackboardPath = path.join(workspaceDir, 'blackboard.json');
+
+  // ─── invoke handlers ─────────────────────────────────────
+
+  ipcMain.handle('inputs:pick-material', async (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    return pickMaterial(win, workspaceDir);
+  });
+
+  ipcMain.handle('inputs:pick-dimensions', async (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    return pickDimensions(win, workspaceDir);
+  });
+
+  ipcMain.handle('inputs:pick-guidance', async (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    return pickGuidance(win, workspaceDir);
+  });
+
+  ipcMain.handle('inputs:clear-guidance', async () => {
+    clearGuidance();
+    return { ok: true as const };
+  });
+
+  ipcMain.handle('inputs:status', async () => getStatus());
+
+  ipcMain.handle('workflow:start', async () => {
+    if (isWorkflowRunning()) return { ok: false as const, error: 'already running' };
+    runWorkflow(workspaceDir).catch((err) => {
+      console.error('runWorkflow threw:', err);
+    });
+    return { ok: true as const };
+  });
+
+  ipcMain.handle('workflow:stop', async () => {
+    stopWorkflow();
+    return { ok: true as const };
+  });
+
+  ipcMain.handle('board:read', async () => readBlackboard(blackboardPath));
+
+  // ─── event forwarders (coordinator → all windows) ────────
+
+  const eventNames = [
+    'workflow:started',
+    'workflow:completed',
+    'workflow:error',
+    'board:updated',
+    'schema:warn',
+    'agent:started',
+    'agent:stream',
+    'agent:pty',
+    'agent:raw',
+    'agent:completed',
+  ] as const;
+
+  for (const name of eventNames) {
+    coordinatorEvents.on(name, (payload) => {
+      for (const win of BrowserWindow.getAllWindows()) {
+        win.webContents.send(name, payload);
+      }
+    });
+  }
+}

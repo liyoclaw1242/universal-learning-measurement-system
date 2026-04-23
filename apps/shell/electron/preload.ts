@@ -1,14 +1,54 @@
-// ULMS preload — contextBridge exposing the minimal IPC surface renderer
-// is allowed to use. Kept deliberately empty at scaffold stage; specific
-// handlers (inputs loaders, workflow start/stop, second-opinion trigger)
-// are added alongside their coordinator-side counterparts in step 7.
+// Preload — contextBridge surface for the renderer.
+// Wraps ipcRenderer.invoke + ipcRenderer.on into a typed `window.ulms`.
+// Event subscriptions return an unsubscribe function.
 
-import { contextBridge } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
+import type { IpcRendererEvent } from 'electron';
+
+type Unsubscribe = () => void;
+
+function subscribe(channel: string, cb: (payload: unknown) => void): Unsubscribe {
+  const handler = (_: IpcRendererEvent, payload: unknown) => cb(payload);
+  ipcRenderer.on(channel, handler);
+  return () => ipcRenderer.removeListener(channel, handler);
+}
 
 const api = {
-  // intentionally empty for now. First real handlers land when we port
-  // the spike's coordinator (ADR 001 · Migration strategy row "Coordinator
-  // logic").
+  // ── input loaders ─────────────────────────────────────
+  pickMaterial: () => ipcRenderer.invoke('inputs:pick-material'),
+  pickDimensions: () => ipcRenderer.invoke('inputs:pick-dimensions'),
+  pickGuidance: () => ipcRenderer.invoke('inputs:pick-guidance'),
+  clearGuidance: () => ipcRenderer.invoke('inputs:clear-guidance'),
+  inputsStatus: () => ipcRenderer.invoke('inputs:status'),
+
+  // ── workflow ──────────────────────────────────────────
+  startWorkflow: () => ipcRenderer.invoke('workflow:start'),
+  stopWorkflow: () => ipcRenderer.invoke('workflow:stop'),
+  readBlackboard: () => ipcRenderer.invoke('board:read'),
+
+  // ── event subscriptions ───────────────────────────────
+  onWorkflowStarted: (cb: () => void): Unsubscribe =>
+    subscribe('workflow:started', () => cb()),
+  onWorkflowCompleted: (cb: (payload: unknown) => void): Unsubscribe =>
+    subscribe('workflow:completed', cb),
+  onWorkflowError: (cb: (payload: { error: string }) => void): Unsubscribe =>
+    subscribe('workflow:error', (p) => cb(p as { error: string })),
+  onBoardUpdated: (cb: (payload: { board: unknown }) => void): Unsubscribe =>
+    subscribe('board:updated', (p) => cb(p as { board: unknown })),
+  onSchemaWarn: (cb: (payload: { agent: string; warnings: string[] }) => void): Unsubscribe =>
+    subscribe('schema:warn', (p) => cb(p as { agent: string; warnings: string[] })),
+  onAgentStarted: (cb: (payload: { agent: string }) => void): Unsubscribe =>
+    subscribe('agent:started', (p) => cb(p as { agent: string })),
+  onAgentStream: (cb: (payload: { agent: string; msg: unknown }) => void): Unsubscribe =>
+    subscribe('agent:stream', (p) => cb(p as { agent: string; msg: unknown })),
+  onAgentPty: (cb: (payload: { agent: string; data: string }) => void): Unsubscribe =>
+    subscribe('agent:pty', (p) => cb(p as { agent: string; data: string })),
+  onAgentRaw: (cb: (payload: { agent: string; line: string }) => void): Unsubscribe =>
+    subscribe('agent:raw', (p) => cb(p as { agent: string; line: string })),
+  onAgentCompleted: (cb: (payload: unknown) => void): Unsubscribe =>
+    subscribe('agent:completed', cb),
+
+  // legacy sanity check
   ping(): string {
     return 'ulms-ready';
   },

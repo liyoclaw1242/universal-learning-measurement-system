@@ -1,7 +1,6 @@
-// ULMS formal v1 — shell after Step 6 (Zustand).
-// App.tsx composes components from @ulms/ui, reads state from
-// useShellStore, and dispatches actions. Data is still fixture-seeded
-// (happens inside the store); step 7 replaces the seed with IPC.
+// ULMS formal v1 — shell after Step 7a.
+// Inputs + workflow are now wired through the Electron IPC bridge; the
+// Zustand store holds live state updated by coordinator events.
 
 import { useMemo } from 'react';
 import {
@@ -16,10 +15,9 @@ import {
   type Tab,
 } from '@ulms/ui';
 import { useShellStore } from '@/state/shellStore';
+import { bridge } from '@/state/ipcBridge';
 
 export default function App() {
-  // Subscribe to exactly the fields this component reads. Keeps React
-  // from re-rendering the whole shell on unrelated state changes.
   const stage = useShellStore((s) => s.stage);
   const density = useShellStore((s) => s.density);
   const activeRibbonTab = useShellStore((s) => s.activeRibbonTab);
@@ -38,17 +36,21 @@ export default function App() {
   const itemOptions = useShellStore((s) => s.itemOptions);
   const sourceExcerpt = useShellStore((s) => s.sourceExcerpt);
 
-  const setStage = useShellStore((s) => s.setStage);
+  const inputsReady = useShellStore((s) => s.inputsReady);
+  const loadedMaterialFilename = useShellStore((s) => s.loadedMaterialFilename);
+  const loadedDimensionCount = useShellStore((s) => s.loadedDimensionCount);
+  const loadedGuidance = useShellStore((s) => s.loadedGuidance);
+
   const setDensity = useShellStore((s) => s.setDensity);
   const setRibbonTab = useShellStore((s) => s.setRibbonTab);
   const setActiveCenterTab = useShellStore((s) => s.setActiveCenterTab);
+  const setStage = useShellStore((s) => s.setStage);
   const openTab = useShellStore((s) => s.openTab);
   const closeTab = useShellStore((s) => s.closeTab);
   const selectItem = useShellStore((s) => s.selectItem);
   const selectAgent = useShellStore((s) => s.selectAgent);
   const applyItemOverride = useShellStore((s) => s.applyItemOverride);
 
-  // Derive the Tab[] list for TabBar from openTabIds.
   const centerTabs: Tab[] = useMemo(() => {
     return openTabIds.map<Tab>((id) => {
       if (id === 'overview') return { id, label: 'Overview' };
@@ -61,22 +63,26 @@ export default function App() {
     });
   }, [openTabIds]);
 
-  // Session payload shown in chrome. Keep session.status in sync with the
-  // simulated stage so the cost chip / status dot render consistently
-  // until real IPC drives both.
-  const displaySession = { ...session, status: stageToStatus(stage) };
-
   return (
     <div className="shell ulms-root" data-density={density}>
       <Ribbon
-        session={displaySession}
+        session={session}
         stage={stage}
         activeTab={activeRibbonTab}
         density={density}
         onTabChange={setRibbonTab}
         onDensityChange={setDensity}
-        onRunSecondOpinion={() => console.log('gemini second opinion (step 7 wiring)')}
-        onExport={() => console.log('export (step 7 wiring)')}
+        onRunSecondOpinion={() => console.log('gemini second opinion (step 7b)')}
+        onExport={() => console.log('export (step 7b)')}
+        onPickMaterial={() => void bridge.pickMaterial()}
+        onPickDimensions={() => void bridge.pickDimensions()}
+        onPickGuidance={() => void bridge.pickGuidance()}
+        onClearGuidance={() => void bridge.clearGuidance()}
+        onStartWorkflow={() => void bridge.startWorkflow()}
+        materialFilename={loadedMaterialFilename}
+        dimensionCount={loadedDimensionCount}
+        hasGuidance={loadedGuidance}
+        inputsReady={inputsReady}
       />
 
       <NavRail
@@ -113,22 +119,15 @@ export default function App() {
       </section>
 
       <StatusBar
-        session={displaySession}
+        session={session}
         stage={stage}
         onToggleStage={setStage}
-        versionLabel="ULMS · v0.1 step-6"
+        versionLabel="ULMS · v0.1 step-7a"
       />
     </div>
   );
 }
 
-function stageToStatus(s: ReturnType<typeof useShellStore.getState>['stage']) {
-  if (s === 'running') return 'running' as const;
-  if (s === 'review') return 'review' as const;
-  return 'idle' as const;
-}
-
-// Tab-body router. Pure function of activeCenterTab + store data slices.
 function renderTabBody(
   activeId: string,
   ctx: {
@@ -144,6 +143,15 @@ function renderTabBody(
   },
 ) {
   if (activeId === 'overview') {
+    if (ctx.items.length === 0) {
+      return (
+        <div style={{ padding: 24 }}>
+          <p className="ulms-meta">
+            (no run has produced items yet — load material + dimensions, click Start)
+          </p>
+        </div>
+      );
+    }
     return <OverviewTab items={ctx.items} dimensions={ctx.dimensions} />;
   }
   if (activeId.startsWith('item_')) {

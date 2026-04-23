@@ -34,6 +34,26 @@ interface RibbonProps {
   onRunSecondOpinion?: () => void;
   /** optional — only valid in review stage */
   onExport?: () => void;
+
+  // ─── Inputs / Home body wiring (step 7a) ──────────────
+  /** Handler for picking the material file (Home + Inputs bodies) */
+  onPickMaterial?: () => void;
+  /** Handler for picking the dimensions YAML */
+  onPickDimensions?: () => void;
+  /** Handler for picking the optional guidance file */
+  onPickGuidance?: () => void;
+  /** Handler for clearing the staged guidance file */
+  onClearGuidance?: () => void;
+  /** Handler for starting the workflow (Home body Start button) */
+  onStartWorkflow?: () => void;
+  /** Currently-staged material filename (shown in input slot) */
+  materialFilename?: string | null;
+  /** Number of dimensions currently loaded */
+  dimensionCount?: number;
+  /** Whether guidance is loaded */
+  hasGuidance?: boolean;
+  /** Whether material + dimensions are both present — Start button gate */
+  inputsReady?: boolean;
 }
 
 export default function Ribbon(props: RibbonProps) {
@@ -51,7 +71,19 @@ export default function Ribbon(props: RibbonProps) {
         density={props.density}
         onDensityChange={props.onDensityChange}
       />
-      <RibbonBody activeTab={props.activeTab} stage={props.stage} />
+      <RibbonBody
+        activeTab={props.activeTab}
+        stage={props.stage}
+        onPickMaterial={props.onPickMaterial}
+        onPickDimensions={props.onPickDimensions}
+        onPickGuidance={props.onPickGuidance}
+        onClearGuidance={props.onClearGuidance}
+        onStartWorkflow={props.onStartWorkflow}
+        materialFilename={props.materialFilename}
+        dimensionCount={props.dimensionCount}
+        hasGuidance={props.hasGuidance}
+        inputsReady={props.inputsReady}
+      />
     </>
   );
 }
@@ -159,13 +191,23 @@ function RibbonTabs({ activeTab, onTabChange, density, onDensityChange }: TabsPr
 interface BodyProps {
   activeTab: RibbonTab;
   stage: Stage;
+  onPickMaterial?: () => void;
+  onPickDimensions?: () => void;
+  onPickGuidance?: () => void;
+  onClearGuidance?: () => void;
+  onStartWorkflow?: () => void;
+  materialFilename?: string | null;
+  dimensionCount?: number;
+  hasGuidance?: boolean;
+  inputsReady?: boolean;
 }
 
-function RibbonBody({ activeTab, stage }: BodyProps) {
+function RibbonBody(props: BodyProps) {
+  const { activeTab } = props;
   return (
     <div className="ribbon-body">
-      {activeTab === 'home' && <HomeBody stage={stage} />}
-      {activeTab === 'inputs' && <InputsBody />}
+      {activeTab === 'home' && <HomeBody {...props} />}
+      {activeTab === 'inputs' && <InputsBody {...props} />}
       {activeTab === 'run' && <RunBody />}
       {(activeTab === 'settings' || activeTab === 'tweaks') && (
         <EmptyBody label={activeTab.toUpperCase()} />
@@ -175,9 +217,13 @@ function RibbonBody({ activeTab, stage }: BodyProps) {
 }
 
 // Per handoff §4.3.3: Home = two button clusters separated by a 2px line.
-// Concrete button content depends on stage; left cluster is quick session
-// actions, right cluster is stage-specific shortcuts. Wiring comes in step 7.
-function HomeBody({ stage }: { stage: Stage }) {
+// Right cluster is stage-specific; Start is enabled only when inputs are
+// ready (step 7a).
+function HomeBody({
+  stage,
+  onStartWorkflow,
+  inputsReady,
+}: BodyProps) {
   return (
     <div className="home-body">
       <div className="cluster">
@@ -191,7 +237,12 @@ function HomeBody({ stage }: { stage: Stage }) {
       <div className="cluster-sep" />
       <div className="cluster">
         {stage === 'inputs' && (
-          <button className="btn primary" disabled>
+          <button
+            className="btn primary"
+            onClick={onStartWorkflow}
+            disabled={!inputsReady || !onStartWorkflow}
+            title={!inputsReady ? '先載入 material + dimensions' : undefined}
+          >
             Start run
           </button>
         )}
@@ -210,22 +261,76 @@ function HomeBody({ stage }: { stage: Stage }) {
   );
 }
 
-// Per handoff §4.3.3: three placeholder file slots (syllabus / textbook /
-// transcript), drop zones. Visual only here; actual picker + IPC in step 7.
-function InputsBody() {
-  const slots = [
-    { label: 'SYLLABUS', hint: '拖放或選擇 .md / .txt' },
-    { label: 'TEXTBOOK', hint: '拖放或選擇 .md / .txt' },
-    { label: 'TRANSCRIPT', hint: '拖放或選擇 .md / .txt（可選）' },
-  ];
+// Per handoff §4.3.3: three input slots. Step 7a: wired to IPC pickers
+// + status from the store. Slot shows filename when loaded.
+function InputsBody({
+  onPickMaterial,
+  onPickDimensions,
+  onPickGuidance,
+  onClearGuidance,
+  materialFilename,
+  dimensionCount = 0,
+  hasGuidance = false,
+}: BodyProps) {
   return (
     <div className="inputs-body">
-      {slots.map((s) => (
-        <div className="slot-placeholder" key={s.label}>
-          <span className="ulms-label">{s.label}</span>
-          <span className="ulms-meta">{s.hint}</span>
-        </div>
-      ))}
+      <InputSlot
+        label="MATERIAL"
+        required
+        loadedText={materialFilename ?? null}
+        emptyHint="選擇 .md / .txt · 必填"
+        onPick={onPickMaterial}
+      />
+      <InputSlot
+        label="DIMENSIONS"
+        required
+        loadedText={dimensionCount > 0 ? `${dimensionCount} 維度` : null}
+        emptyHint="選擇 .yaml · 必填"
+        onPick={onPickDimensions}
+      />
+      <InputSlot
+        label="GUIDANCE"
+        loadedText={hasGuidance ? '已載入' : null}
+        emptyHint="選擇 .md · 強建議"
+        onPick={onPickGuidance}
+        onClear={hasGuidance ? onClearGuidance : undefined}
+      />
+    </div>
+  );
+}
+
+interface InputSlotProps {
+  label: string;
+  emptyHint: string;
+  loadedText: string | null;
+  required?: boolean;
+  onPick?: () => void;
+  onClear?: () => void;
+}
+
+function InputSlot({ label, emptyHint, loadedText, required, onPick, onClear }: InputSlotProps) {
+  const loaded = !!loadedText;
+  return (
+    <div
+      className={`slot-placeholder ${loaded ? 'loaded' : ''} ${required ? '' : 'optional'}`}
+      onClick={onPick}
+      role="button"
+      tabIndex={0}
+    >
+      <span className="ulms-label">{label}</span>
+      <span className="ulms-meta">{loadedText ?? emptyHint}</span>
+      {onClear && (
+        <button
+          className="btn xs ghost"
+          style={{ alignSelf: 'flex-start', marginTop: 2 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClear();
+          }}
+        >
+          清除
+        </button>
+      )}
     </div>
   );
 }

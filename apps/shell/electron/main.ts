@@ -1,12 +1,20 @@
 // ULMS formal v1 — Electron main process
-// Minimal shell. Coordinator / spawn logic is ported in later steps
-// (see design handoff README §11 step 7).
+// After step 7a: registers the IPC surface backed by the ported
+// coordinator (apps/shell/electron/coordinator/*). Spawns claude CLI
+// with cwd = apps/shell/workspace/ so its .claude/skills/ discovery
+// finds the four agent skills.
 
 import { app, BrowserWindow } from 'electron';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { registerIpc } from './ipc';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// apps/shell/workspace — relative to the compiled main bundle.
+// Dev: out/main/index.js → ../../workspace resolves to
+// apps/shell/workspace. Same relative path inside packaged app.
+const WORKSPACE_DIR = path.resolve(__dirname, '../../workspace');
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -35,6 +43,7 @@ async function createWindow(): Promise<void> {
 }
 
 app.whenReady().then(() => {
+  registerIpc(WORKSPACE_DIR);
   createWindow();
 
   app.on('activate', () => {

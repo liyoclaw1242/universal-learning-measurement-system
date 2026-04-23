@@ -234,7 +234,15 @@ html, body, #root {
   min-height: 56px;
   justify-content: center;
   background: var(--ulms-canvas-2);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
 }
+.inputs-body .slot-placeholder:hover { border-color: var(--ulms-ink-2); }
+.inputs-body .slot-placeholder.loaded {
+  border: 1px solid var(--ulms-green);
+  background: var(--ulms-green-bg);
+}
+.inputs-body .slot-placeholder.loaded .ulms-meta { color: var(--ulms-green-ink); }
 
 .run-body {
   display: flex;
