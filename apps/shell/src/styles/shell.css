@@ -200,6 +200,49 @@ html, body, #root {
   padding: 10px 14px;
 }
 
+/* ribbon-body contents — added for formal v1 step 5.1 */
+.home-body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 60px;
+}
+.home-body .cluster {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.home-body .cluster-sep {
+  width: 2px;
+  align-self: stretch;
+  background: var(--ulms-line-soft);
+  margin: 4px 0;
+}
+
+.inputs-body {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.inputs-body .slot-placeholder {
+  border: var(--ulms-border-dashed);
+  border-radius: var(--ulms-r-sm);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 56px;
+  justify-content: center;
+  background: var(--ulms-canvas-2);
+}
+
+.run-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 60px;
+}
+
 /* step pill row (Run tab) */
 .steps {
   display: grid;

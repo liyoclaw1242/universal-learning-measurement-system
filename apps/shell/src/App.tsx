@@ -1,64 +1,42 @@
-// ULMS formal v1 — shell scaffolding
-// Step 4 per design handoff README §11: 5-region CSS grid with placeholder
-// divs. No interactivity yet; steps 5+ will wire Ribbon / NavRail / TabBar /
-// tab bodies / state store.
+// ULMS formal v1 — shell
+// Step 5.1 lands the Ribbon component. Other regions still placeholders
+// until their own steps (5.2 StatusBar, 5.3 NavRail, 5.4 TabBar, etc.).
 //
-// Grid (from app/src/styles/shell.css):
-//   rows    36px / 32px / auto / 1fr / 22px
-//   cols    260px / 1fr
-//
-// ┌──────────────────────────────────────────┐
-// │  ribbon-strip    (36px, full-width)       │
-// ├──────────────────────────────────────────┤
-// │  ribbon-tabs     (32px, full-width)       │
-// ├──────────────────────────────────────────┤
-// │  ribbon-body     (auto, full-width)       │
-// ├──────────┬───────────────────────────────┤
-// │  rail    │  center (tabbar + tab-body)   │
-// │  (260px) │  (1fr)                        │
-// ├──────────┴───────────────────────────────┤
-// │  statusbar       (22px, full-width)       │
-// └──────────────────────────────────────────┘
+// Local React state is the working-floor for step 5.* prototypes; Zustand
+// store arrives in step 6 and replaces this.
+
+import { useState } from 'react';
+import Ribbon, { type RibbonTab } from '@/components/Ribbon';
+import type { Session, Stage, Density } from '@/types/session';
+
+// Placeholder session data for static review. Step 7 replaces with IPC.
+const PLACEHOLDER_SESSION: Session = {
+  id: '—',
+  project: '—',
+  material: '—',
+  elapsed_s: 0,
+  cost_usd: 0,
+  cost_cap: 1.0,
+  status: 'idle',
+};
 
 export default function App() {
+  const [stage, setStage] = useState<Stage>('inputs');
+  const [density, setDensity] = useState<Density>('standard');
+  const [activeRibbonTab, setActiveRibbonTab] = useState<RibbonTab>('home');
+
   return (
-    <div className="shell ulms-root" data-density="standard">
-      {/* ───── ribbon strip (session meta) ───── */}
-      <div className="ribbon-strip">
-        <div className="breadcrumb">
-          <span className="brand">ulms</span>
-          <span className="sep">›</span>
-          <span>— project —</span>
-          <span className="sep">›</span>
-          <span className="session-id">session —</span>
-        </div>
-        <div className="right">
-          <span className="cost-chip" data-state="ok">
-            <span className="track">
-              <span className="fill" style={{ width: '0%' }} />
-            </span>
-            <span>$0.00</span>
-            <span className="total">/ $1.00</span>
-          </span>
-        </div>
-      </div>
+    <div className="shell ulms-root" data-density={density}>
+      <Ribbon
+        session={PLACEHOLDER_SESSION}
+        stage={stage}
+        activeTab={activeRibbonTab}
+        density={density}
+        onTabChange={setActiveRibbonTab}
+        onDensityChange={setDensity}
+      />
 
-      {/* ───── ribbon tabs ───── */}
-      <div className="ribbon-tabs">
-        <div className="tab active">Home</div>
-        <div className="tab">Inputs</div>
-        <div className="tab">Run</div>
-        <div className="tab">Settings</div>
-        <div className="tab">Tweaks</div>
-        <div className="spacer" />
-      </div>
-
-      {/* ───── ribbon body (contextual to active ribbon tab) ───── */}
-      <div className="ribbon-body">
-        <span className="ulms-label">HOME</span>
-      </div>
-
-      {/* ───── left rail ───── */}
+      {/* ───── left rail (step 5.3 / 5.8) ───── */}
       <aside className="rail" aria-label="navigation rail">
         <div className="rail-head">
           <span className="ulms-label">OUTLINE</span>
@@ -67,26 +45,45 @@ export default function App() {
         <div className="rail-scroll" />
       </aside>
 
-      {/* ───── center (tabbar + tab body) ───── */}
+      {/* ───── center (step 5.4 / tab bodies in 5.5–5.7) ───── */}
       <section className="center" aria-label="main workspace">
         <div className="tabbar">
           <div className="tab active">Overview</div>
         </div>
         <div className="tab-body" style={{ padding: '20px' }}>
-          <p className="ulms-meta">(shell scaffold — step 4)</p>
+          <p className="ulms-meta">
+            (shell step 5.1 — Ribbon landed · stage=<code>{stage}</code> · density=
+            <code>{density}</code>)
+          </p>
+          <p className="ulms-meta">
+            Try Home / Inputs / Run tabs on the ribbon to see different bodies. Density toggle is on
+            the right of the ribbon-tabs row. Stage buttons below switch the right-side ribbon
+            actions.
+          </p>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            <button className="btn" onClick={() => setStage('inputs')}>
+              stage: inputs
+            </button>
+            <button className="btn" onClick={() => setStage('running')}>
+              stage: running
+            </button>
+            <button className="btn" onClick={() => setStage('review')}>
+              stage: review
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* ───── status bar ───── */}
+      {/* ───── status bar (step 5.2) ───── */}
       <div className="statusbar">
         <span className="item">
-          <span className="dot green" />
-          ready
+          <span className={`dot ${stage === 'running' ? 'yellow' : 'green'}`} />
+          {stage === 'running' ? 'running' : stage === 'review' ? 'ready' : 'awaiting inputs'}
         </span>
         <span className="item">session —</span>
         <span className="item truncable">— material —</span>
         <span className="spacer" />
-        <span className="item">ULMS · v0.1 scaffold</span>
+        <span className="item">ULMS · v0.1 step-5.1</span>
       </div>
     </div>
   );
