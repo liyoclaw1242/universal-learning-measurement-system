@@ -601,12 +601,18 @@ async function runSecondOpinion() {
     }
     if (beforeBoard.data.review_gemini) {
       // Allow re-run by clearing previous Gemini output + merged result
-      beforeBoard.data.review_gemini = null;
-      beforeBoard.data.review_merged = null;
+      delete beforeBoard.data.review_gemini;
+      delete beforeBoard.data.review_merged;
     }
-    // D2: Gemini must NOT see Claude's verdicts, so we clear data.review
-    // before spawning. Skill will write its own output there.
-    beforeBoard.data.review = null;
+    // D2: Gemini must NOT see Claude's verdicts, so we must remove
+    // data.review before spawning. Critical: DELETE the field, don't set
+    // to null. Gemini's file editing tool is surgical (does string replace
+    // rather than full rewrite); if `"review": null` is present in the
+    // file, Gemini may INSERT a new review entry without removing the
+    // null one, producing duplicate keys. JSON.parse last-wins semantics
+    // then returns null, which looks like Gemini didn't write anything.
+    // Observed in iching run 2026-04-23.
+    delete beforeBoard.data.review;
     await fs.writeFile(BLACKBOARD, JSON.stringify(beforeBoard, null, 2));
     sendUI('board:updated', beforeBoard);
 

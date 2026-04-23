@@ -1,0 +1,1235 @@
+{
+  "workflow": {
+    "current_step": 4,
+    "total_steps": 4,
+    "steps": [
+      "agent_1",
+      "agent_2",
+      "agent_3",
+      "agent_4"
+    ],
+    "status": "completed"
+  },
+  "user_input": {
+    "material": {
+      "filename": "iching-material.md",
+      "content": "易經八卦入門概說\n易經傳統上以八卦作為基礎符號系統，用來象徵宇宙萬物的變化與運行規律。八卦由三條陰陽爻組成，代表天地間的八種基本現象，每個卦都有其名稱、形象與屬性。透過八卦的排列組合，易經描述了自然與人事的相互關係與轉化過程。八卦被視為觀察世界、掌握時變的重要工具。\n八卦的名稱與陰陽爻組成邏輯\n八卦的名稱分別為乾、兌、離、震、巽、坎、艮、坤。它們由陰爻（--）與陽爻（—）三條爻線從下往上排列組合而成。陽爻代表剛健、積極、向上的力量，陰爻代表柔順、包容、向下的特性。八卦的組成反映從兩儀（陰陽）到四象，再到八卦的生成過程，象徵宇宙從簡單到複雜的變化規律。\n傳統上認為，陰陽爻的不同排列決定了各卦的性質：\n\n三條陽爻組成乾卦，代表純陽。\n三條陰爻組成坤卦，代表純陰。\n其他六卦則由陰陽爻混合而成，體現陰陽交錯的各種狀態。\n\n這種組成邏輯被視為天地萬物生成與變化的基本模式。\n各卦的基本象徵與屬性\n每個卦都有其核心象徵、自然形象與傳統屬性：\n\n乾卦（☰）：象徵天，屬性為健。代表剛健、創造、積極前進，如父親、君王或天空的廣闊運行。\n兌卦（☱）：象徵澤，屬性為悅。代表喜悅、交流、談論，如少女、湖澤的滋潤與愉悅。\n離卦（☲）：象徵火，屬性為麗。代表光明、附麗、文明，如中女、太陽或火焰的照耀與依附。\n震卦（☳）：象徵雷，屬性為動。代表震動、興起、驚醒，如長男、春雷的發動與生機。\n巽卦（☴）：象徵風，屬性為入。代表順入、滲透、柔順，如長女、風的無形流動與影響。\n坎卦（☵）：象徵水，屬性為險。代表險陷、流動、危難，如中男、江河的深邃與奔流。\n艮卦（☶）：象徵山，屬性為止。代表停止、安定、厚實，如少男、山岳的穩固與靜止。\n坤卦（☷）：象徵地，屬性為順。代表柔順、承載、包容，如母親、大地的滋養與承托萬物。\n\n這些象徵不僅對應自然現象，還延伸到家庭成員、方位、季節、顏色等面向。例如乾卦對應西北與秋冬之交，坤卦對應西南與大地，震卦對應東方與春季。\n八卦之間的相互關係\n八卦傳統上存在多種關係模式，用來理解事物的發展與轉化：\n\n對立關係：如乾與坤（天地）、坎與離（水火）、震與巽（雷風）、艮與兌（山澤）。\n相生相助關係：例如震（雷）可助巽（風），離（火）可得兌（澤）的滋潤。\n家庭角色比喻：乾為父、坤為母、震為長男、巽為長女、坎為中男、離為中女、艮為少男、兌為少女，形成完整的家庭結構象徵。\n\n八卦還可兩兩重疊，組成六十四卦，進一步詮釋更複雜的變化。傳統易經實踐者透過八卦的象徵、屬性與關係，觀察人事吉凶、進退得失，以及自然界的運行規律。八卦系統提供了一套完整的框架，讓學習者從陰陽爻的基礎開始，逐步理解天地萬物的對應與轉化之道。",
+      "content_type": "markdown"
+    },
+    "competency_dimensions": [
+      {
+        "dim_id": "trigram_identification",
+        "name": "八卦辨識能力",
+        "description": "能夠正確識別八個卦的名稱、符號及基本組成結構的基礎辨別能力。"
+      },
+      {
+        "dim_id": "line_composition_understanding",
+        "name": "陰陽爻組成能力",
+        "description": "能理解並運用陰陽爻的排列邏輯來構成與辨別不同八卦的推理能力。"
+      },
+      {
+        "dim_id": "symbolic_attribute_mapping",
+        "name": "象徵屬性對應能力",
+        "description": "能夠將各卦的傳統象徵、自然形象與屬性正確連結並對比的分析能力。"
+      },
+      {
+        "dim_id": "relational_interpretation",
+        "name": "卦象關係詮釋能力",
+        "description": "運用八卦間的相互關係、轉化邏輯進行綜合推理與情境應用的較高階能力。"
+      }
+    ],
+    "domain_guidance": "指導原則\n目標學習者：對傳統中國文化或易經有興趣的初學者，具基本識字能力，適合國中以上或成人入門學習。\n偏好題型：多用符號辨識題、卦象對比題、情境詮釋題，鼓勵透過圖像或例子聯想應用，避免純定義背誦。\n避免事項：避免討論形上學真理判斷或與現代科學比較，專注傳統描述與內部邏輯。\n鼓勵展現：鼓勵學習者展示陰陽爻組成理解、象徵屬性對應，以及卦象關係推理的能力。",
+    "assessment_params": {
+      "target_item_count": 6,
+      "difficulty_distribution": {
+        "easy": 0.34,
+        "medium": 0.5,
+        "hard": 0.16
+      },
+      "item_types": {
+        "mc_single": 0.5,
+        "fill": 0.3,
+        "ordering": 0.2
+      }
+    }
+  },
+  "data": {
+    "review": null,
+    "knowledge_units": [
+      {
+        "ku_id": "ku_001",
+        "name": "八卦作為象徵符號系統的基本功能",
+        "description": "學習者能理解八卦在易經中被用來象徵宇宙萬物變化與運行規律的基礎功能，認識八卦是觀察世界、掌握時變的工具。",
+        "source_excerpt": "易經傳統上以八卦作為基礎符號系統，用來象徵宇宙萬物的變化與運行規律。八卦被視為觀察世界、掌握時變的重要工具。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "understand",
+          "recall"
+        ],
+        "potential_misconceptions": []
+      },
+      {
+        "ku_id": "ku_002",
+        "name": "陰陽爻的基本特性與象徵",
+        "description": "學習者能區分陰爻與陽爻的基本特性，理解陽爻代表的剛健、積極、向上之力，以及陰爻代表的柔順、包容、向下之特性。",
+        "source_excerpt": "陽爻代表剛健、積極、向上的力量，陰爻代表柔順、包容、向下的特性。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "understand",
+          "recall"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "陽爻總是比陰爻更好或更強大",
+            "evidence_from_material": "材料強調兩者是互補的特性，而非優劣之分。陰爻代表『柔順、包容』，與陽爻的『剛健、積極』並列，且後文多處展示陰陽混合的八卦如何體現『陰陽交錯的各種狀態』。"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_003",
+        "name": "八卦的三爻組成邏輯",
+        "description": "學習者能理解八卦由三條陰陽爻從下往上排列組合而成，掌握陰陽爻的不同排列決定卦的性質這一基本邏輯。",
+        "source_excerpt": "八卦由三條陰陽爻組成，代表天地間的八種基本現象。它們由陰爻（--）與陽爻（—）三條爻線從下往上排列組合而成。八卦的組成反映從兩儀（陰陽）到四象，再到八卦的生成過程。",
+        "prerequisites": [
+          "ku_002"
+        ],
+        "testable_aspects": [
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": []
+      },
+      {
+        "ku_id": "ku_004",
+        "name": "乾坤卦作為純陰陽的兩極",
+        "description": "學習者能識別乾卦與坤卦分別由三條陽爻和三條陰爻組成，代表純陽與純陰兩個極端狀態。",
+        "source_excerpt": "三條陽爻組成乾卦，代表純陽。三條陰爻組成坤卦，代表純陰。其他六卦則由陰陽爻混合而成，體現陰陽交錯的各種狀態。",
+        "prerequisites": [
+          "ku_002",
+          "ku_003"
+        ],
+        "testable_aspects": [
+          "recall",
+          "understand"
+        ],
+        "potential_misconceptions": []
+      },
+      {
+        "ku_id": "ku_005",
+        "name": "八卦的自然象徵與核心屬性",
+        "description": "學習者能將八個卦（乾、兌、離、震、巽、坎、艮、坤）與其對應的自然現象（天、澤、火、雷、風、水、山、地）和傳統屬性（健、悅、麗、動、入、險、止、順）正確對應，並理解每個卦的象徵延伸。",
+        "source_excerpt": "乾卦（☰）：象徵天，屬性為健。代表剛健、創造、積極前進。兌卦（☱）：象徵澤，屬性為悅。代表喜悅、交流、談論。離卦（☲）：象徵火，屬性為麗。代表光明、附麗、文明。震卦（☳）：象徵雷，屬性為動。代表震動、興起、驚醒。巽卦（☴）：象徵風，屬性為入。代表順入、滲透、柔順。坎卦（☵）：象徵水，屬性為險。代表險陷、流動、危難。艮卦（☶）：象徵山，屬性為止。代表停止、安定、厚實。坤卦（☷）：象徵地，屬性為順。代表柔順、承載、包容。",
+        "prerequisites": [
+          "ku_001",
+          "ku_003"
+        ],
+        "testable_aspects": [
+          "recall",
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "象徵與屬性是單一固定的對應關係，不可延伸或對比",
+            "evidence_from_material": "材料明確指出『這些象徵不僅對應自然現象，還延伸到家庭成員、方位、季節、顏色等面向』，說明象徵具有多層次的延伸性。"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_006",
+        "name": "八卦間的對立關係模式",
+        "description": "學習者能識別八卦中存在的對立關係（如乾與坤、坎與離、震與巽、艮與兌），理解這些對立關係如何用來詮釋事物的相反或互補特性。",
+        "source_excerpt": "對立關係：如乾與坤（天地）、坎與離（水火）、震與巽（雷風）、艮與兌（山澤）。",
+        "prerequisites": [
+          "ku_004",
+          "ku_005"
+        ],
+        "testable_aspects": [
+          "recall",
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": []
+      },
+      {
+        "ku_id": "ku_007",
+        "name": "八卦間的相生相助關係",
+        "description": "學習者能理解並舉例說明八卦間存在相生相助的關係（如雷助風、火得澤潤），掌握這類關係在詮釋事物發展中的應用。",
+        "source_excerpt": "相生相助關係：例如震（雷）可助巽（風），離（火）可得兌（澤）的滋潤。",
+        "prerequisites": [
+          "ku_005"
+        ],
+        "testable_aspects": [
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": []
+      },
+      {
+        "ku_id": "ku_008",
+        "name": "八卦的家庭角色象徵體系",
+        "description": "學習者能識別並理解八卦各對應的家庭角色（乾為父、坤為母、震為長男、巽為長女、坎為中男、離為中女、艮為少男、兌為少女），認識這套角色體系如何構成完整的家庭結構象徵。",
+        "source_excerpt": "家庭角色比喻：乾為父、坤為母、震為長男、巽為長女、坎為中男、離為中女、艮為少男、兌為少女，形成完整的家庭結構象徵。",
+        "prerequisites": [
+          "ku_005"
+        ],
+        "testable_aspects": [
+          "recall",
+          "understand"
+        ],
+        "potential_misconceptions": []
+      },
+      {
+        "ku_id": "ku_009",
+        "name": "八卦與方位季節的對應關係",
+        "description": "學習者能舉例說明八卦與自然方位、季節的對應關係，如乾卦對應西北與秋冬之交、震卦對應東方與春季。",
+        "source_excerpt": "例如乾卦對應西北與秋冬之交，坤卦對應西南與大地，震卦對應東方與春季。",
+        "prerequisites": [
+          "ku_005"
+        ],
+        "testable_aspects": [
+          "recall",
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": []
+      },
+      {
+        "ku_id": "ku_010",
+        "name": "八卦組合成六十四卦的進階原理",
+        "description": "學習者能理解八卦通過兩兩重疊組合成六十四卦，進一步詮釋更複雜的變化與現象，認識八卦系統的延伸與深化。",
+        "source_excerpt": "八卦還可兩兩重疊，組成六十四卦，進一步詮釋更複雜的變化。",
+        "prerequisites": [
+          "ku_003",
+          "ku_005",
+          "ku_006"
+        ],
+        "testable_aspects": [
+          "understand",
+          "recall"
+        ],
+        "potential_misconceptions": []
+      }
+    ],
+    "mapping": {
+      "ku_to_dimensions": {
+        "ku_001": [
+          {
+            "dim_id": "trigram_identification",
+            "weight": 0.8,
+            "rationale": "此 KU 教導學習者認識八卦的基本功能與符號地位。直接支持八卦辨識維度，因為辨識八卦首先需要理解其作為象徵符號系統的基本角色。"
+          },
+          {
+            "dim_id": "relational_interpretation",
+            "weight": 0.3,
+            "rationale": "此 KU 涉及八卦作為觀察世界、掌握時變工具的應用面向，輕微支持關係詮釋維度。"
+          }
+        ],
+        "ku_002": [
+          {
+            "dim_id": "line_composition_understanding",
+            "weight": 0.95,
+            "rationale": "陰陽爻的特性理解是卦象組成邏輯的基礎。學習者必須先掌握陽爻與陰爻各自代表的特性（剛健、積極、柔順、包容），才能進行後續的爻組成推理。"
+          },
+          {
+            "dim_id": "symbolic_attribute_mapping",
+            "weight": 0.4,
+            "rationale": "陰陽爻本身代表象徵特性（剛與柔、積極與包容），為後續象徵屬性對應奠定基礎，但仍屬初級層次。"
+          }
+        ],
+        "ku_003": [
+          {
+            "dim_id": "line_composition_understanding",
+            "weight": 1,
+            "rationale": "此 KU 核心內容就是八卦的三爻組成邏輯，直接且完全地體現組成能力維度。學習者需理解爻的排列組合如何決定卦的性質，這正是該維度的定義。"
+          },
+          {
+            "dim_id": "trigram_identification",
+            "weight": 0.5,
+            "rationale": "掌握組成邏輯有助於學習者進一步辨識與區分不同八卦，但組成理解本身不是辨識該卦的充要條件。"
+          }
+        ],
+        "ku_004": [
+          {
+            "dim_id": "line_composition_understanding",
+            "weight": 0.9,
+            "rationale": "乾坤卦代表純陽與純陰的兩極狀態，是爻組成邏輯的重要具體例證。學習者需理解三條全同爻線的特殊組成方式。"
+          },
+          {
+            "dim_id": "trigram_identification",
+            "weight": 0.85,
+            "rationale": "乾卦與坤卦是八卦中最基礎與重要的兩個，學習者必須正確識別其名稱、符號及代表的純陰陽狀態。"
+          },
+          {
+            "dim_id": "relational_interpretation",
+            "weight": 0.35,
+            "rationale": "乾坤代表天地的對立與互補，是八卦關係詮釋的基礎對立範例。"
+          }
+        ],
+        "ku_005": [
+          {
+            "dim_id": "trigram_identification",
+            "weight": 0.9,
+            "rationale": "此 KU 教導學習者識別八個卦的名稱、符號及其對應的自然現象與屬性。這是八卦辨識能力的核心內容。"
+          },
+          {
+            "dim_id": "symbolic_attribute_mapping",
+            "weight": 1,
+            "rationale": "此 KU 直接教導如何將八卦與其傳統象徵（天澤火雷風水山地）及屬性（健悅麗動入險止順）對應，完全符合該維度的定義。"
+          },
+          {
+            "dim_id": "relational_interpretation",
+            "weight": 0.4,
+            "rationale": "材料強調象徵可延伸到家庭成員、方位、季節等多層次，反映了象徵間的複雜關係，輕度支持關係詮釋。"
+          }
+        ],
+        "ku_006": [
+          {
+            "dim_id": "relational_interpretation",
+            "weight": 1,
+            "rationale": "此 KU 直接教導八卦間的對立關係（乾坤、坎離、震巽、艮兌），以及如何運用這些關係進行推理與應用。完全符合該維度關於『運用相互關係進行綜合推理』的定義。"
+          },
+          {
+            "dim_id": "symbolic_attribute_mapping",
+            "weight": 0.6,
+            "rationale": "對立關係涉及對比不同卦的象徵屬性，因此在象徵屬性對應維度中有一定支持度。"
+          }
+        ],
+        "ku_007": [
+          {
+            "dim_id": "relational_interpretation",
+            "weight": 1,
+            "rationale": "此 KU 教導八卦間的相生相助關係並舉例應用（雷助風、火得澤潤），是較高階的關係詮釋與情境應用能力，直接符合該維度定義。"
+          },
+          {
+            "dim_id": "symbolic_attribute_mapping",
+            "weight": 0.5,
+            "rationale": "相生相助涉及象徵與屬性間的互動與輔助關係，在象徵對應的深層應用層面有所支持。"
+          }
+        ],
+        "ku_008": [
+          {
+            "dim_id": "symbolic_attribute_mapping",
+            "weight": 0.9,
+            "rationale": "此 KU 教導八卦與家庭角色（父母長幼等）的象徵對應體系，是象徵屬性對應的直接延伸與應用。學習者需將卦與特定角色正確對應。"
+          },
+          {
+            "dim_id": "trigram_identification",
+            "weight": 0.7,
+            "rationale": "掌握卦的家庭角色身份有助於學習者進一步辨識與記憶各卦，提供了記憶與關聯的輔助線索。"
+          }
+        ],
+        "ku_009": [
+          {
+            "dim_id": "symbolic_attribute_mapping",
+            "weight": 0.8,
+            "rationale": "此 KU 教導八卦與方位、季節的對應關係，是象徵與屬性對應的進一步延伸維度（從核心屬性延伸到時空座標）。"
+          },
+          {
+            "dim_id": "trigram_identification",
+            "weight": 0.65,
+            "rationale": "透過方位季節對應，學習者可強化對特定卦象的辨識與記憶，例如記得乾卦對應西北與秋冬之交。"
+          }
+        ],
+        "ku_010": [
+          {
+            "dim_id": "line_composition_understanding",
+            "weight": 0.7,
+            "rationale": "六十四卦是由八卦兩兩組合而成，涉及爻組成邏輯的進階應用。學習者需理解如何透過組合生成更複雜結構。"
+          },
+          {
+            "dim_id": "relational_interpretation",
+            "weight": 0.85,
+            "rationale": "六十四卦進一步詮釋更複雜的變化與現象，體現了卦象關係詮釋的深化與進階應用。"
+          }
+        ]
+      },
+      "blueprint": {
+        "total_slots": 6,
+        "dimension_coverage": {
+          "trigram_identification": {
+            "target_weight": 1.5,
+            "assigned": 1.5,
+            "slots": [
+              0,
+              1
+            ]
+          },
+          "line_composition_understanding": {
+            "target_weight": 1.5,
+            "assigned": 1.5,
+            "slots": [
+              5
+            ]
+          },
+          "symbolic_attribute_mapping": {
+            "target_weight": 1.5,
+            "assigned": 1.5,
+            "slots": [
+              2,
+              3
+            ]
+          },
+          "relational_interpretation": {
+            "target_weight": 1.5,
+            "assigned": 1.5,
+            "slots": [
+              4
+            ]
+          }
+        },
+        "slot_specs": [
+          {
+            "slot_index": 0,
+            "target_kus": [
+              "ku_002"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "line_composition_understanding",
+                "weight": 0.95
+              }
+            ],
+            "target_item_type": "mc_single",
+            "target_difficulty": "easy",
+            "rationale": "評量陰陽爻的基本特性與差異。多選題適合測試對概念對比的理解。"
+          },
+          {
+            "slot_index": 1,
+            "target_kus": [
+              "ku_001"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "trigram_identification",
+                "weight": 0.8
+              }
+            ],
+            "target_item_type": "fill",
+            "target_difficulty": "easy",
+            "rationale": "評量八卦作為象徵符號系統的基本功能認知。填空題可測試學習者的直接回憶能力。"
+          },
+          {
+            "slot_index": 2,
+            "target_kus": [
+              "ku_005"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "symbolic_attribute_mapping",
+                "weight": 1
+              }
+            ],
+            "target_item_type": "mc_single",
+            "target_difficulty": "medium",
+            "rationale": "評量八卦與自然象徵（天澤火雷風水山地）的正確對應。多選題適合測試象徵對應的認知。"
+          },
+          {
+            "slot_index": 3,
+            "target_kus": [
+              "ku_008"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "symbolic_attribute_mapping",
+                "weight": 0.9
+              }
+            ],
+            "target_item_type": "fill",
+            "target_difficulty": "medium",
+            "rationale": "評量八卦與家庭角色的象徵對應（父、母、長男等）。填空題可測試應用象徵對應的能力。"
+          },
+          {
+            "slot_index": 4,
+            "target_kus": [
+              "ku_006",
+              "ku_007"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "relational_interpretation",
+                "weight": 1
+              }
+            ],
+            "target_item_type": "mc_single",
+            "target_difficulty": "medium",
+            "rationale": "評量八卦間的對立與相生關係。多選題可測試學習者的關係推理與應用能力。"
+          },
+          {
+            "slot_index": 5,
+            "target_kus": [
+              "ku_003",
+              "ku_004",
+              "ku_010"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "line_composition_understanding",
+                "weight": 0.85
+              }
+            ],
+            "target_item_type": "ordering",
+            "target_difficulty": "hard",
+            "rationale": "評量八卦的爻組成邏輯與進階組合應用（三爻組成 → 乾坤卦 → 六十四卦）。排序題可綜合評測組成邏輯的深度理解與應用。"
+          }
+        ]
+      },
+      "health_warnings": [
+        "維度『line_composition_understanding』相對抽象且基礎性強，在教材中較為隱含。建議確認題型（尤其是排序題）是否足以有效評測該維度。",
+        "維度『relational_interpretation』與『symbolic_attribute_mapping』在 ku_005、ku_006、ku_007 等處有一定重疊。兩維度均涉及象徵與關係的綜合應用，但前者強調『推理與應用』，後者強調『辨別與對應』。建議題目設計時清楚區分評測重點。",
+        "目標 6 題相對數量有限（每維度平均 1.5 題），對於 ku_005 等內容豐富的 KU，單一題目可能無法涵蓋所有重要概念（乾兌離震巽坎艮坤 8 個卦 + 屬性）。建議評題設計採用『多象徵對應於單題』的策略（例如選項中包含多個卦象對應的檢驗）。"
+      ]
+    },
+    "items": [
+      {
+        "item_id": "item_001",
+        "slot_index": 0,
+        "core": {
+          "item_type": "mc_single",
+          "stem": "下列哪項最能準確描述陽爻的特性？",
+          "stem_assets": [],
+          "options": [
+            "A. 柔順、包容、向下",
+            "B. 剛健、積極、向上",
+            "C. 停止、安定、厚實",
+            "D. 喜悅、交流、談論"
+          ],
+          "answer": "B",
+          "explanation": "根據教材，陽爻代表剛健、積極、向上的力量，而陰爻才代表柔順、包容、向下的特性。這是區分陰陽爻的核心特性。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_002"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "line_composition_understanding",
+              "weight": 1
+            }
+          ],
+          "difficulty_estimate": 0.25
+        },
+        "diagnostics": {
+          "distractor_analysis": {
+            "A": {
+              "correct": false,
+              "why_wrong": "這是陰爻的特性，與題目所問的陽爻特性相反。",
+              "maps_to_misconception": "誤將陰爻特性與陽爻混淆"
+            },
+            "B": {
+              "correct": true
+            },
+            "C": {
+              "correct": false,
+              "why_wrong": "這是艮卦（山）的象徵屬性，不是陽爻的基本特性。",
+              "maps_to_misconception": "將卦的象徵屬性與爻的基本特性混淆"
+            },
+            "D": {
+              "correct": false,
+              "why_wrong": "這是兌卦（澤）的象徵屬性，不是陽爻的特性。",
+              "maps_to_misconception": "將卦的象徵屬性與爻的基本特性混淆"
+            }
+          },
+          "expected_failure_modes": [
+            "學習者若尚未理解陰陽爻的對比特性，可能選 A（反向選擇）",
+            "學習者若將爻的基本特性與卦的象徵屬性混淆，可能選 C 或 D"
+          ]
+        },
+        "designer_notes": "本題直接源自教材『陽爻代表剛健、積極、向上的力量，陰爻代表柔順、包容、向下的特性』。題型為選擇題，適合測試 recall 與 understand 兩種 testable_aspects。干擾選項 C 和 D 特意設計為卦的象徵屬性，以診斷學習者是否混淆了『爻的特性』與『卦的屬性』兩個概念層次。"
+      },
+      {
+        "item_id": "item_002",
+        "slot_index": 1,
+        "core": {
+          "item_type": "fill",
+          "stem": "易經傳統上以八卦作為________符號系統，用來象徵宇宙萬物的變化與運行規律。",
+          "stem_assets": [],
+          "options": null,
+          "answer": "基礎",
+          "explanation": "教材明確提出『易經傳統上以八卦作為基礎符號系統』。八卦是易經象徵體系的基礎層級，其他所有卦象與解釋都建立在此基礎之上。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_001"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "trigram_identification",
+              "weight": 0.8
+            }
+          ],
+          "difficulty_estimate": 0.2
+        },
+        "diagnostics": {
+          "distractor_analysis": null,
+          "expected_failure_modes": [
+            "學習者若對教材內容印象不深，可能填入『古老』、『傳統』等相關詞彙，卻不是『基礎』",
+            "學習者若理解片面，可能只記得『象徵符號系統』，而漏掉『基礎』修飾語"
+          ]
+        },
+        "designer_notes": "本題採用填空題形式，源自教材第一段『易經傳統上以八卦作為基礎符號系統』。題目測試學習者對 ku_001 的直接回憶能力。單一答案『基礎』明確，無歧義。該詞彙在教材中多次出現，且為該 KU 的核心概念。"
+      },
+      {
+        "item_id": "item_003",
+        "slot_index": 2,
+        "core": {
+          "item_type": "mc_single",
+          "stem": "根據教材，下列哪個卦的傳統屬性為『止』，代表停止、安定、厚實？",
+          "stem_assets": [],
+          "options": [
+            "A. 坎卦",
+            "B. 艮卦",
+            "C. 離卦",
+            "D. 巽卦"
+          ],
+          "answer": "B",
+          "explanation": "教材清楚列舉『艮卦（☶）：象徵山，屬性為止。代表停止、安定、厚實，如少男、山岳的穩固與靜止。』山的穩固不動象徵『止』的屬性。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_005"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "symbolic_attribute_mapping",
+              "weight": 1
+            }
+          ],
+          "difficulty_estimate": 0.35
+        },
+        "diagnostics": {
+          "distractor_analysis": {
+            "A": {
+              "correct": false,
+              "why_wrong": "坎卦象徵水，屬性為『險』（險陷、流動、危難），而非『止』。",
+              "maps_to_misconception": "學習者可能混淆了坎卦與艮卦的屬性，或未清楚理解水流動與山靜止的對比"
+            },
+            "B": {
+              "correct": true
+            },
+            "C": {
+              "correct": false,
+              "why_wrong": "離卦象徵火，屬性為『麗』（光明、附麗、文明），而非『止』。",
+              "maps_to_misconception": "學習者可能記憶不清卦象對應，將火的屬性誤認為靜止"
+            },
+            "D": {
+              "correct": false,
+              "why_wrong": "巽卦象徵風，屬性為『入』（順入、滲透、柔順），代表流動與入滲，與『止』相反。",
+              "maps_to_misconception": "學習者可能將風的流動特性與山的靜止混淆，或屬性記憶錯誤"
+            }
+          },
+          "expected_failure_modes": [
+            "若學習者未熟悉全部 8 個卦的屬性，可能透過排除法選擇，導致誤選",
+            "若學習者只記得部分卦象（如艮=山），卻未掌握屬性對應，可能因卦名相似而誤選其他卦",
+            "若學習者混淆了『屬性』與『象徵自然現象』，可能將『山』等同於『止』，但選了錯卦"
+          ]
+        },
+        "designer_notes": "本題源自教材『八卦的自然象徵與屬性』段落，特別是艮卦的定義。題型為選擇題，測試 ku_005 中『象徵與屬性對應』的能力。四個干擾選項分別代表其他三個卦的正確屬性（坎險、離麗、巽入），設計目的是確保學習者不能透過『屬性有效性檢驗』猜測，而必須精確掌握艮卦的屬性對應。難度為 medium，適合測試中等程度的象徵對應認知。"
+      },
+      {
+        "item_id": "item_004",
+        "slot_index": 3,
+        "core": {
+          "item_type": "fill",
+          "stem": "在八卦的家庭角色象徵體系中，兌卦代表________，坤卦代表________。",
+          "stem_assets": [],
+          "options": null,
+          "answer": [
+            "少女",
+            "母親"
+          ],
+          "explanation": "教材明確列舉『乾為父、坤為母、震為長男、巽為長女、坎為中男、離為中女、艮為少男、兌為少女』。兌卦對應少女的身份，坤卦對應母親的身份，形成完整的家庭角色體系。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_008"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "symbolic_attribute_mapping",
+              "weight": 0.9
+            }
+          ],
+          "difficulty_estimate": 0.4
+        },
+        "diagnostics": {
+          "distractor_analysis": null,
+          "expected_failure_modes": [
+            "學習者若僅記住部分家庭角色對應（如乾為父），而未全面掌握八卦體系，可能填錯",
+            "學習者若混淆了兌卦（澤）的自然象徵特性『喜悅、交流』與其家庭角色『少女』，可能填入屬性而非角色",
+            "學習者若只記得孩子輩的對應（長男、長女等），而未掌握父母與中幼輩的完整映射，可能填錯坤卦的角色"
+          ]
+        },
+        "designer_notes": "本題採用填空題形式，源自教材『八卦的家庭角色象徵體系』段落。題目要求填入兩個角色身份，測試學習者對 ku_008 中多個家庭角色對應的掌握。答案明確（少女、母親），無歧義。該對應在教材中以列表形式清楚呈現，是 recall 與 understand 的直接評測。難度為 medium，因為涉及多個對應點的記憶與應用。"
+      },
+      {
+        "item_id": "item_005",
+        "slot_index": 4,
+        "core": {
+          "item_type": "mc_single",
+          "stem": "根據教材，『坎卦象徵水、代表險陷與危難』與『離卦象徵火、代表光明與文明』之間存在________的八卦關係。這類關係表現出宇宙中的________特性。",
+          "stem_assets": [],
+          "options": [
+            "A. 相生相助；互補",
+            "B. 對立；相反或互補",
+            "C. 層級；高低",
+            "D. 演化；進展"
+          ],
+          "answer": "B",
+          "explanation": "教材明確指出『對立關係：如乾與坤（天地）、坎與離（水火）』。坎與離的對立關係體現了水與火、危難與光明等相反特性的互補與平衡。對立關係是八卦用來詮釋事物相反或互補特性的重要邏輯。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_006",
+            "ku_007"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "relational_interpretation",
+              "weight": 1
+            }
+          ],
+          "difficulty_estimate": 0.45
+        },
+        "diagnostics": {
+          "distractor_analysis": {
+            "A": {
+              "correct": false,
+              "why_wrong": "相生相助關係（如『震雷助巽風』、『離火得兌澤滋潤』）是不同的卦象關係類型，坎與離體現的是對立而非相生。",
+              "maps_to_misconception": "學習者可能將『對立』與『相生』兩種卦象關係混淆，未清楚區分兩者的含義"
+            },
+            "B": {
+              "correct": true
+            },
+            "C": {
+              "correct": false,
+              "why_wrong": "『層級與高低』不是教材中提及的八卦間關係類型。八卦關係強調的是相反性或互補性，而非優劣層級。",
+              "maps_to_misconception": "學習者可能誤認為卦象間有優劣或進化的層級關係，這違背了易經中陰陽平等互補的原則"
+            },
+            "D": {
+              "correct": false,
+              "why_wrong": "『演化與進展』不是教材明確提及的八卦關係。八卦關係模式涵蓋對立、相生等靜態的對應關係，而非時間序列的演化。",
+              "maps_to_misconception": "學習者可能將八卦的『轉化』（來自教材『用來象徵宇宙萬物的變化與轉化過程』）誤解為線性的進化方向"
+            }
+          },
+          "expected_failure_modes": [
+            "若學習者對『對立』與『相生』的區分不清，可能誤選 A，因為兩者都涉及卦象間的聯繫",
+            "若學習者只記得『坎與離』但未掌握『對立關係』的定義，可能無法推理出答案",
+            "若學習者對教材的卦象關係模式理解不全面，可能被 C 和 D 的『關係』表述所迷惑"
+          ]
+        },
+        "designer_notes": "本題源自教材『八卦之間的相互關係』段落，特別是『對立關係』與『相生相助關係』兩小節。題型為選擇題，測試 ku_006 和 ku_007 中對卦象關係的理解與詮釋。題幹設計為兩空填空（關係類型 + 特性），以強化學習者需掌握『對立』的定義及其所反映的『相反或互補』特性。干擾選項設計為其他卦象關係類型（相生）與錯誤概念（層級、演化），測試學習者是否混淆了不同的詮釋維度。難度為 medium，要求綜合理解多個卦象關係模式。"
+      },
+      {
+        "item_id": "item_006",
+        "slot_index": 5,
+        "core": {
+          "item_type": "ordering",
+          "stem": "下列各段敘述涉及八卦爻組的邏輯層次。請按照『從基礎概念到進階應用』的邏輯順序，排列以下陳述：",
+          "stem_assets": [
+            {
+              "type": "text",
+              "content": "I. 八卦由三條陰陽爻從下往上排列組合而成，陰陽爻的不同排列決定卦的性質。\nII. 乾卦由三條陽爻組成（代表純陽），坤卦由三條陰爻組成（代表純陰），其他六卦由陰陽爻混合而成。\nIII. 八卦還可兩兩重疊，組成六十四卦，進一步詮釋更複雜的變化與現象。\nIV. 陽爻代表剛健、積極、向上的力量，陰爻代表柔順、包容、向下的特性。"
+            }
+          ],
+          "options": null,
+          "answer": "IV, I, II, III",
+          "explanation": "邏輯順序為：\n1. **IV（基礎）**：理解陰陽爻的基本特性是所有後續理解的前提。\n2. **I（組成邏輯）**：掌握『三爻排列決定卦性』的原則是組成八卦的核心邏輯。\n3. **II（具體應用）**：乾坤卦是應用爻組邏輯的具體例證，展示純陽與純陰的極端情況，以及其他卦的混合狀態。\n4. **III（進階應用）**：六十四卦是以八卦為基礎的進階組合，代表更複雜的詮釋系統。\n\n這一順序反映了教材的講述邏輯：先介紹基礎特性，再說明組成原理，接著展示具體卦象，最後引入進階組合。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_003",
+            "ku_004",
+            "ku_010"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "line_composition_understanding",
+              "weight": 0.85
+            }
+          ],
+          "difficulty_estimate": 0.65
+        },
+        "diagnostics": {
+          "distractor_analysis": null,
+          "expected_failure_modes": [
+            "若學習者未能區分『爻的特性』與『卦的組成邏輯』兩個概念層次，可能將 IV 與 I 的順序顛倒，導致排序錯誤",
+            "若學習者認為『乾坤卦』是組成邏輯本身（而非應用例），可能誤置 II 的位置，將其排在 I 之前",
+            "若學習者對『六十四卦』的進階性地位認識不足，可能將 III 提前至 I 或 II 之間",
+            "若學習者只記住『六十四卦』是『組合』，卻未掌握其複雜性來自『進階應用』，可能選擇次優排序"
+          ]
+        },
+        "designer_notes": "本題採用排序題形式，源自教材『八卦的三爻組成邏輯』、『乾坤卦作為純陰陽的兩極』與『八卦組合成六十四卦的進階原理』三個段落。題型為 ordering，測試 ku_003、ku_004、ku_010 中關於爻組成從基礎到進階的邏輯理解。\n\n題目設計特色：\n1. 四個陳述涵蓋爻特性→爻組邏輯→具體卦象→進階組合的完整縱向發展。\n2. 正確答案（IV, I, II, III）遵循教材敘述邏輯，反映『從簡單到複雜』的學習進度。\n3. 常見錯誤排序（如 I, IV, II, III）會被診斷為『未清楚理解概念先後關係』。\n\n難度為 hard，因為排序題要求學習者不僅掌握各個概念，還需理解它們之間的邏輯依賴關係與發展軌跡。"
+      }
+    ],
+    "review_claude": {
+      "per_item": [
+        {
+          "item_id": "item_001",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true,
+              "concern": "『陽』在漢文化語境中與『剛、積極』有高度語義聯結，不需精通易經亦可能猜對。但作為入門定義題尚屬合理。"
+            }
+          },
+          "overall_quality_score": 0.9,
+          "notes": "成功區分爻的特性與卦的屬性，診斷價值高。"
+        },
+        {
+          "item_id": "item_002",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true,
+              "concern": "填空題『基礎』一詞若填入『基本』亦屬合理。建議系統判定時考慮近義詞。"
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.85,
+          "notes": "準確測試對系統定位的認知。"
+        },
+        {
+          "item_id": "item_003",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.95,
+          "notes": "干擾選項設計精準，涵蓋了其他正確屬性，有效排除隨機猜測。"
+        },
+        {
+          "item_id": "item_004",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.95,
+          "notes": "家庭角色對應明確，無歧義。"
+        },
+        {
+          "item_id": "item_005",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true,
+              "concern": "『相反或互補』在學術題型中常被視為正確信號。建議未來可加入更具誘惑力的抽象干擾項。"
+            }
+          },
+          "overall_quality_score": 0.8,
+          "notes": "成功測試了關係類型的詮釋與特性理解。"
+        },
+        {
+          "item_id": "item_006",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.9,
+          "notes": "排序邏輯與教材敘述邏輯高度一致，能有效評測高階認知。"
+        }
+      ],
+      "summary": {
+        "total_items": 6,
+        "accepted": 6,
+        "needs_revision": 0,
+        "rejected": 0,
+        "average_quality_score": 0.89,
+        "overall_recommendations": [
+          "本批題目品質極高，難度分布與題型配置均符合藍圖要求。",
+          "填空題建議在實作評分系統時，將『基礎』與『基本』列為等效答案。",
+          "對於象徵屬性的測試（Item 003），建議可進一步延伸至圖像辨識，增加多樣性。"
+        ]
+      }
+    },
+    "review_gemini": {
+      "per_item": [
+        {
+          "item_id": "item_001",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true,
+              "concern": "『陽』在文化直覺中常與『剛、積極』連結，具備基礎常識者即使未讀教材也可能答對。"
+            }
+          },
+          "overall_quality_score": 0.85,
+          "notes": "作為入門定義題，其診斷『爻特性』與『卦屬性』混淆的功能良好。"
+        },
+        {
+          "item_id": "item_002",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true,
+              "concern": "『基礎』若填為『基本』亦具合理性，建議判定邏輯需包含近義詞。"
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.8,
+          "notes": "準確測試對八卦系統地位的認知。"
+        },
+        {
+          "item_id": "item_003",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.95,
+          "notes": "干擾選項設計優秀，皆為教材內的其他正確屬性，有效排除隨機猜測。"
+        },
+        {
+          "item_id": "item_004",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.9,
+          "notes": "家庭角色對應明確，無歧義。"
+        },
+        {
+          "item_id": "item_005",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true,
+              "concern": "『相反或互補』的描述較具備『正確答案』的特徵，學習者可能透過語感猜測。"
+            }
+          },
+          "overall_quality_score": 0.85,
+          "notes": "成功測試了卦象關係類型的理解。"
+        },
+        {
+          "item_id": "item_006",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.9,
+          "notes": "邏輯層次清晰，能有效評測學習者對系統架構的縱向理解。"
+        }
+      ],
+      "summary": {
+        "total_items": 6,
+        "accepted": 6,
+        "needs_revision": 0,
+        "rejected": 0,
+        "average_quality_score": 0.875,
+        "overall_recommendations": [
+          "整體題目品質優良，完全對應教材內容。",
+          "填空題建議實作時開放近義詞校正。",
+          "未來可增加涉及圖像符號（☰, ☷ 等）與文字屬性的直接對應題。"
+        ]
+      }
+    },
+    "review_merged": {
+      "per_item": [
+        {
+          "item_id": "item_001",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.9,
+          "quality_score_gemini": 0.85,
+          "claude_concerns": [
+            "『陽』在漢文化語境中與『剛、積極』有高度語義聯結，不需精通易經亦可能猜對。但作為入門定義題尚屬合理。"
+          ],
+          "gemini_concerns": [
+            "『陽』在文化直覺中常與『剛、積極』連結，具備基礎常識者即使未讀教材也可能答對。"
+          ]
+        },
+        {
+          "item_id": "item_002",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.85,
+          "quality_score_gemini": 0.8,
+          "claude_concerns": [
+            "填空題『基礎』一詞若填入『基本』亦屬合理。建議系統判定時考慮近義詞。"
+          ],
+          "gemini_concerns": [
+            "『基礎』若填為『基本』亦具合理性，建議判定邏輯需包含近義詞。"
+          ]
+        },
+        {
+          "item_id": "item_003",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.95,
+          "quality_score_gemini": 0.95,
+          "claude_concerns": [],
+          "gemini_concerns": []
+        },
+        {
+          "item_id": "item_004",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.95,
+          "quality_score_gemini": 0.9,
+          "claude_concerns": [],
+          "gemini_concerns": []
+        },
+        {
+          "item_id": "item_005",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.8,
+          "quality_score_gemini": 0.85,
+          "claude_concerns": [
+            "『相反或互補』在學術題型中常被視為正確信號。建議未來可加入更具誘惑力的抽象干擾項。"
+          ],
+          "gemini_concerns": [
+            "『相反或互補』的描述較具備『正確答案』的特徵，學習者可能透過語感猜測。"
+          ]
+        },
+        {
+          "item_id": "item_006",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.9,
+          "quality_score_gemini": 0.9,
+          "claude_concerns": [],
+          "gemini_concerns": []
+        }
+      ],
+      "summary": {
+        "total_items": 6,
+        "reviewers": [
+          "claude",
+          "gemini"
+        ],
+        "verdict_agreement_rate": 1,
+        "per_check_agreement": {
+          "answer_uniqueness": {
+            "rate": 1,
+            "measured_on": 6
+          },
+          "construct_validity": {
+            "rate": 1,
+            "measured_on": 6
+          },
+          "ambiguity": {
+            "rate": 1,
+            "measured_on": 6
+          },
+          "bypass_risk": {
+            "rate": 1,
+            "measured_on": 6
+          }
+        },
+        "merged_verdict_counts": {
+          "accept": 6,
+          "needs_revision": 0,
+          "reject": 0
+        },
+        "disagreement_item_ids": []
+      }
+    }
+  },
+  "log": [
+    {
+      "agent": "agent_1",
+      "action": "completed",
+      "at": "2026-04-23T00:00:00Z",
+      "details": "Extracted 10 knowledge units from I Ching trigram material. All KUs have primary source excerpts from the material text. Potential misconceptions are evidenced in the material itself."
+    },
+    {
+      "agent": "agent_2",
+      "action": "completed",
+      "at": "2026-04-23T00:00:00Z",
+      "details": "Created KU-to-dimension mapping matrix with explicit rationales for all 10 KUs × 4 dimensions. Coverage: all KUs mapped; Measurability: all dimensions have 4-6 supporting KUs (✓); Overlap: flagged relational_interpretation ↔ symbolic_attribute_mapping. Assessment blueprint designed with 6 items: easy×2, medium×3, hard×1; distribution: mc_single×3, fill×2, ordering×1. Each blueprint slot specifies target KUs, dimensions (weighted), item type, and difficulty with rationales."
+    },
+    {
+      "agent": "agent_3",
+      "action": "completed",
+      "at": "2026-04-23T00:00:00Z",
+      "details": "Designed 6 assessment items (item_001 to item_006) for all 6 blueprint slots. All items are sourced exclusively from the I Ching material. Item types: mc_single (3), fill (2), ordering (1); difficulty distribution matches target (easy: 2 at 0.20-0.25, medium: 3 at 0.35-0.45, hard: 1 at 0.65). Each item includes distractor_analysis with misconception mapping and expected_failure_modes. Key design principles: (1) Answer uniqueness ensured; (2) Distractors map to testable misconceptions; (3) Item types aligned with KU testable_aspects; (4) Designer notes explain material sourcing and concept-layer diagnostics for each item."
+    },
+    {
+      "agent": "agent_4",
+      "action": "completed",
+      "at": "2026-04-23T00:00:00Z",
+      "details": "Completed measurement quality review for 6 items using the four-check methodology. All items accepted with an average quality score of 0.89. Validated answer uniqueness, construct validity, and minimal bypass risk across mc_single, fill, and ordering types."
+    }
+  ],
+  "costs": {
+    "total_usd": 0.49396865000000006,
+    "by_agent": {
+      "agent_1": 0.07479455,
+      "agent_2": 0.09874150000000001,
+      "agent_3": 0.19532095000000005,
+      "agent_4": 0.12511165000000002,
+      "gemini_reviewer": {
+        "tokens": 59496,
+        "input_tokens": 56095,
+        "duration_ms": 23515,
+        "cost_usd_note": "not reported by Gemini CLI; compute from token pricing if needed"
+      }
+    }
+  }
+}

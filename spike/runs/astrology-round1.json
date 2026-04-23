@@ -1,0 +1,1276 @@
+{
+  "workflow": {
+    "current_step": 4,
+    "total_steps": 4,
+    "steps": [
+      "agent_1",
+      "agent_2",
+      "agent_3",
+      "agent_4"
+    ],
+    "status": "completed"
+  },
+  "user_input": {
+    "material": {
+      "filename": "astrology-material.md",
+      "content": "星座占卜基礎概說\n星座占卜傳統上以黃道十二宮作為核心系統，認為太陽在一年中運行經過的黃道帶被劃分為十二個區域，每個區域對應一個星座。這些星座不僅代表天體位置，更象徵著人類性格、命運與自然循環的對應模式。占星學家透過出生時太陽所在的星座位置，來描述個人的基本特質與生命傾向。\n十二星座的分類系統\n十二星座依出生日期順序排列如下：\n\n白羊座（3月21日–4月19日）：象徵起始與行動。\n金牛座（4月20日–5月20日）：代表穩固與感官享受。\n雙子座（5月21日–6月21日）：體現溝通與多變。\n巨蟹座（6月22日–7月22日）：象徵保護與情感。\n獅子座（7月23日–8月22日）：代表創造與領導。\n處女座（8月23日–9月22日）：注重分析與服務。\n天秤座（9月23日–10月23日）：追求平衡與和諧。\n天蠍座（10月24日–11月22日）：深入轉化與激情。\n射手座（11月23日–12月21日）：探索哲理與自由。\n魔羯座（12月22日–1月19日）：象徵紀律與成就。\n水瓶座（1月20日–2月18日）：創新與人道。\n雙魚座（2月19日–3月20日）：融合與靈性。\n\n每個星座有其獨特符號、守護行星與季節對應，形成完整的循環系統。\n元素歸屬與能量分類\n傳統星座學將十二星座歸屬於四大元素，每元素包含三個星座，反映不同的能量表現：\n\n火象星座（白羊、獅子、射手）：充滿活力、主動積極，傾向熱情、冒險與領導特質。\n土象星座（金牛、處女、魔羯）：注重實際、穩定，表現為務實、耐力與物質世界的掌握。\n風象星座（雙子、天秤、水瓶）：強調智力、社交，擅長溝通、理念與關係網絡。\n水象星座（巨蟹、天蠍、雙魚）：聚焦情感、直覺，富有同理心、深度與適應流動性。\n\n元素不僅分類星座，也說明人際互動與個人內在平衡的方式。例如火象與風象常相互激勵，而土象與水象則提供穩定與滋養。此外，星座還依「模式」分類為本位、固定、變動三種。本位星座（白羊、巨蟹、天秤、魔羯）具啟動力；固定星座（金牛、獅子、天蠍、水瓶）具持久力；變動星座（雙子、處女、射手、雙魚）具適應力。這兩大分類系統相互交織，提供更細緻的性格輪廓。\n性格特質描述與相互關係\n各星座的性格特質是占星傳統中重要的描述部分。白羊座傳統上被描述為勇敢、衝動、充滿開創精神；金牛座則穩重、堅持、喜愛美好事物；雙子座好奇、機智、善於表達；巨蟹座敏感、保護、重視家庭；獅子座熱情、自信、富有領導魅力；處女座細心、分析、注重完美；天秤座優雅、追求公平、擅長協調；天蠍座神秘、堅韌、具有深度洞察；射手座樂觀、冒險、熱愛自由；魔羯座務實、負責、追求長期成就；水瓶座獨立、創新、重視人道；雙魚座富有同情、夢幻、易受環境影響。\n每個星座的特質都有正面與挑戰面，構成完整的性格光譜。星座之間的關係透過元素相合或對立、模式互補來理解。例如同元素星座通常相容，而對立星座（如白羊與天秤）則提供互補學習機會。火象星座的熱情可激發風象星座的理念，水象星座的情感則能滋潤土象星座的穩定。這些對應概念幫助占星實踐者分析出生圖、預測趨勢或理解人際動態。\n透過元素歸屬、性格特質描述與相互關係，星座占卜提供了一個系統化的框架，讓學習者探索宇宙與人性間的傳統連結模式。",
+      "content_type": "markdown"
+    },
+    "competency_dimensions": [
+      {
+        "dim_id": "zodiac_symbol_recognition",
+        "name": "星座符號辨識能力",
+        "description": "能夠準確辨識十二星座的傳統符號、名稱、日期範圍及其元素歸屬的基本辨識與記憶能力。"
+      },
+      {
+        "dim_id": "element_classification",
+        "name": "元素分類推理能力",
+        "description": "運用火、土、風、水四大元素對星座進行分類，並推理元素特性如何對應星座傳統性格描述的分析能力。"
+      },
+      {
+        "dim_id": "trait_differentiation",
+        "name": "性格特質對比能力",
+        "description": "比較不同星座或元素群的傳統性格描述，辨識相似性、差異性並舉例說明的推理能力。"
+      },
+      {
+        "dim_id": "conceptual_integration",
+        "name": "星座概念整合能力",
+        "description": "在簡單情境中整合分類系統、元素屬性與性格特質，進行關聯解釋與初步應用的能力。"
+      }
+    ],
+    "domain_guidance": "指導原則\n目標學習者：對星座占卜感興趣的初學者或中學生，無需先備知識。\n偏好題型：多用情境題、星座對比題、元素應用情境，避免純背誦定義題。\n避免事項：避免科學有效性討論或批判，專注傳統描述。\n鼓勵展現：鼓勵學習者展示分類推理、特質對應及關係分析的能力，透過例子應用概念。",
+    "assessment_params": {
+      "target_item_count": 6,
+      "difficulty_distribution": {
+        "easy": 0.34,
+        "medium": 0.5,
+        "hard": 0.16
+      },
+      "item_types": {
+        "mc_single": 0.5,
+        "fill": 0.3,
+        "ordering": 0.2
+      }
+    }
+  },
+  "data": {
+    "knowledge_units": [
+      {
+        "ku_id": "ku_001",
+        "name": "十二星座的基本定義與歷史系統",
+        "description": "學習者理解黃道十二宮系統的基本概念：太陽在一年中運行經過黃道帶的十二個區域，每個區域對應一個星座，這些星座代表天體位置，也象徵著人類性格、命運與自然循環的對應模式。",
+        "source_excerpt": "星座占卜傳統上以黃道十二宮作為核心系統，認為太陽在一年中運行經過的黃道帶被劃分為十二個區域，每個區域對應一個星座。這些星座不僅代表天體位置，更象徵著人類性格、命運與自然循環的對應模式。",
+        "prerequisites": [],
+        "testable_aspects": [
+          "recall",
+          "understand"
+        ],
+        "potential_misconceptions": []
+      },
+      {
+        "ku_id": "ku_002",
+        "name": "十二星座的名稱與日期範圍對應",
+        "description": "學習者能夠準確列舉十二個星座的名稱與其對應的出生日期範圍（如白羊座3月21日–4月19日），建立星座與時間的對應關係。",
+        "source_excerpt": "白羊座（3月21日–4月19日）、金牛座（4月20日–5月20日）、雙子座（5月21日–6月21日）、巨蟹座（6月22日–7月22日）、獅子座（7月23日–8月22日）、處女座（8月23日–9月22日）、天秤座（9月23日–10月23日）、天蠍座（10月24日–11月22日）、射手座（11月23日–12月21日）、魔羯座（12月22日–1月19日）、水瓶座（1月20日–2月18日）、雙魚座（2月19日–3月20日）",
+        "prerequisites": [
+          "ku_001"
+        ],
+        "testable_aspects": [
+          "recall"
+        ],
+        "potential_misconceptions": []
+      },
+      {
+        "ku_id": "ku_003",
+        "name": "火象星座的特性與代表星座",
+        "description": "學習者理解火象星座的能量特性：充滿活力、主動積極，傾向熱情、冒險與領導特質，並能識別三個火象代表星座（白羊、獅子、射手）。",
+        "source_excerpt": "火象星座（白羊、獅子、射手）：充滿活力、主動積極，傾向熱情、冒險與領導特質。",
+        "prerequisites": [
+          "ku_001"
+        ],
+        "testable_aspects": [
+          "recall",
+          "understand"
+        ],
+        "potential_misconceptions": []
+      },
+      {
+        "ku_id": "ku_004",
+        "name": "土象、風象、水象星座的特性分類",
+        "description": "學習者理解三個其他元素（土、風、水）各自的能量表現特徵，以及各元素包含的三個代表星座。土象強調實際與穩定；風象強調智力與社交；水象強調情感與直覺。",
+        "source_excerpt": "土象星座（金牛、處女、魔羯）：注重實際、穩定，表現為務實、耐力與物質世界的掌握。風象星座（雙子、天秤、水瓶）：強調智力、社交，擅長溝通、理念與關係網絡。水象星座（巨蟹、天蠍、雙魚）：聚焦情感、直覺，富有同理心、深度與適應流動性。",
+        "prerequisites": [
+          "ku_001"
+        ],
+        "testable_aspects": [
+          "recall",
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "學習者可能混淆土象星座代表的「物質世界掌握」與風象星座的「關係網絡」，並將水象星座的「適應流動性」誤認為風象的特性。",
+            "evidence_from_material": "教材透過對比「土象與水象則提供穩定與滋養」、「火象與風象常相互激勵」，暗示不同元素有本質差異，容易被混淆。"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_005",
+        "name": "星座的模式分類：本位、固定、變動",
+        "description": "學習者理解星座除了四元素分類外，還依「模式」分為三種：本位星座具啟動力、固定星座具持久力、變動星座具適應力，並能識別各模式包含的四個星座。",
+        "source_excerpt": "星座還依「模式」分類為本位、固定、變動三種。本位星座（白羊、巨蟹、天秤、魔羯）具啟動力；固定星座（金牛、獅子、天蠍、水瓶）具持久力；變動星座（雙子、處女、射手、雙魚）具適應力。",
+        "prerequisites": [
+          "ku_001"
+        ],
+        "testable_aspects": [
+          "recall",
+          "understand"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "學習者可能誤認為模式分類與元素分類是相同的系統，而非兩套獨立的分類系統。",
+            "evidence_from_material": "教材明確指出「這兩大分類系統相互交織，提供更細緻的性格輪廓」，表示兩者是獨立且互補的。"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_006",
+        "name": "個別星座的傳統性格特質",
+        "description": "學習者能夠識別並描述十二個星座各自的傳統性格特質（如白羊座勇敢衝動、金牛座穩重堅持等），並理解每個星座同時具有正面與挑戰面。",
+        "source_excerpt": "白羊座傳統上被描述為勇敢、衝動、充滿開創精神；金牛座則穩重、堅持、喜愛美好事物；雙子座好奇、機智、善於表達；巨蟹座敏感、保護、重視家庭；獅子座熱情、自信、富有領導魅力；處女座細心、分析、注重完美；天秤座優雅、追求公平、擅長協調；天蠍座神秘、堅韌、具有深度洞察；射手座樂觀、冒險、熱愛自由；魔羯座務實、負責、追求長期成就；水瓶座獨立、創新、重視人道；雙魚座富有同情、夢幻、易受環境影響。每個星座的特質都有正面與挑戰面，構成完整的性格光譜。",
+        "prerequisites": [
+          "ku_001",
+          "ku_002"
+        ],
+        "testable_aspects": [
+          "recall",
+          "understand"
+        ],
+        "potential_misconceptions": []
+      },
+      {
+        "ku_id": "ku_007",
+        "name": "星座間的相容與互補關係",
+        "description": "學習者理解星座之間透過元素相合或對立、模式互補來產生相容或互補關係，並能應用此原理分析不同星座對的互動（如同元素相容、對立星座互補）。",
+        "source_excerpt": "星座之間的關係透過元素相合或對立、模式互補來理解。例如同元素星座通常相容，而對立星座（如白羊與天秤）則提供互補學習機會。火象星座的熱情可激發風象星座的理念，水象星座的情感則能滋潤土象星座的穩定。",
+        "prerequisites": [
+          "ku_003",
+          "ku_004",
+          "ku_005"
+        ],
+        "testable_aspects": [
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": [
+          {
+            "description": "學習者可能認為「對立星座」表示不相容，而非互補關係。",
+            "evidence_from_material": "教材特別說明「對立星座（如白羊與天秤）則提供互補學習機會」，對比說明對立實際上提供學習機會，非完全衝突。"
+          }
+        ]
+      },
+      {
+        "ku_id": "ku_008",
+        "name": "透過出生時星座推斷個人特質",
+        "description": "學習者能夠應用占星學的基本原理，根據出生時太陽所在的星座位置，推斷個人的基本特質與生命傾向（結合星座性格特質、元素能量、模式力量）。",
+        "source_excerpt": "占星學家透過出生時太陽所在的星座位置，來描述個人的基本特質與生命傾向。",
+        "prerequisites": [
+          "ku_002",
+          "ku_003",
+          "ku_004",
+          "ku_005",
+          "ku_006"
+        ],
+        "testable_aspects": [
+          "understand",
+          "apply"
+        ],
+        "potential_misconceptions": []
+      }
+    ],
+    "mapping": {
+      "ku_to_dimensions": {
+        "ku_001": [
+          {
+            "dim_id": "zodiac_symbol_recognition",
+            "weight": 0.3,
+            "rationale": "黃道十二宮系統的基本概念為星座識別的基礎，使學習者理解星座代表天體位置與性格象徵，為後續識別奠定理論基礎。"
+          },
+          {
+            "dim_id": "element_classification",
+            "weight": 0.25,
+            "rationale": "理解星座系統的基本框架是進行元素分類的前提，為分類推理提供核心背景。"
+          },
+          {
+            "dim_id": "trait_differentiation",
+            "weight": 0.25,
+            "rationale": "星座與自然循環、人類性格的對應模式是理解各星座特質的理論基礎，支持後續特質對比分析。"
+          },
+          {
+            "dim_id": "conceptual_integration",
+            "weight": 0.2,
+            "rationale": "作為整個星座系統的入門概念，為整合多個分類維度奠定基礎理解。"
+          }
+        ],
+        "ku_002": [
+          {
+            "dim_id": "zodiac_symbol_recognition",
+            "weight": 0.9,
+            "rationale": "十二星座的名稱與日期範圍直接對應能力維度的核心內容：「準確辨識十二星座的傳統符號、名稱、日期範圍」。這是維度測量的主要內容。"
+          },
+          {
+            "dim_id": "element_classification",
+            "weight": 0.1,
+            "rationale": "透過星座名稱與日期可識別其元素歸屬，但這不是 ku_002 的主要內容。"
+          }
+        ],
+        "ku_003": [
+          {
+            "dim_id": "element_classification",
+            "weight": 0.85,
+            "rationale": "火象星座的特性與代表星座直接對應元素分類推理能力。學習者需理解火象特質（活力、熱情、領導），並識別白羊、獅子、射手三個代表星座，是元素分類系統的核心組成。"
+          },
+          {
+            "dim_id": "zodiac_symbol_recognition",
+            "weight": 0.4,
+            "rationale": "識別火象代表星座（白羊、獅子、射手）的符號與元素歸屬，支持星座辨識能力。"
+          },
+          {
+            "dim_id": "trait_differentiation",
+            "weight": 0.3,
+            "rationale": "火象星座具特定的性格描述（充滿活力、主動積極、熱情、冒險、領導），提供星座特質對比的基礎內容。"
+          },
+          {
+            "dim_id": "conceptual_integration",
+            "weight": 0.25,
+            "rationale": "火象元素是兩大分類系統（元素與模式）中的一個維度，為概念整合提供具體內容。"
+          }
+        ],
+        "ku_004": [
+          {
+            "dim_id": "element_classification",
+            "weight": 0.9,
+            "rationale": "土、風、水象的特性與代表星座是元素分類系統最完整的表述。學習者需理解三個元素的能量特徵（土象：實際穩定；風象：智力社交；水象：情感直覺），並推理特性對應，是維度的核心內容。"
+          },
+          {
+            "dim_id": "trait_differentiation",
+            "weight": 0.5,
+            "rationale": "不同元素的性格特質有明顯差異（如土象的務實耐力 vs 風象的溝通理念 vs 水象的同理心深度），直接支持特質對比能力。"
+          },
+          {
+            "dim_id": "zodiac_symbol_recognition",
+            "weight": 0.2,
+            "rationale": "識別各元素代表星座的符號與元素歸屬，間接支持星座辨識。"
+          },
+          {
+            "dim_id": "conceptual_integration",
+            "weight": 0.3,
+            "rationale": "四元素分類系統與模式分類相互交織，為概念整合提供完整框架。"
+          }
+        ],
+        "ku_005": [
+          {
+            "dim_id": "conceptual_integration",
+            "weight": 0.8,
+            "rationale": "星座的模式分類（本位、固定、變動）是與四元素分類相互交織的獨立系統，直接支持整合不同分類維度的高階能力。教材明確指出「這兩大分類系統相互交織，提供更細緻的性格輪廓」。"
+          },
+          {
+            "dim_id": "trait_differentiation",
+            "weight": 0.4,
+            "rationale": "不同模式對應不同的特質與動力（啟動力、持久力、適應力），支持特質對比分析。"
+          },
+          {
+            "dim_id": "element_classification",
+            "weight": 0.2,
+            "rationale": "模式與元素為兩個交織的分類系統，了解模式有助於完整的元素分類理解。"
+          },
+          {
+            "dim_id": "zodiac_symbol_recognition",
+            "weight": 0.15,
+            "rationale": "識別星座的模式歸屬（如白羊為本位）補充星座辨識的維度。"
+          }
+        ],
+        "ku_006": [
+          {
+            "dim_id": "trait_differentiation",
+            "weight": 0.9,
+            "rationale": "十二星座的傳統性格特質描述是特質對比能力的直接內容。學習者需識別個別星座的特質（勇敢衝動、穩重堅持等），並理解正面與挑戰面，直接支持「比較不同星座特質、辨識相似性與差異性」的維度要求。"
+          },
+          {
+            "dim_id": "zodiac_symbol_recognition",
+            "weight": 0.5,
+            "rationale": "能夠辨識每個星座的傳統性格特質特徵，支持星座符號與特質的整體認識。"
+          },
+          {
+            "dim_id": "conceptual_integration",
+            "weight": 0.3,
+            "rationale": "為整合多個分類系統應用於特質推論奠定基礎。"
+          }
+        ],
+        "ku_007": [
+          {
+            "dim_id": "trait_differentiation",
+            "weight": 0.85,
+            "rationale": "星座間的相容與互補關係涉及不同星座或元素群的性格對比與分析。學習者需辨識相似性（同元素相容）與差異性（對立互補），並舉例說明（火象激勵風象、水象滋潤土象），直接對應「比較不同星座特質、辨識相似性、差異性並舉例說明」的維度。"
+          },
+          {
+            "dim_id": "conceptual_integration",
+            "weight": 0.8,
+            "rationale": "整合元素分類、模式分類與特質描述，進行關聯解釋與應用。這是概念整合維度的典型高階應用。"
+          },
+          {
+            "dim_id": "element_classification",
+            "weight": 0.4,
+            "rationale": "通過元素相合或對立來理解星座關係的核心機制。"
+          },
+          {
+            "dim_id": "zodiac_symbol_recognition",
+            "weight": 0.1,
+            "rationale": "涉及特定星座對（白羊與天秤）的辨識，但不是主要內容。"
+          }
+        ],
+        "ku_008": [
+          {
+            "dim_id": "conceptual_integration",
+            "weight": 0.9,
+            "rationale": "根據出生星座推斷個人特質是最高階的整合應用。學習者需整合分類系統（元素、模式）、元素屬性與性格特質，進行關聯解釋與實際應用。完全對應「在簡單情境中整合分類系統、元素屬性與性格特質，進行關聯解釋與初步應用」的維度定義。"
+          },
+          {
+            "dim_id": "trait_differentiation",
+            "weight": 0.5,
+            "rationale": "推斷特質的過程涉及星座特質的應用與對比。"
+          },
+          {
+            "dim_id": "element_classification",
+            "weight": 0.4,
+            "rationale": "應用元素知識（如火象代表主動積極）進行特質推論。"
+          },
+          {
+            "dim_id": "zodiac_symbol_recognition",
+            "weight": 0.3,
+            "rationale": "需識別出生星座，進而應用其特質與屬性。"
+          }
+        ]
+      },
+      "blueprint": {
+        "total_slots": 6,
+        "slot_specs": [
+          {
+            "slot_index": 0,
+            "target_kus": [
+              "ku_001",
+              "ku_002"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "zodiac_symbol_recognition",
+                "weight": 1
+              }
+            ],
+            "target_item_type": "mc_single",
+            "target_difficulty": "easy",
+            "item_intent": "基礎星座識別：給定日期或星座名稱，識別對應的星座符號或時間範圍"
+          },
+          {
+            "slot_index": 1,
+            "target_kus": [
+              "ku_003"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "element_classification",
+                "weight": 1
+              }
+            ],
+            "target_item_type": "mc_single",
+            "target_difficulty": "easy",
+            "item_intent": "元素分類基礎：識別火象星座或其能量特性"
+          },
+          {
+            "slot_index": 2,
+            "target_kus": [
+              "ku_006"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "trait_differentiation",
+                "weight": 1
+              }
+            ],
+            "target_item_type": "fill",
+            "target_difficulty": "medium",
+            "item_intent": "性格特質識別：填空個別星座的傳統性格特質描述或特質差異"
+          },
+          {
+            "slot_index": 3,
+            "target_kus": [
+              "ku_003",
+              "ku_004",
+              "ku_007"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "element_classification",
+                "weight": 0.4
+              },
+              {
+                "dim_id": "trait_differentiation",
+                "weight": 0.35
+              },
+              {
+                "dim_id": "conceptual_integration",
+                "weight": 0.25
+              }
+            ],
+            "target_item_type": "mc_single",
+            "target_difficulty": "medium",
+            "item_intent": "元素應用情境題：根據火象與其他元素的互動（如火象激勵風象），分析特定情境中星座合作的特點"
+          },
+          {
+            "slot_index": 4,
+            "target_kus": [
+              "ku_004",
+              "ku_005",
+              "ku_006"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "conceptual_integration",
+                "weight": 0.5
+              },
+              {
+                "dim_id": "trait_differentiation",
+                "weight": 0.3
+              },
+              {
+                "dim_id": "element_classification",
+                "weight": 0.2
+              }
+            ],
+            "target_item_type": "fill",
+            "target_difficulty": "medium",
+            "item_intent": "分類系統整合：根據元素與模式的交織，填空關於兩個星座在不同分類維度上的差異或相容原因"
+          },
+          {
+            "slot_index": 5,
+            "target_kus": [
+              "ku_007",
+              "ku_008",
+              "ku_003",
+              "ku_004",
+              "ku_006"
+            ],
+            "target_dimensions": [
+              {
+                "dim_id": "conceptual_integration",
+                "weight": 0.65
+              },
+              {
+                "dim_id": "trait_differentiation",
+                "weight": 0.25
+              },
+              {
+                "dim_id": "element_classification",
+                "weight": 0.1
+              }
+            ],
+            "target_item_type": "ordering",
+            "target_difficulty": "hard",
+            "item_intent": "整合應用最高階：根據星座特質、元素關係與模式特性，排序多個星座配對或場景的相容度或特質表現"
+          }
+        ],
+        "difficulty_distribution_actual": {
+          "easy": 2,
+          "medium": 3,
+          "hard": 1
+        },
+        "item_type_distribution_actual": {
+          "mc_single": 3,
+          "fill": 2,
+          "ordering": 1
+        }
+      },
+      "health_warnings": [
+        "覆蓋度檢查：所有 8 個 KU 都至少對應到一個維度 ✓",
+        "可測性檢查：所有 4 個維度都有 4+ 個 KU 支撐 ✓",
+        "重疊檢查：trait_differentiation（6個KU）與 conceptual_integration（5個KU）有相當的 KU 共用（ku_001, ku_006, ku_007, ku_008），但兩維度的核心能力差異清晰 — trait_differentiation 聚焦特質對比與差異性分析，conceptual_integration 聚焦多系統整合與應用。建議通過題型設計區分兩者測量的對象：trait_differentiation 題應要求具體比較，而 conceptual_integration 題應要求整合應用。",
+        "粒度一致性檢查：四個維度從基礎識別→分類推理→對比分析→整合應用，粒度層級清晰，符合認知複雜度遞進 ✓"
+      ]
+    },
+    "items": [
+      {
+        "item_id": "item_001",
+        "slot_index": 0,
+        "core": {
+          "item_type": "mc_single",
+          "stem": "以下哪一個日期範圍對應射手座？",
+          "stem_assets": [],
+          "options": [
+            "A. 10月24日–11月22日",
+            "B. 11月23日–12月21日",
+            "C. 12月22日–1月19日",
+            "D. 1月20日–2月18日"
+          ],
+          "answer": "B",
+          "explanation": "根據教材十二星座分類系統，射手座對應的日期範圍是11月23日–12月21日。其他選項分別對應天蠍座（A）、魔羯座（C）及水瓶座（D）。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_001",
+            "ku_002"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "zodiac_symbol_recognition",
+              "weight": 1
+            }
+          ],
+          "difficulty_estimate": 0.25
+        },
+        "diagnostics": {
+          "distractor_analysis": {
+            "A": {
+              "correct": false,
+              "why_wrong": "這是天蠍座的日期範圍",
+              "maps_to_misconception": "混淆相鄰星座的日期範圍"
+            },
+            "B": {
+              "correct": true
+            },
+            "C": {
+              "correct": false,
+              "why_wrong": "這是魔羯座的日期範圍",
+              "maps_to_misconception": "混淆後序星座的日期範圍"
+            },
+            "D": {
+              "correct": false,
+              "why_wrong": "這是水瓶座的日期範圍",
+              "maps_to_misconception": "混淆相隔多個月份的星座日期"
+            }
+          },
+          "expected_failure_modes": [
+            "若學習者未熟記十二星座的完整日期對應，容易在相鄰星座（如射手與魔羯）間混淆",
+            "若學習者只記得部分星座日期，可能隨意猜測"
+          ]
+        },
+        "designer_notes": "本題直接測試 ku_002 的核心內容：十二星座名稱與日期範圍對應。選項均選自教材列舉的十二星座與其日期。此題為基礎識別題，難度低。"
+      },
+      {
+        "item_id": "item_002",
+        "slot_index": 1,
+        "core": {
+          "item_type": "mc_single",
+          "stem": "以下哪一項最能代表火象星座的能量特性？",
+          "stem_assets": [],
+          "options": [
+            "A. 注重實際、穩定、務實耐力",
+            "B. 強調智力、社交、擅長溝通",
+            "C. 充滿活力、主動積極、傾向熱情與領導",
+            "D. 聚焦情感、直覺、富有同理心"
+          ],
+          "answer": "C",
+          "explanation": "教材明確指出，火象星座（白羊、獅子、射手）的特性是『充滿活力、主動積極，傾向熱情、冒險與領導特質』。選項 A 代表土象星座，B 代表風象星座，D 代表水象星座。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_003"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "element_classification",
+              "weight": 1
+            }
+          ],
+          "difficulty_estimate": 0.3
+        },
+        "diagnostics": {
+          "distractor_analysis": {
+            "A": {
+              "correct": false,
+              "why_wrong": "『注重實際、穩定、務實耐力』是土象星座的特性描述，不是火象",
+              "maps_to_misconception": "混淆土象與火象的能量特性"
+            },
+            "B": {
+              "correct": false,
+              "why_wrong": "『強調智力、社交、擅長溝通』是風象星座的特性描述",
+              "maps_to_misconception": "混淆風象與火象的能量特性"
+            },
+            "C": {
+              "correct": true
+            },
+            "D": {
+              "correct": false,
+              "why_wrong": "『聚焦情感、直覺、富有同理心』是水象星座的特性描述",
+              "maps_to_misconception": "混淆水象與火象的能量特性"
+            }
+          },
+          "expected_failure_modes": [
+            "若學習者未清晰掌握四大元素的能量特性差異，容易在四個選項間混淆",
+            "若學習者重點記憶某個特定星座的特質但未歸納元素共性，可能無法快速判斷"
+          ]
+        },
+        "designer_notes": "本題測試 ku_003（火象星座特性與代表星座）。四個選項分別代表四大元素的能量特性，直接取自教材『元素歸屬與能量分類』章節。此題為基礎分類題，難度低。"
+      },
+      {
+        "item_id": "item_003",
+        "slot_index": 2,
+        "core": {
+          "item_type": "fill",
+          "stem": "根據占星傳統描述，處女座被描述為細心、________、注重完美。",
+          "stem_assets": [],
+          "options": null,
+          "answer": "分析",
+          "explanation": "教材在『性格特質描述與相互關係』章節明確指出：『處女座細心、分析、注重完美』。『分析』是處女座性格特質中不可或缺的一環，與『細心』和『注重完美』共同構成處女座的特質輪廓。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_006"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "trait_differentiation",
+              "weight": 1
+            }
+          ],
+          "difficulty_estimate": 0.45
+        },
+        "diagnostics": {
+          "distractor_analysis": null,
+          "expected_failure_modes": [
+            "若學習者未完整記憶處女座的三個核心特質，可能填入其他與『完美』相關但不符材料的詞彙（如『追求』『執著』）",
+            "若學習者混淆處女座與其他星座的特質，可能填入不同星座的特質描述（如雙子座的『機智』或金牛座的『堅持』）",
+            "若學習者只記得『細心』和『完美』，可能無法推理出『分析』是連結兩者的特質"
+          ]
+        },
+        "designer_notes": "本題為填空題，測試 ku_006（個別星座性格特質識別）。答案『分析』直接取自教材原文『處女座細心、分析、注重完美』。此題為中等難度，因為需要準確回憶特定星座的多個特質描述。本題不採用選項設計，以強調對原文的準確記憶與理解。"
+      },
+      {
+        "item_id": "item_004",
+        "slot_index": 3,
+        "core": {
+          "item_type": "mc_single",
+          "stem": "根據占星傳統關於不同元素互動的描述，水象星座與土象星座互動時，水象星座主要能為土象星座提供什麼？",
+          "stem_assets": [],
+          "options": [
+            "A. 激發新的理念與創新思維",
+            "B. 滋潤與情感的補養",
+            "C. 溝通與社交網絡的拓展",
+            "D. 持久力與物質世界的掌握"
+          ],
+          "answer": "B",
+          "explanation": "教材『元素歸屬與能量分類』章節明確說明：『水象星座的情感則能滋潤土象星座的穩定』。水象（如情感、直覺、同理心）為土象（務實、穩定）的星座帶來情感的滋潤與補養。選項 A 描述的是『火象與風象常相互激勵』的互動，C 和 D 分別代表風象和土象自身的特性。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_003",
+            "ku_004",
+            "ku_007"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "element_classification",
+              "weight": 0.4
+            },
+            {
+              "dim_id": "trait_differentiation",
+              "weight": 0.35
+            },
+            {
+              "dim_id": "conceptual_integration",
+              "weight": 0.25
+            }
+          ],
+          "difficulty_estimate": 0.5
+        },
+        "diagnostics": {
+          "distractor_analysis": {
+            "A": {
+              "correct": false,
+              "why_wrong": "『激發新的理念與創新思維』是『火象星座的熱情可激發風象星座的理念』描述的火象與風象互動關係，不是水象與土象的互動",
+              "maps_to_misconception": "混淆不同元素對之間的互動關係"
+            },
+            "B": {
+              "correct": true
+            },
+            "C": {
+              "correct": false,
+              "why_wrong": "『溝通與社交網絡的拓展』是風象星座的特性描述，不是水象星座為土象星座提供的互動效果",
+              "maps_to_misconception": "將不同元素的固有特性誤認為是互動效果"
+            },
+            "D": {
+              "correct": false,
+              "why_wrong": "『持久力與物質世界的掌握』是土象星座自身的特性，不是水象星座提供給土象星座的補養",
+              "maps_to_misconception": "混淆互動雙方的主動方角色"
+            }
+          },
+          "expected_failure_modes": [
+            "若學習者未理解『相互激勵』與『滋潤補養』的區別，可能混淆火象-風象和水象-土象的不同互動特質",
+            "若學習者只記憶各元素自身特性但未整合『互動關係』概念，可能選擇『土象特性』相關的選項",
+            "若學習者誤認為『水象情感』等同於『溝通社交』（風象特性），可能選 C"
+          ]
+        },
+        "designer_notes": "本題為情境應用題，測試 ku_003、ku_004（元素特性）與 ku_007（星座間互動關係）的整合應用。題目直接取材於教材『元素歸屬與能量分類』與『性格特質描述與相互關係』章節中對水象-土象互動的描述。此題為中等難度，需要學習者理解不同元素對之間的特定互動模式。"
+      },
+      {
+        "item_id": "item_005",
+        "slot_index": 4,
+        "core": {
+          "item_type": "fill",
+          "stem": "白羊座既具有本位星座的________力，同時也具有火象星座的充滿活力與熱情的特性。",
+          "stem_assets": [],
+          "options": null,
+          "answer": "啟動",
+          "explanation": "教材『元素歸屬與能量分類』章節說明，星座依『模式』分為三種，其中『本位星座（白羊、巨蟹、天秤、魔羯）具啟動力』。本題要求學習者填入『啟動』，展現對兩大分類系統（四元素與三模式）相互交織的理解。白羊座同時具備本位模式的『啟動力』與火象元素的『活力和熱情』。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_004",
+            "ku_005",
+            "ku_006"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "conceptual_integration",
+              "weight": 0.5
+            },
+            {
+              "dim_id": "trait_differentiation",
+              "weight": 0.3
+            },
+            {
+              "dim_id": "element_classification",
+              "weight": 0.2
+            }
+          ],
+          "difficulty_estimate": 0.5
+        },
+        "diagnostics": {
+          "distractor_analysis": null,
+          "expected_failure_modes": [
+            "若學習者混淆模式分類與元素分類，可能填入『火象』或『活力』等元素相關詞彙，而非模式特性",
+            "若學習者未理解『本位星座』的定義，可能填入『固定』或『變動』等其他模式名稱",
+            "若學習者只記得『火象』相關特性，忽視了題目對『本位』模式的考查，可能無法正確填空",
+            "若學習者將『啟動力』誤記為『主導力』『領導力』等相近但不同的詞彙，答案可能不符材料"
+          ]
+        },
+        "designer_notes": "本題為分類系統整合題，測試 ku_004（土風水象）、ku_005（模式分類）與 ku_006（個別特質）的整合理解。答案『啟動』直接源自教材『本位星座（白羊、巨蟹、天秤、魔羯）具啟動力』。此題為中等難度，因為需要學習者理解並應用『兩大分類系統相互交織』的核心概念。題目明確指出白羊座同時屬於本位與火象，要求學習者識別與填入本位模式的特性。"
+      },
+      {
+        "item_id": "item_006",
+        "slot_index": 5,
+        "core": {
+          "item_type": "ordering",
+          "stem": "根據占星傳統中關於星座間相容性與互補關係的描述，請將以下四個星座配對按『相容度』從高到低排序：\n\n1. 白羊座（本位火象）與獅子座（固定火象）\n2. 白羊座（本位火象）與天秤座（本位風象）\n3. 白羊座（本位火象）與巨蟹座（本位水象）\n4. 白羊座（本位火象）與金牛座（固定土象）",
+          "stem_assets": [],
+          "options": null,
+          "answer": "1, 2, 3, 4",
+          "explanation": "根據教材對星座間相容關係的描述：\n\n1. 最高相容度：『同元素星座通常相容』——白羊（火象）與獅子（火象）同為火象星座，具最高相容度。\n\n2. 高相容度：『火象星座的熱情可激發風象星座的理念』——白羊（火象）與天秤（風象）因元素間的激勵關係具較高相容度。\n\n3. 中等相容度：白羊（本位）與巨蟹（本位）雖然都是本位星座具啟動力，但元素不同（火象 vs 水象），且教材未明確指出火象與水象的互動關係，相容度低於前兩者。\n\n4. 最低相容度：白羊（火象）與金牛（土象）既不同元素，且教材未提及火象與土象的特別相容關係，相容度最低。"
+        },
+        "measurement": {
+          "knowledge_units": [
+            "ku_007",
+            "ku_008",
+            "ku_003",
+            "ku_004",
+            "ku_006"
+          ],
+          "competency_dimensions": [
+            {
+              "dim_id": "conceptual_integration",
+              "weight": 0.65
+            },
+            {
+              "dim_id": "trait_differentiation",
+              "weight": 0.25
+            },
+            {
+              "dim_id": "element_classification",
+              "weight": 0.1
+            }
+          ],
+          "difficulty_estimate": 0.7
+        },
+        "diagnostics": {
+          "distractor_analysis": null,
+          "expected_failure_modes": [
+            "若學習者只關注『同元素相容』，可能將位置 1 和 2 對調，未充分理解『火象激發風象』的特殊互動關係",
+            "若學習者混淆『本位模式相容』與『元素相容』，可能將位置 2 和 3 對調，誤認為『白羊與巨蟹因都是本位而更相容』",
+            "若學習者未掌握『同元素相容』與『元素互補』的層級差異，可能給出不同的排序",
+            "若學習者只記憶模式分類而忽視元素分類在相容度判斷中的核心作用，可能高估位置 3 的相容度",
+            "配對 3 與 4 的排序順序在教材中缺乏明確依據。學習者可能合理地認為『同為本位星座』足以使配對 3 相容度高於配對 4，這是一個潛在的歧義點。"
+          ]
+        },
+        "designer_notes": "本題為最高階的概念整合應用題，測試 ku_007（星座間相容與互補關係）、ku_008（出生星座推斷個人特質）與多個基礎 KU 的整合。題目要求學習者同時整合元素分類（ku_003, ku_004）、模式分類（ku_005）與特質對比（ku_006）來判斷四個星座配對的相容度，直接對應『在簡單情境中整合分類系統、元素屬性與性格特質，進行關聯解釋與初步應用』的最高階能力。所有相容度判斷依據均源自教材中明確描述的『同元素相容』『火象激發風象』等互動原理。此題為高難度，測試學習者是否能夠多維度整合所學概念。\n\n**品質審查備註**：配對 3（白羊-巨蟹，同為本位但不同元素）與配對 4（白羊-金牛，不同模式不同元素）的相容度排序在教材中缺乏明確的比較依據。教材明確說明『同元素相容』、『火象激發風象』和『水象滋潤土象』，但未明確說明『同模式相容的強度』或『火象與水象的互動關係』。因此，學習者可能有合理的替代答案（如 1, 2, 4, 3）。建議修訂本題的配對選擇或補充教材中對火象-水象關係的明確描述。"
+      }
+    ],
+    "review": null,
+    "review_claude": {
+      "per_item": [
+        {
+          "item_id": "item_001",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.82,
+          "notes": "基礎星座日期識別題，答案明確唯一。四個選項均取自教材十二星座列表，避免了無關的干擾項。沒有明顯的繞題路徑或歧義。測量指標清晰，難度與 slot 設計相符（easy）。"
+        },
+        {
+          "item_id": "item_002",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.8,
+          "notes": "元素分類基礎題，四個選項分別代表四大元素的能量特性，直接取自教材。答案 C（火象）明確唯一。選項長度與內容複雜度均勻，無視覺線索洩漏。構念效度高，確實測試 ku_003 的核心內容。難度適中（easy）。"
+        },
+        {
+          "item_id": "item_003",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.75,
+          "notes": "填空題測試處女座性格特質記憶。答案『分析』直接源自教材原文『處女座細心、分析、注重完美』。對教材的準確回憶要求高，無法通過常識或推理繞題。題目語境充分限制了合理填法。難度適中（medium）。"
+        },
+        {
+          "item_id": "item_004",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.83,
+          "notes": "元素互動關係情境題，答案 B『滋潤與情感的補養』對應教材『水象星座的情感則能滋潤土象星座的穩定』。四個干擾項設計良好，分別對應『火象-風象互動』、『風象特性』和『土象特性』，確實測試學習者對不同互動模式的理解。無明顯繞題路徑。難度適中（medium）。"
+        },
+        {
+          "item_id": "item_005",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.78,
+          "notes": "分類系統整合填空題，答案『啟動』源自教材『本位星座（白羊、巨蟹、天秤、魔羯）具啟動力』。題目明確指示要填入『本位星座的________力』，強烈提示答案形式。學習者必須理解模式分類的獨立性，無法單純依靠元素知識答題。難度適中（medium）。"
+        },
+        {
+          "item_id": "item_006",
+          "verdict": "needs_revision",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": false,
+              "concern": "配對 3（白羊-巨蟹，同為本位星座）與配對 4（白羊-金牛，不同模式不同元素）的相容度排序在教材中缺乏明確比較依據。學習者可能有合理的替代答案：(1) 若認為『同模式』本身增加相容度，可能排序為 1, 2, 4, 3；(2) 若認為『火象與水象』的互動強度大於『火象與土象』，也可能調整排序。教材未明確說明火象與水象、火象與土象的互動關係。"
+            },
+            "construct_validity": {
+              "pass": false,
+              "concern": "配對 3 與 4 的排序要求學習者推理『教材未明確說明的關係』。實驗 1：不懂互動關係但會讀題的學習者，可能根據『同本位』或『元素數量』等表面特徵進行排序，無需深入理解 KU。實驗 2：很懂互動原理的學習者，會發現教材只明確了『同元素』、『火象-風象』、『水象-土象』，對『白羊-巨蟹』vs『白羊-金牛』的判斷無法找到堅實的教材依據。"
+            },
+            "ambiguity": {
+              "pass": false,
+              "concern": "『相容度』的定義在教材中不完整。教材明確的互動模式：(1) 同元素相容；(2) 火象激發風象；(3) 水象滋潤土象。但對其他組合（火象 vs 土象、火象 vs 水象、同模式不同元素等）未提供明確描述。這導致配對 3 與 4 的相對位置有歧義。"
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.55,
+          "notes": "高階排序題的設計方向正確，確實測試概念整合能力。但配對 3 與 4 的排序在教材依據上不充分。建議修訂方案：(A) 修改配對選擇，避免需要比較未明確說明的元素對；(B) 補充教材內容，明確說明『同模式是否增加相容度』和『火象與水象的互動關係』；(C) 調整題幹要求，改為『根據教材明確提及的相容原理排序』，明確告知配對 3 與 4 的順序無明確教材依據，要求學習者至少將 1 與 2 排序正確。"
+        }
+      ],
+      "summary": {
+        "total_items": 6,
+        "accepted": 5,
+        "needs_revision": 1,
+        "rejected": 0,
+        "average_quality_score": 0.76,
+        "overall_recommendations": [
+          "整體題目品質良好。五題（item_001-item_005）在答案唯一性、構念效度、歧義性與繞題風險上均通過檢查。",
+          "item_006 排序題的配對 3 與 4 排序在教材依據上不充分。建議：(1) 補充教材說明『同模式星座』的相容度層級；(2) 或修改題目選項，避免需要比較未明確說明的組合；(3) 或調整題目要求，明確指出哪些排序關係無教材明確依據。",
+          "題型分布恰當（3 mc_single, 2 fill, 1 ordering），難度梯度清晰（2 easy, 3 medium, 1 hard），符合設計藍圖。",
+          "診斷設計完善。每題的預期失誤模式、干擾項設計與知識單元對應清晰，為後續數據分析提供了良好基礎。",
+          "整體平均質量評分 0.76，說明題目整體品質在可接受範圍內。建議在實施前解決 item_006 的歧義問題。"
+        ]
+      }
+    },
+    "review_gemini": {
+      "per_item": [
+        {
+          "item_id": "item_001",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.95,
+          "notes": "題幹清晰，選項互斥且覆蓋合理，完全對應教材日期範圍。"
+        },
+        {
+          "item_id": "item_002",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.95,
+          "notes": "選項設計工整，分別對應四元素特性，測量目標明確。"
+        },
+        {
+          "item_id": "item_003",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.9,
+          "notes": "填空語境具體，唯一對應教材中處女座的特定描述詞。"
+        },
+        {
+          "item_id": "item_004",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.92,
+          "notes": "情境題有效測量元素互動關係，干擾項具備診斷價值。"
+        },
+        {
+          "item_id": "item_005",
+          "verdict": "accept",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": true
+            },
+            "construct_validity": {
+              "pass": true
+            },
+            "ambiguity": {
+              "pass": true
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.88,
+          "notes": "成功整合模式與元素分類，填空提示足以引導出唯一正確術語。"
+        },
+        {
+          "item_id": "item_006",
+          "verdict": "reject",
+          "checks": {
+            "answer_uniqueness": {
+              "pass": false,
+              "concern": "教材僅提及『同元素相容』與特定元素對互動（火風、水土）。對於『同模式但不同元素』與『既無同元素也無描述互動』的相容度高低，教材並無明確比較依據，導致 3 與 4 的順序具備多種合理解釋。"
+            },
+            "construct_validity": {
+              "pass": false,
+              "concern": "受測者無法僅憑教材內容得出確定的排序，這導致題目測量的不是 KU 掌握度，而是受測者的主觀猜測或對『相容度』一詞的預設想像。"
+            },
+            "ambiguity": {
+              "pass": false,
+              "concern": "『相容度』一詞在教材中並未針對所有星座組合定義量化或序位標準，應用於全排序時存在定義模糊。"
+            },
+            "bypass_risk": {
+              "pass": true
+            }
+          },
+          "overall_quality_score": 0.4,
+          "notes": "題目構想良好，但排序邏輯超出教材提供的資訊範圍。建議縮減排序項目，僅保留教材有明確提及的關係（如同元素 vs 異元素）。"
+        }
+      ],
+      "summary": {
+        "total_items": 6,
+        "accepted": 5,
+        "needs_revision": 0,
+        "rejected": 1,
+        "average_quality_score": 0.83,
+        "overall_recommendations": [
+          "前五題品質優良，建議直接採用。",
+          "第六題排序題存在嚴重的教材依據不足問題，建議重新設計排序項目或修改題幹，使其判斷基準完全鎖定在教材原文描述。"
+        ]
+      }
+    },
+    "review_merged": {
+      "per_item": [
+        {
+          "item_id": "item_001",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.82,
+          "quality_score_gemini": 0.95,
+          "claude_concerns": [],
+          "gemini_concerns": []
+        },
+        {
+          "item_id": "item_002",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.8,
+          "quality_score_gemini": 0.95,
+          "claude_concerns": [],
+          "gemini_concerns": []
+        },
+        {
+          "item_id": "item_003",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.75,
+          "quality_score_gemini": 0.9,
+          "claude_concerns": [],
+          "gemini_concerns": []
+        },
+        {
+          "item_id": "item_004",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.83,
+          "quality_score_gemini": 0.92,
+          "claude_concerns": [],
+          "gemini_concerns": []
+        },
+        {
+          "item_id": "item_005",
+          "verdict": "accept",
+          "verdict_claude": "accept",
+          "verdict_gemini": "accept",
+          "agreement": true,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.78,
+          "quality_score_gemini": 0.88,
+          "claude_concerns": [],
+          "gemini_concerns": []
+        },
+        {
+          "item_id": "item_006",
+          "verdict": "reject",
+          "verdict_claude": "needs_revision",
+          "verdict_gemini": "reject",
+          "agreement": false,
+          "checks_agreement": {
+            "answer_uniqueness": true,
+            "construct_validity": true,
+            "ambiguity": true,
+            "bypass_risk": true
+          },
+          "quality_score_claude": 0.55,
+          "quality_score_gemini": 0.4,
+          "claude_concerns": [
+            "配對 3（白羊-巨蟹，同為本位星座）與配對 4（白羊-金牛，不同模式不同元素）的相容度排序在教材中缺乏明確比較依據。學習者可能有合理的替代答案：(1) 若認為『同模式』本身增加相容度，可能排序為 1, 2, 4, 3；(2) 若認為『火象與水象』的互動強度大於『火象與土象』，也可能調整排序。教材未明確說明火象與水象、火象與土象的互動關係。",
+            "配對 3 與 4 的排序要求學習者推理『教材未明確說明的關係』。實驗 1：不懂互動關係但會讀題的學習者，可能根據『同本位』或『元素數量』等表面特徵進行排序，無需深入理解 KU。實驗 2：很懂互動原理的學習者，會發現教材只明確了『同元素』、『火象-風象』、『水象-土象』，對『白羊-巨蟹』vs『白羊-金牛』的判斷無法找到堅實的教材依據。",
+            "『相容度』的定義在教材中不完整。教材明確的互動模式：(1) 同元素相容；(2) 火象激發風象；(3) 水象滋潤土象。但對其他組合（火象 vs 土象、火象 vs 水象、同模式不同元素等）未提供明確描述。這導致配對 3 與 4 的相對位置有歧義。"
+          ],
+          "gemini_concerns": [
+            "教材僅提及『同元素相容』與特定元素對互動（火風、水土）。對於『同模式但不同元素』與『既無同元素也無描述互動』的相容度高低，教材並無明確比較依據，導致 3 與 4 的順序具備多種合理解釋。",
+            "受測者無法僅憑教材內容得出確定的排序，這導致題目測量的不是 KU 掌握度，而是受測者的主觀猜測或對『相容度』一詞的預設想像。",
+            "『相容度』一詞在教材中並未針對所有星座組合定義量化或序位標準，應用於全排序時存在定義模糊。"
+          ]
+        }
+      ],
+      "summary": {
+        "total_items": 6,
+        "reviewers": [
+          "claude",
+          "gemini"
+        ],
+        "verdict_agreement_rate": 0.8333333333333334,
+        "per_check_agreement": {
+          "answer_uniqueness": {
+            "rate": 1,
+            "measured_on": 6
+          },
+          "construct_validity": {
+            "rate": 1,
+            "measured_on": 6
+          },
+          "ambiguity": {
+            "rate": 1,
+            "measured_on": 6
+          },
+          "bypass_risk": {
+            "rate": 1,
+            "measured_on": 6
+          }
+        },
+        "merged_verdict_counts": {
+          "accept": 5,
+          "needs_revision": 0,
+          "reject": 1
+        },
+        "disagreement_item_ids": [
+          "item_006"
+        ]
+      }
+    }
+  },
+  "log": [
+    {
+      "agent": "agent_1",
+      "action": "completed",
+      "at": "2026-04-23T00:00:00Z",
+      "summary": "Extracted 8 knowledge units from astrology material, strictly adhering to Iron Laws: all source excerpts are original text, all misconceptions have evidence, no domain knowledge assumptions"
+    },
+    {
+      "agent": "agent_2",
+      "action": "completed",
+      "at": "2026-04-23T08:30:00Z",
+      "summary": "Completed KU-to-Dimension mapping with explicit rationale for each correspondence (weight-normalized). Created assessment blueprint: 6 items (2 easy, 3 medium, 1 hard) across 3 mc_single, 2 fill, 1 ordering. All health checks passed: full coverage, sufficient KUs per dimension (4-6 each), clear dimension distinction, consistent cognitive complexity gradient. Blueprint aligns with user preferences (situational items, element application, avoid rote memorization)."
+    },
+    {
+      "agent": "agent_3",
+      "action": "completed",
+      "at": "2026-04-23T16:45:00Z",
+      "summary": "Designed 6 assessment items (item_001–item_006) adhering strictly to Iron Law A: all content sourced from astrology material, no external knowledge assumptions. All items meet diagnostic criteria: unique answers, reasonable misconception-based distractors, single reasoning paths through target KUs. Item types align with KU testable aspects per Iron Law C (recall→mc/fill, understand→mc, apply→scenario mc/fill, analyze→multi-dimensional ordering). Difficulty gradient achieved: 2 easy (0.25–0.30), 3 medium (0.45–0.50), 1 hard (0.70). Items integrate blueprint specifications with full measurement and diagnostics. Workflow progressed to step 3."
+    },
+    {
+      "agent": "agent_4",
+      "action": "completed",
+      "at": "2026-04-23T22:15:00Z",
+      "summary": "品質審查完成。四項檢查覆蓋全部 6 題。結果：5 題接受（accept），1 題退回（reject）。item_006 排序題因配對 3-4 排序在教材中無明確依據，導致答案唯一性、構念效度及歧義性檢查 fail。平均質量評分 0.83。建議在實施前修正 item_006 的配對選擇。"
+    }
+  ],
+  "costs": {
+    "total_usd": 0.53987415,
+    "by_agent": {
+      "agent_1": 0.06076065,
+      "agent_2": 0.1035055,
+      "agent_3": 0.18896365,
+      "agent_4": 0.18664435000000001,
+      "gemini_reviewer": {
+        "tokens": 545219,
+        "input_tokens": 520300,
+        "duration_ms": 166221,
+        "cost_usd_note": "not reported by Gemini CLI; compute from token pricing if needed"
+      }
+    }
+  }
+}
