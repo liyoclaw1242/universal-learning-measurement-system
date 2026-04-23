@@ -47,6 +47,11 @@ export default function App() {
   const warnings = useShellStore((s) => s.warnings);
   const dismissWarning = useShellStore((s) => s.dismissWarning);
   const dismissAllWarnings = useShellStore((s) => s.dismissAllWarnings);
+  const regeneratingItemId = useShellStore((s) => s.regeneratingItemId);
+  const regenerateBatchRemaining = useShellStore((s) => s.regenerateBatchRemaining);
+
+  // Derived: count of items user has rejected.
+  const rejectedCount = useMemo(() => items.filter((i) => i.user === 'reject').length, [items]);
 
   const setDensity = useShellStore((s) => s.setDensity);
   const setRibbonTab = useShellStore((s) => s.setRibbonTab);
@@ -124,6 +129,13 @@ export default function App() {
         geminiRunning={geminiRunning}
         geminiElapsedS={geminiElapsedS}
         reviewSummary={reviewSummary}
+        rejectedCount={rejectedCount}
+        onRerunRejected={
+          rejectedCount > 0 && regenerateBatchRemaining === 0
+            ? () => void bridge.regenerateRejected()
+            : undefined
+        }
+        rerunBatchRemaining={regenerateBatchRemaining}
       />
 
       <NavRail
@@ -155,6 +167,7 @@ export default function App() {
             sourceExcerpt,
             streamLog,
             applyItemOverride,
+            regeneratingItemId,
           })}
         </div>
       </section>
@@ -163,7 +176,7 @@ export default function App() {
         session={session}
         stage={stage}
         onToggleStage={setStage}
-        versionLabel="ULMS · v0.1 step-7c"
+        versionLabel="ULMS · v0.1 step-7d"
       />
 
       <WarningsTray
@@ -188,6 +201,7 @@ function renderTabBody(
     sourceExcerpt: ReturnType<typeof useShellStore.getState>['sourceExcerpt'];
     streamLog: ReturnType<typeof useShellStore.getState>['streamLog'];
     applyItemOverride: ReturnType<typeof useShellStore.getState>['applyItemOverride'];
+    regeneratingItemId: ReturnType<typeof useShellStore.getState>['regeneratingItemId'];
   },
 ) {
   if (activeId === 'overview') {
@@ -230,6 +244,8 @@ function renderTabBody(
           ctx.applyItemOverride(id, 'ship');
           void bridge.applyItemOverride(id, 'ship');
         }}
+        onRegenerate={(id) => void bridge.regenerateItem(id)}
+        regenerating={ctx.regeneratingItemId === item.id}
       />
     );
   }

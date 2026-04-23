@@ -65,6 +65,15 @@ interface RibbonProps {
     verdict_agreement_rate: number;
     merged_verdict_counts: { accept: number; needs_revision: number; reject: number };
   } | null;
+
+  // ─── Regenerate (step 7d) ───────────────────────────
+  /** Count of items currently marked user_override='reject'. Visible
+   *  value is also used to enable/disable the batch button. */
+  rejectedCount?: number;
+  /** Handler for re-running all rejected items (batch) */
+  onRerunRejected?: () => void;
+  /** Batch progress — remaining count (0 when idle) */
+  rerunBatchRemaining?: number;
 }
 
 export default function Ribbon(props: RibbonProps) {
@@ -78,6 +87,9 @@ export default function Ribbon(props: RibbonProps) {
         geminiRunning={props.geminiRunning}
         geminiElapsedS={props.geminiElapsedS}
         reviewSummary={props.reviewSummary}
+        rejectedCount={props.rejectedCount}
+        onRerunRejected={props.onRerunRejected}
+        rerunBatchRemaining={props.rerunBatchRemaining}
       />
       <RibbonTabs
         activeTab={props.activeTab}
@@ -112,6 +124,9 @@ interface StripProps {
   geminiRunning?: boolean;
   geminiElapsedS?: number;
   reviewSummary?: RibbonProps['reviewSummary'];
+  rejectedCount?: number;
+  onRerunRejected?: () => void;
+  rerunBatchRemaining?: number;
 }
 
 function RibbonStrip({
@@ -122,6 +137,9 @@ function RibbonStrip({
   geminiRunning,
   geminiElapsedS,
   reviewSummary,
+  rejectedCount = 0,
+  onRerunRejected,
+  rerunBatchRemaining = 0,
 }: StripProps) {
   const state = costStateOf(session.cost_usd, session.cost_cap);
   const pct = session.cost_cap > 0 ? Math.min(100, (session.cost_usd / session.cost_cap) * 100) : 0;
@@ -161,6 +179,21 @@ function RibbonStrip({
 
         {stage === 'review' && (
           <>
+            {rerunBatchRemaining > 0 ? (
+              <button className="btn running" disabled aria-live="polite">
+                <span className="pulse-dot" />
+                Re-running · {rerunBatchRemaining} left
+              </button>
+            ) : rejectedCount > 0 ? (
+              <button
+                className="btn"
+                onClick={onRerunRejected}
+                disabled={!onRerunRejected}
+                title="agent-3 重新生成所有被 reject 的題目"
+              >
+                Re-run rejected ({rejectedCount})
+              </button>
+            ) : null}
             {geminiRunning ? (
               <button className="btn running" disabled aria-live="polite">
                 <span className="pulse-dot" />

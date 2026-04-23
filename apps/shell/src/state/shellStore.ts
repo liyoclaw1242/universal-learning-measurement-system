@@ -85,6 +85,11 @@ export interface ShellState {
   geminiRunning: boolean;
   /** Wall-clock when Gemini started (ms since epoch), null when idle */
   geminiStartedAt: number | null;
+
+  /** Item currently being regenerated (single-item spawn in progress) */
+  regeneratingItemId: string | null;
+  /** Batch mode: remaining count of items still to regenerate */
+  regenerateBatchRemaining: number;
   /** Merged review summary, populated after second-opinion:completed */
   reviewSummary: {
     total_items: number;
@@ -131,6 +136,11 @@ export interface ShellState {
   _onGeminiStopped: () => void;
   _onReviewSummary: (summary: ShellState['reviewSummary']) => void;
   _onGeminiStreamLine: (tsISO: string, kind: string, text: string) => void;
+  _onRegenerateStarted: (itemId: string) => void;
+  _onRegenerateFinished: (itemId: string) => void;
+  _onRegenerateBatchStarted: (itemIds: string[]) => void;
+  _onRegenerateBatchItemDone: (remaining: number) => void;
+  _onRegenerateBatchCompleted: () => void;
   _pushWarning: (msg: string) => void;
   dismissWarning: (index: number) => void;
   dismissAllWarnings: () => void;
@@ -171,6 +181,8 @@ export const useShellStore = create<ShellState>()(
       geminiRunning: false,
       geminiStartedAt: null,
       reviewSummary: null,
+      regeneratingItemId: null,
+      regenerateBatchRemaining: 0,
       warnings: [],
 
       // ── UI actions ───────────────────────────────────
@@ -336,6 +348,15 @@ export const useShellStore = create<ShellState>()(
         })),
 
       dismissAllWarnings: () => set({ warnings: [] }),
+
+      _onRegenerateStarted: (itemId) => set({ regeneratingItemId: itemId }),
+      _onRegenerateFinished: () => set({ regeneratingItemId: null }),
+      _onRegenerateBatchStarted: (itemIds) =>
+        set({ regenerateBatchRemaining: itemIds.length }),
+      _onRegenerateBatchItemDone: (remaining) =>
+        set({ regenerateBatchRemaining: remaining }),
+      _onRegenerateBatchCompleted: () =>
+        set({ regenerateBatchRemaining: 0, regeneratingItemId: null }),
     }),
     {
       name: 'ulms-shell-ui',

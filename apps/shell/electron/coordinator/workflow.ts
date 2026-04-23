@@ -94,7 +94,10 @@ export function stopWorkflow(): void {
 
 // ─── spawnAgent ──────────────────────────────────────────────
 
-function spawnAgent(agentName: AgentId, workspaceDir: string): Promise<{ result: ResultSnapshot | null }> {
+export function spawnAgent(
+  agentName: AgentId,
+  workspaceDir: string,
+): Promise<{ result: ResultSnapshot | null }> {
   return new Promise((resolve, reject) => {
     const slug = AGENT_SLUGS[agentName];
     const prompt = `/${slug}`;

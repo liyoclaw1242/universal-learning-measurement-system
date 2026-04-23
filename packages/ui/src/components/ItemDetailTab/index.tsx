@@ -6,7 +6,7 @@
 // real state updates + IPC for override persistence.
 
 import { useState } from 'react';
-import { Flag, ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight } from 'lucide-react';
+import { Flag, ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, RotateCcw } from 'lucide-react';
 import type {
   Agreement,
   CheckKey,
@@ -28,6 +28,10 @@ interface ItemDetailTabProps {
   onReject?: (id: string) => void;
   onPromote?: (id: string) => void;
   onShip?: (id: string) => void;
+  /** Step 7d: regenerate just this item. Disabled while busy. */
+  onRegenerate?: (id: string) => void;
+  /** Whether THIS item is currently being regenerated (agent-3 running) */
+  regenerating?: boolean;
 }
 
 const CHECK_KEYS: CheckKey[] = ['uniqueness', 'construct', 'workaround', 'ambiguity'];
@@ -57,6 +61,8 @@ export default function ItemDetailTab({
   onReject,
   onPromote,
   onShip,
+  onRegenerate,
+  regenerating = false,
 }: ItemDetailTabProps) {
   return (
     <div className="item-detail">
@@ -74,18 +80,50 @@ export default function ItemDetailTab({
       </header>
 
       <div className="item-actions">
-        <button className="btn xs" onClick={() => onFlag?.(item.id)} aria-label="flag">
+        <button
+          className="btn xs"
+          onClick={() => onFlag?.(item.id)}
+          aria-label="flag"
+          disabled={regenerating}
+        >
           <Flag size={12} strokeWidth={1.5} /> flag
         </button>
-        <button className="btn xs danger" onClick={() => onReject?.(item.id)} aria-label="reject">
+        <button
+          className="btn xs danger"
+          onClick={() => onReject?.(item.id)}
+          aria-label="reject"
+          disabled={regenerating}
+        >
           <ArrowDown size={12} strokeWidth={1.5} /> reject
         </button>
-        <button className="btn xs" onClick={() => onPromote?.(item.id)} aria-label="promote">
+        <button
+          className="btn xs"
+          onClick={() => onPromote?.(item.id)}
+          aria-label="promote"
+          disabled={regenerating}
+        >
           <ArrowUp size={12} strokeWidth={1.5} /> promote
         </button>
-        <button className="btn xs primary" onClick={() => onShip?.(item.id)} aria-label="ship">
+        <button
+          className="btn xs primary"
+          onClick={() => onShip?.(item.id)}
+          aria-label="ship"
+          disabled={regenerating}
+        >
           <Check size={12} strokeWidth={1.5} /> ship
         </button>
+        {onRegenerate && (
+          <button
+            className={`btn xs ${regenerating ? 'running' : ''}`}
+            onClick={() => onRegenerate(item.id)}
+            aria-label="regenerate"
+            disabled={regenerating}
+            title="agent-3 重新生成這一題"
+          >
+            {regenerating ? <span className="pulse-dot" /> : <RotateCcw size={12} strokeWidth={1.5} />}
+            {regenerating ? 'regenerating…' : 'regenerate'}
+          </button>
+        )}
       </div>
 
       <div className="stem">{item.stem}</div>

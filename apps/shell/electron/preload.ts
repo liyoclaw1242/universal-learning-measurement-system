@@ -37,6 +37,10 @@ const api = {
   // ── export ───────────────────────────────────────────
   exportItems: () => ipcRenderer.invoke('export:items'),
 
+  // ── regenerate (step 7d) ─────────────────────────────
+  regenerateItem: (itemId: string) => ipcRenderer.invoke('items:regenerate', itemId),
+  regenerateRejected: () => ipcRenderer.invoke('items:regenerate-rejected'),
+
   // ── event subscriptions ───────────────────────────────
   onWorkflowStarted: (cb: () => void): Unsubscribe =>
     subscribe('workflow:started', () => cb()),
@@ -74,6 +78,30 @@ const api = {
     subscribe('second-opinion:completed', cb),
   onSecondOpinionError: (cb: (payload: { error: string }) => void): Unsubscribe =>
     subscribe('second-opinion:error', (p) => cb(p as { error: string })),
+
+  // Regenerate events
+  onRegenerateStarted: (cb: (payload: { item_id: string }) => void): Unsubscribe =>
+    subscribe('regenerate:started', (p) => cb(p as { item_id: string })),
+  onRegenerateCompleted: (
+    cb: (payload: { item_id: string; cost_usd: number; duration_ms: number }) => void,
+  ): Unsubscribe =>
+    subscribe('regenerate:completed', (p) =>
+      cb(p as { item_id: string; cost_usd: number; duration_ms: number }),
+    ),
+  onRegenerateError: (cb: (payload: { item_id: string; error: string }) => void): Unsubscribe =>
+    subscribe('regenerate:error', (p) => cb(p as { item_id: string; error: string })),
+  onRegenerateBatchStarted: (cb: (payload: { item_ids: string[] }) => void): Unsubscribe =>
+    subscribe('regenerate-batch:started', (p) => cb(p as { item_ids: string[] })),
+  onRegenerateBatchItemDone: (
+    cb: (payload: { item_id: string; remaining: number }) => void,
+  ): Unsubscribe =>
+    subscribe('regenerate-batch:item-done', (p) => cb(p as { item_id: string; remaining: number })),
+  onRegenerateBatchCompleted: (
+    cb: (payload: { count: number; regenerated: string[] }) => void,
+  ): Unsubscribe =>
+    subscribe('regenerate-batch:completed', (p) =>
+      cb(p as { count: number; regenerated: string[] }),
+    ),
 
   // legacy sanity check
   ping(): string {

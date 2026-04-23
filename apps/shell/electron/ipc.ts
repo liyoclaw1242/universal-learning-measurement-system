@@ -25,6 +25,11 @@ import {
 } from './coordinator/gemini';
 import { applyItemOverride, type UserOverride } from './coordinator/overrides';
 import { exportItems } from './coordinator/export';
+import {
+  regenerateItem,
+  regenerateRejected,
+  isRegenerating,
+} from './coordinator/regenerate';
 
 export function registerIpc(workspaceDir: string): void {
   const blackboardPath = path.join(workspaceDir, 'blackboard.json');
@@ -90,6 +95,22 @@ export function registerIpc(workspaceDir: string): void {
     return exportItems(win, workspaceDir);
   });
 
+  ipcMain.handle('items:regenerate', async (_e, itemId: string) => {
+    if (isRegenerating()) return { ok: false as const, error: 'another regeneration in progress' };
+    regenerateItem(workspaceDir, itemId).catch((err) => {
+      console.error('regenerateItem threw:', err);
+    });
+    return { ok: true as const };
+  });
+
+  ipcMain.handle('items:regenerate-rejected', async () => {
+    if (isRegenerating()) return { ok: false as const, error: 'another regeneration in progress' };
+    regenerateRejected(workspaceDir).catch((err) => {
+      console.error('regenerateRejected threw:', err);
+    });
+    return { ok: true as const };
+  });
+
   // ─── event forwarders (coordinator → all windows) ────────
 
   const eventNames = [
@@ -110,6 +131,12 @@ export function registerIpc(workspaceDir: string): void {
     'gemini:completed',
     'second-opinion:completed',
     'second-opinion:error',
+    'regenerate:started',
+    'regenerate:completed',
+    'regenerate:error',
+    'regenerate-batch:started',
+    'regenerate-batch:item-done',
+    'regenerate-batch:completed',
   ] as const;
 
   for (const name of eventNames) {

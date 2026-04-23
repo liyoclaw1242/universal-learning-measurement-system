@@ -279,6 +279,45 @@ export function setupIpcBridge(): () => void {
     }),
   );
 
+  // ─── regenerate (per-item + batch) ───────────────────
+
+  unsubs.push(
+    ulms.onRegenerateStarted(({ item_id }) => {
+      useShellStore.getState()._onRegenerateStarted(item_id);
+    }),
+  );
+
+  unsubs.push(
+    ulms.onRegenerateCompleted(() => {
+      useShellStore.getState()._onRegenerateFinished('');
+    }),
+  );
+
+  unsubs.push(
+    ulms.onRegenerateError(({ item_id, error }) => {
+      useShellStore.getState()._onRegenerateFinished(item_id);
+      _pushWarning(`[regenerate:${item_id}] ${error}`);
+    }),
+  );
+
+  unsubs.push(
+    ulms.onRegenerateBatchStarted(({ item_ids }) => {
+      useShellStore.getState()._onRegenerateBatchStarted(item_ids);
+    }),
+  );
+
+  unsubs.push(
+    ulms.onRegenerateBatchItemDone(({ remaining }) => {
+      useShellStore.getState()._onRegenerateBatchItemDone(remaining);
+    }),
+  );
+
+  unsubs.push(
+    ulms.onRegenerateBatchCompleted(() => {
+      useShellStore.getState()._onRegenerateBatchCompleted();
+    }),
+  );
+
   return () => {
     for (const u of unsubs) u();
   };
@@ -332,5 +371,11 @@ export const bridge = {
   async exportItems(): Promise<{ ok: boolean; error?: string; paths?: string[] }> {
     const res = await window.ulms.exportItems();
     return res as { ok: boolean; error?: string; paths?: string[] };
+  },
+  async regenerateItem(itemId: string): Promise<void> {
+    await window.ulms.regenerateItem(itemId);
+  },
+  async regenerateRejected(): Promise<void> {
+    await window.ulms.regenerateRejected();
   },
 };
