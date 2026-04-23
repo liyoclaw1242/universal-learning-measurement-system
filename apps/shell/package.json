@@ -1,5 +1,5 @@
 {
-  "name": "ulms-app",
+  "name": "@ulms/shell",
   "version": "0.1.0",
   "private": true,
   "description": "ULMS formal v1 — desktop shell for teachers to run the multi-agent pipeline",

@@ -17,9 +17,11 @@ After three feasibility / methodology / dual-reviewer spikes (`docs/spike_learni
 
 Spike code lives in `spike/` — deliberately utilitarian, vanilla JS, no build step. Handoff implementation guidance (§11) says: if no frontend framework exists, use **Vite + React + TypeScript + CSS Modules or Tailwind**.
 
+> **Addendum 2026-04-23 (post-scaffold):** repo switched to a **monorepo layout** under `apps/*`. `spike/` → `apps/spike/`, `app/` → `apps/shell/`. Package names are `@ulms/spike` and `@ulms/shell`. Root uses **npm workspaces** (no pnpm / turbo / nx — 2 apps, no shared packages yet). All references to `spike/` and `app/` below should be read as `apps/spike/` and `apps/shell/`.
+
 ## Decision
 
-**Formal v1 lives in new `app/` directory.** Spike stays under `spike/` as frozen historical reference (regression fixtures, Grok-generated materials, run archives).
+**Formal v1 lives in new `apps/shell/` directory.** Spike stays under `apps/spike/` as frozen historical reference (regression fixtures, Grok-generated materials, run archives).
 
 ### Stack
 

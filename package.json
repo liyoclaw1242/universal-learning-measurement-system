@@ -1,0 +1,20 @@
+{
+  "name": "ulms",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Universal Learning Measurement System — monorepo root",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "shell:dev": "npm -w @ulms/shell run dev",
+    "shell:build": "npm -w @ulms/shell run build",
+    "shell:typecheck": "npm -w @ulms/shell run typecheck",
+    "shell:test": "npm -w @ulms/shell run test",
+    "spike": "npm -w @ulms/spike run start",
+    "format": "npm -w @ulms/shell run format"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

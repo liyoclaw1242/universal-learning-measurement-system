@@ -1,5 +1,5 @@
 {
-  "name": "ulms-spike",
+  "name": "@ulms/spike",
   "version": "0.0.1",
   "private": true,
   "description": "Technical feasibility spike for ULMS. Throwaway code — do not extend.",
