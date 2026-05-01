@@ -7,6 +7,7 @@
 //     5. second_opinion / regenerate / overrides / export
 
 mod blackboard;
+mod inputs;
 mod types;
 
 use std::path::PathBuf;
@@ -17,6 +18,7 @@ use serde_json::Value;
 use tauri::{AppHandle, Manager, State};
 use tokio::sync::Mutex;
 
+use crate::inputs::PickResp;
 use crate::types::{Blackboard, StagedInputs};
 
 // ─── shared state ───────────────────────────────────────────
@@ -129,18 +131,33 @@ async fn inputs_status(state: State<'_, Arc<AppState>>) -> Result<InputsStatusRe
 }
 
 #[tauri::command]
-async fn pick_material() -> Result<OkResp, String> {
-    Err("pick_material not yet implemented (Phase 3)".into())
+async fn pick_material(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<PickResp, String> {
+    let workspace = state.workspace_dir.clone();
+    let mut staged = state.staged.lock().await;
+    Ok(inputs::run_pick_material(app, &workspace, &mut staged).await)
 }
 
 #[tauri::command]
-async fn pick_dimensions() -> Result<OkResp, String> {
-    Err("pick_dimensions not yet implemented (Phase 3)".into())
+async fn pick_dimensions(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<PickResp, String> {
+    let workspace = state.workspace_dir.clone();
+    let mut staged = state.staged.lock().await;
+    Ok(inputs::run_pick_dimensions(app, &workspace, &mut staged).await)
 }
 
 #[tauri::command]
-async fn pick_guidance() -> Result<OkResp, String> {
-    Err("pick_guidance not yet implemented (Phase 3)".into())
+async fn pick_guidance(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<PickResp, String> {
+    let workspace = state.workspace_dir.clone();
+    let mut staged = state.staged.lock().await;
+    Ok(inputs::run_pick_guidance(app, &workspace, &mut staged).await)
 }
 
 #[tauri::command]
@@ -217,6 +234,7 @@ async fn regenerate_rejected() -> Result<OkResp, String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let workspace_dir = resolve_workspace_dir();
             eprintln!("[ulms] workspace_dir = {}", workspace_dir.display());
