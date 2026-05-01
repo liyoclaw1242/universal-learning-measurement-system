@@ -124,7 +124,7 @@ pub struct StagedInputs {
 // We don't fully parse this — just enough to extract result snapshots
 // and forward the raw msg to the renderer for display.
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ResultSnapshot {
     pub total_cost_usd: Option<f64>,
     pub duration_ms: Option<u64>,

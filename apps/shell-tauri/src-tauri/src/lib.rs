@@ -9,8 +9,10 @@
 mod blackboard;
 mod inputs;
 mod types;
+mod workflow;
 
 use std::path::PathBuf;
+use std::sync::atomic::Ordering;
 use std::sync::Arc;
 
 use serde::Serialize;
@@ -20,6 +22,7 @@ use tokio::sync::Mutex;
 
 use crate::inputs::PickResp;
 use crate::types::{Blackboard, StagedInputs};
+use crate::workflow::WorkflowRuntime;
 
 // ─── shared state ───────────────────────────────────────────
 
@@ -42,6 +45,7 @@ fn resolve_workspace_dir() -> PathBuf {
 struct AppState {
     workspace_dir: PathBuf,
     staged: Mutex<StagedInputs>,
+    workflow: Arc<WorkflowRuntime>,
 }
 
 impl AppState {
@@ -170,13 +174,30 @@ async fn clear_guidance(state: State<'_, Arc<AppState>>) -> Result<OkResp, Strin
 // ─── workflow ───────────────────────────────────────────────
 
 #[tauri::command]
-async fn start_workflow(app: AppHandle) -> Result<OkResp, String> {
-    let _ = app;
-    Err("start_workflow not yet implemented (Phase 4)".into())
+async fn start_workflow(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<OkResp, String> {
+    if state.workflow.running.load(Ordering::SeqCst) {
+        return Err("workflow already running".into());
+    }
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.workflow);
+    // Snapshot staged inputs so the spawned task doesn't need to hold
+    // the lock for the entire run.
+    let staged_snapshot = state.staged.lock().await.clone();
+    tokio::spawn(workflow::run_workflow(
+        app,
+        workspace,
+        runtime,
+        staged_snapshot,
+    ));
+    Ok(OkResp { ok: true })
 }
 
 #[tauri::command]
-async fn stop_workflow() -> Result<OkResp, String> {
+async fn stop_workflow(state: State<'_, Arc<AppState>>) -> Result<OkResp, String> {
+    state.workflow.request_stop().await;
     Ok(OkResp { ok: true })
 }
 
@@ -241,6 +262,7 @@ pub fn run() {
             app.manage(Arc::new(AppState {
                 workspace_dir,
                 staged: Mutex::new(StagedInputs::default()),
+                workflow: Arc::new(WorkflowRuntime::default()),
             }));
             Ok(())
         })
