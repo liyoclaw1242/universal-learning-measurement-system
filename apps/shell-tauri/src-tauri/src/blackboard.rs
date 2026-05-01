@@ -24,11 +24,11 @@ pub fn default_params() -> AssessmentParams {
             medium: 0.5,
             hard: 0.16,
         },
-        item_types: HashMap::from([
+        item_types: Some(HashMap::from([
             ("mc_single".to_string(), 0.5),
             ("fill".to_string(), 0.3),
             ("ordering".to_string(), 0.2),
-        ]),
+        ])),
         item_type_counts: None,
     }
 }

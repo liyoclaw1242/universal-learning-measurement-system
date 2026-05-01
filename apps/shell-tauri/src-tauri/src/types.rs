@@ -50,8 +50,11 @@ pub struct DifficultyDistribution {
 pub struct AssessmentParams {
     pub target_item_count: usize,
     pub difficulty_distribution: DifficultyDistribution,
-    pub item_types: HashMap<String, f64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Ratio-based item-type distribution. Optional — YAML configs may
+    /// supply only `item_type_counts` (exact integer counts) instead.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub item_types: Option<HashMap<String, f64>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub item_type_counts: Option<HashMap<String, usize>>,
 }
 
