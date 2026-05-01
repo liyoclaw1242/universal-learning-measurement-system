@@ -122,7 +122,7 @@ struct AgentCompleted {
 
 // ─── spawn one agent ────────────────────────────────────────
 
-async fn spawn_agent(
+pub async fn spawn_agent(
     app: &AppHandle,
     agent: &str,
     workspace_dir: &Path,

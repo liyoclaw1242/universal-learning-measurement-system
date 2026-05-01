@@ -7,7 +7,11 @@
 //     5. second_opinion / regenerate / overrides / export
 
 mod blackboard;
+mod export;
+mod gemini;
 mod inputs;
+mod overrides;
+mod regenerate;
 mod types;
 mod workflow;
 
@@ -20,7 +24,11 @@ use serde_json::Value;
 use tauri::{AppHandle, Manager, State};
 use tokio::sync::Mutex;
 
+use crate::export::ExportResp;
+use crate::gemini::GeminiRuntime;
 use crate::inputs::PickResp;
+use crate::overrides::OverrideResp;
+use crate::regenerate::RegenerateRuntime;
 use crate::types::{Blackboard, StagedInputs};
 use crate::workflow::WorkflowRuntime;
 
@@ -46,6 +54,8 @@ struct AppState {
     workspace_dir: PathBuf,
     staged: Mutex<StagedInputs>,
     workflow: Arc<WorkflowRuntime>,
+    gemini: Arc<GeminiRuntime>,
+    regen: Arc<RegenerateRuntime>,
 }
 
 impl AppState {
@@ -59,13 +69,6 @@ impl AppState {
 #[derive(Serialize)]
 struct OkResp {
     ok: bool,
-}
-
-#[derive(Serialize)]
-struct ExportResp {
-    ok: bool,
-    error: Option<String>,
-    paths: Option<Vec<String>>,
 }
 
 #[derive(Serialize)]
@@ -209,13 +212,22 @@ async fn read_board(state: State<'_, Arc<AppState>>) -> Result<Option<Blackboard
 // ─── second opinion ─────────────────────────────────────────
 
 #[tauri::command]
-async fn start_second_opinion(app: AppHandle) -> Result<OkResp, String> {
-    let _ = app;
-    Err("start_second_opinion not yet implemented (Phase 5)".into())
+async fn start_second_opinion(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<OkResp, String> {
+    if state.gemini.running.load(Ordering::SeqCst) {
+        return Err("already running".into());
+    }
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.gemini);
+    tokio::spawn(gemini::run_second_opinion(app, workspace, runtime));
+    Ok(OkResp { ok: true })
 }
 
 #[tauri::command]
-async fn stop_second_opinion() -> Result<OkResp, String> {
+async fn stop_second_opinion(state: State<'_, Arc<AppState>>) -> Result<OkResp, String> {
+    state.gemini.request_stop().await;
     Ok(OkResp { ok: true })
 }
 
@@ -223,31 +235,68 @@ async fn stop_second_opinion() -> Result<OkResp, String> {
 
 #[tauri::command]
 async fn apply_item_override(
-    item_id: String,
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] itemId: String,
     r#override: Option<String>,
+) -> Result<OverrideResp, String> {
+    Ok(overrides::apply_item_override(
+        &app,
+        &state.workspace_dir,
+        &itemId,
+        r#override.as_deref(),
+    )
+    .await)
+}
+
+#[tauri::command]
+async fn export_items(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<ExportResp, String> {
+    Ok(export::run_export(app, &state.workspace_dir).await)
+}
+
+#[tauri::command]
+async fn regenerate_item(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] itemId: String,
 ) -> Result<OkResp, String> {
-    let _ = (item_id, r#override);
-    Err("apply_item_override not yet implemented (Phase 5)".into())
+    if state.regen.is_busy().await {
+        return Err("another regeneration in progress".into());
+    }
+    let workspace = state.workspace_dir.clone();
+    let workflow_runtime = Arc::clone(&state.workflow);
+    let regen_runtime = Arc::clone(&state.regen);
+    tokio::spawn(regenerate::regenerate_item(
+        app,
+        workspace,
+        itemId,
+        workflow_runtime,
+        regen_runtime,
+    ));
+    Ok(OkResp { ok: true })
 }
 
 #[tauri::command]
-async fn export_items() -> Result<ExportResp, String> {
-    Ok(ExportResp {
-        ok: false,
-        error: Some("export_items not yet implemented (Phase 5)".into()),
-        paths: None,
-    })
-}
-
-#[tauri::command]
-async fn regenerate_item(item_id: String) -> Result<OkResp, String> {
-    let _ = item_id;
-    Err("regenerate_item not yet implemented (Phase 5)".into())
-}
-
-#[tauri::command]
-async fn regenerate_rejected() -> Result<OkResp, String> {
-    Err("regenerate_rejected not yet implemented (Phase 5)".into())
+async fn regenerate_rejected(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<OkResp, String> {
+    if state.regen.is_busy().await {
+        return Err("another regeneration in progress".into());
+    }
+    let workspace = state.workspace_dir.clone();
+    let workflow_runtime = Arc::clone(&state.workflow);
+    let regen_runtime = Arc::clone(&state.regen);
+    tokio::spawn(regenerate::regenerate_rejected(
+        app,
+        workspace,
+        workflow_runtime,
+        regen_runtime,
+    ));
+    Ok(OkResp { ok: true })
 }
 
 // ─── entry point ────────────────────────────────────────────
@@ -263,6 +312,8 @@ pub fn run() {
                 workspace_dir,
                 staged: Mutex::new(StagedInputs::default()),
                 workflow: Arc::new(WorkflowRuntime::default()),
+                gemini: Arc::new(GeminiRuntime::default()),
+                regen: Arc::new(RegenerateRuntime::default()),
             }));
             Ok(())
         })
