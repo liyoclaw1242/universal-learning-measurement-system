@@ -1,159 +1,182 @@
-// ULMS Tauri spike — minimal port of Electron coordinator/workflow.ts.
-// Spawns a stand-in subprocess (bash loop) instead of the real claude
-// CLI; the goal is to prove the spawn → line-stream → emit → renderer
-// path works end-to-end.
-
-use std::process::Stdio;
-use std::sync::Arc;
+// ULMS Tauri shell — Phase 1 stubs.
+//
+// All 14 IPC commands are registered so the renderer can boot without
+// "command not found" errors. Return shapes match the Electron
+// coordinator's contracts (see apps/shell/electron/coordinator/) so the
+// UI translates correctly even with empty / placeholder data.
+//
+// Phases 2–5 will replace each stub with the real implementation:
+//   2. inputs_status / read_board    (types + blackboard)
+//   3. pick_*                        (tauri-plugin-dialog + fs)
+//   4. start/stop_workflow           (claude CLI spawn)
+//   5. second_opinion / regenerate / overrides / export
 
 use serde::Serialize;
-use tauri::{AppHandle, Emitter, Manager, State};
-use tokio::io::{AsyncBufReadExt, BufReader};
-use tokio::process::{Child, Command};
-use tokio::sync::Mutex;
+use serde_json::Value;
+use tauri::AppHandle;
 
-#[derive(Default)]
-struct WorkflowState {
-    child: Mutex<Option<Child>>,
+// ─── shared response shapes ─────────────────────────────────
+
+#[derive(Serialize)]
+struct OkResp {
+    ok: bool,
 }
 
-#[derive(Clone, Serialize)]
-struct AgentStream {
-    agent: String,
-    line: String,
+#[derive(Serialize)]
+struct ExportResp {
+    ok: bool,
+    error: Option<String>,
+    paths: Option<Vec<String>>,
 }
 
-#[derive(Clone, Serialize)]
-struct AgentCompleted {
-    agent: String,
-    exit_code: Option<i32>,
+#[derive(Serialize)]
+struct MaterialStatus {
+    filename: String,
+    char_count: usize,
+    source_count: usize,
+    sources: Vec<Value>,
 }
 
-#[derive(Clone, Serialize)]
-struct WorkflowError {
-    error: String,
+#[derive(Serialize)]
+struct DimensionsStatus {
+    count: usize,
+    ids: Vec<String>,
 }
 
-const SPIKE_AGENT: &str = "agent_spike";
+#[derive(Serialize)]
+struct GuidanceStatus {
+    char_count: usize,
+}
 
-// Stand-in for the real claude CLI: prints 5 lines with a half-second
-// delay between each, then exits 0. Demonstrates async line streaming.
-const SPIKE_SCRIPT: &str = r#"
-for i in 1 2 3 4 5; do
-  echo "[$(date +%H:%M:%S)] hello from spike line $i"
-  sleep 0.4
-done
-echo "spike done"
-"#;
+#[derive(Serialize)]
+struct InputsStatusResp {
+    material: Option<MaterialStatus>,
+    dimensions: Option<DimensionsStatus>,
+    guidance: Option<GuidanceStatus>,
+    assessment_params: Option<Value>,
+    ready: bool,
+}
+
+// ─── inputs ─────────────────────────────────────────────────
 
 #[tauri::command]
-async fn start_workflow(
-    app: AppHandle,
-    state: State<'_, Arc<WorkflowState>>,
-) -> Result<(), String> {
-    {
-        let guard = state.child.lock().await;
-        if guard.is_some() {
-            return Err("workflow already running".into());
-        }
-    }
-
-    let mut child = Command::new("bash")
-        .arg("-c")
-        .arg(SPIKE_SCRIPT)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .stdin(Stdio::null())
-        .spawn()
-        .map_err(|e| format!("spawn failed: {e}"))?;
-
-    let stdout = child.stdout.take().ok_or("stdout pipe missing")?;
-    let stderr = child.stderr.take().ok_or("stderr pipe missing")?;
-
-    {
-        let mut guard = state.child.lock().await;
-        *guard = Some(child);
-    }
-
-    let app_for_stdout = app.clone();
-    tokio::spawn(async move {
-        let mut reader = BufReader::new(stdout).lines();
-        while let Ok(Some(line)) = reader.next_line().await {
-            let _ = app_for_stdout.emit(
-                "agent:stream",
-                AgentStream {
-                    agent: SPIKE_AGENT.into(),
-                    line,
-                },
-            );
-        }
-    });
-
-    let app_for_stderr = app.clone();
-    tokio::spawn(async move {
-        let mut reader = BufReader::new(stderr).lines();
-        while let Ok(Some(line)) = reader.next_line().await {
-            let _ = app_for_stderr.emit(
-                "agent:stream",
-                AgentStream {
-                    agent: SPIKE_AGENT.into(),
-                    line: format!("[stderr] {line}"),
-                },
-            );
-        }
-    });
-
-    let state_for_wait = state.inner().clone();
-    let app_for_wait = app.clone();
-    tokio::spawn(async move {
-        let exit_code = {
-            let mut guard = state_for_wait.child.lock().await;
-            if let Some(mut c) = guard.take() {
-                match c.wait().await {
-                    Ok(status) => status.code(),
-                    Err(e) => {
-                        let _ = app_for_wait.emit(
-                            "workflow:error",
-                            WorkflowError {
-                                error: format!("wait failed: {e}"),
-                            },
-                        );
-                        return;
-                    }
-                }
-            } else {
-                None
-            }
-        };
-        let _ = app_for_wait.emit(
-            "agent:completed",
-            AgentCompleted {
-                agent: SPIKE_AGENT.into(),
-                exit_code,
-            },
-        );
-    });
-
-    Ok(())
+async fn inputs_status() -> Result<InputsStatusResp, String> {
+    Ok(InputsStatusResp {
+        material: None,
+        dimensions: None,
+        guidance: None,
+        assessment_params: None,
+        ready: false,
+    })
 }
 
 #[tauri::command]
-async fn stop_workflow(state: State<'_, Arc<WorkflowState>>) -> Result<(), String> {
-    let mut guard = state.child.lock().await;
-    if let Some(child) = guard.as_mut() {
-        let _ = child.start_kill();
-    }
-    Ok(())
+async fn pick_material() -> Result<OkResp, String> {
+    Err("pick_material not yet implemented (Phase 3)".into())
 }
+
+#[tauri::command]
+async fn pick_dimensions() -> Result<OkResp, String> {
+    Err("pick_dimensions not yet implemented (Phase 3)".into())
+}
+
+#[tauri::command]
+async fn pick_guidance() -> Result<OkResp, String> {
+    Err("pick_guidance not yet implemented (Phase 3)".into())
+}
+
+#[tauri::command]
+async fn clear_guidance() -> Result<OkResp, String> {
+    Ok(OkResp { ok: true })
+}
+
+// ─── workflow ───────────────────────────────────────────────
+
+#[tauri::command]
+async fn start_workflow(app: AppHandle) -> Result<OkResp, String> {
+    let _ = app;
+    Err("start_workflow not yet implemented (Phase 4)".into())
+}
+
+#[tauri::command]
+async fn stop_workflow() -> Result<OkResp, String> {
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn read_board() -> Result<Option<Value>, String> {
+    Ok(None)
+}
+
+// ─── second opinion ─────────────────────────────────────────
+
+#[tauri::command]
+async fn start_second_opinion(app: AppHandle) -> Result<OkResp, String> {
+    let _ = app;
+    Err("start_second_opinion not yet implemented (Phase 5)".into())
+}
+
+#[tauri::command]
+async fn stop_second_opinion() -> Result<OkResp, String> {
+    Ok(OkResp { ok: true })
+}
+
+// ─── overrides / export / regenerate ───────────────────────
+
+#[tauri::command]
+async fn apply_item_override(
+    item_id: String,
+    #[allow(non_snake_case)] r#override: Option<String>,
+) -> Result<OkResp, String> {
+    let _ = (item_id, r#override);
+    Err("apply_item_override not yet implemented (Phase 5)".into())
+}
+
+#[tauri::command]
+async fn export_items() -> Result<ExportResp, String> {
+    Ok(ExportResp {
+        ok: false,
+        error: Some("export_items not yet implemented (Phase 5)".into()),
+        paths: None,
+    })
+}
+
+#[tauri::command]
+async fn regenerate_item(item_id: String) -> Result<OkResp, String> {
+    let _ = item_id;
+    Err("regenerate_item not yet implemented (Phase 5)".into())
+}
+
+#[tauri::command]
+async fn regenerate_rejected() -> Result<OkResp, String> {
+    Err("regenerate_rejected not yet implemented (Phase 5)".into())
+}
+
+// ─── entry point ────────────────────────────────────────────
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
-            app.manage(Arc::new(WorkflowState::default()));
+            let _ = app;
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![start_workflow, stop_workflow])
+        .invoke_handler(tauri::generate_handler![
+            inputs_status,
+            pick_material,
+            pick_dimensions,
+            pick_guidance,
+            clear_guidance,
+            start_workflow,
+            stop_workflow,
+            read_board,
+            start_second_opinion,
+            stop_second_opinion,
+            apply_item_override,
+            export_items,
+            regenerate_item,
+            regenerate_rejected,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
