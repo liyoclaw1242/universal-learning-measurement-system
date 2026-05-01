@@ -1,19 +1,52 @@
-// ULMS Tauri shell — Phase 1 stubs.
+// ULMS Tauri shell — phase 2 (types + blackboard wired).
 //
-// All 14 IPC commands are registered so the renderer can boot without
-// "command not found" errors. Return shapes match the Electron
-// coordinator's contracts (see apps/shell/electron/coordinator/) so the
-// UI translates correctly even with empty / placeholder data.
-//
-// Phases 2–5 will replace each stub with the real implementation:
-//   2. inputs_status / read_board    (types + blackboard)
-//   3. pick_*                        (tauri-plugin-dialog + fs)
-//   4. start/stop_workflow           (claude CLI spawn)
-//   5. second_opinion / regenerate / overrides / export
+// All 14 IPC commands are registered. Implementations land in phases:
+//   ✓ 2. read_board — real disk read; types ported
+//     3. pick_*, inputs_status — file dialog + fs (next)
+//     4. start/stop_workflow — claude CLI spawn
+//     5. second_opinion / regenerate / overrides / export
+
+mod blackboard;
+mod types;
+
+use std::path::PathBuf;
+use std::sync::Arc;
 
 use serde::Serialize;
 use serde_json::Value;
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager, State};
+use tokio::sync::Mutex;
+
+use crate::types::{Blackboard, StagedInputs};
+
+// ─── shared state ───────────────────────────────────────────
+
+/// Resolves the workspace dir (where blackboard.json + .claude/skills/
+/// live). Override via ULMS_WORKSPACE_DIR; default points at the
+/// existing apps/shell/workspace so the Tauri shell shares state with
+/// the Electron shell during the migration.
+fn resolve_workspace_dir() -> PathBuf {
+    if let Ok(d) = std::env::var("ULMS_WORKSPACE_DIR") {
+        return PathBuf::from(d);
+    }
+    let manifest = env!("CARGO_MANIFEST_DIR");
+    PathBuf::from(manifest)
+        .join("..")
+        .join("..")
+        .join("shell")
+        .join("workspace")
+}
+
+struct AppState {
+    workspace_dir: PathBuf,
+    staged: Mutex<StagedInputs>,
+}
+
+impl AppState {
+    fn blackboard_path(&self) -> PathBuf {
+        self.workspace_dir.join("blackboard.json")
+    }
+}
 
 // ─── shared response shapes ─────────────────────────────────
 
@@ -60,13 +93,38 @@ struct InputsStatusResp {
 // ─── inputs ─────────────────────────────────────────────────
 
 #[tauri::command]
-async fn inputs_status() -> Result<InputsStatusResp, String> {
+async fn inputs_status(state: State<'_, Arc<AppState>>) -> Result<InputsStatusResp, String> {
+    let staged = state.staged.lock().await;
+    let material = staged.material.as_ref().map(|m| MaterialStatus {
+        filename: m.filename.clone(),
+        char_count: m.content.chars().count(),
+        source_count: m.sources.as_ref().map(|s| s.len()).unwrap_or(1),
+        sources: m
+            .sources
+            .clone()
+            .unwrap_or_default()
+            .into_iter()
+            .map(|s| serde_json::to_value(s).unwrap_or(Value::Null))
+            .collect(),
+    });
+    let dimensions = staged.dimensions.as_ref().map(|d| DimensionsStatus {
+        count: d.len(),
+        ids: d.iter().map(|x| x.dim_id.clone()).collect(),
+    });
+    let guidance = staged.domain_guidance.as_ref().map(|g| GuidanceStatus {
+        char_count: g.chars().count(),
+    });
+    let ready = material.is_some() && dimensions.as_ref().map(|d| d.count > 0).unwrap_or(false);
+    let assessment_params = staged
+        .assessment_params
+        .as_ref()
+        .map(|p| serde_json::to_value(p).unwrap_or(Value::Null));
     Ok(InputsStatusResp {
-        material: None,
-        dimensions: None,
-        guidance: None,
-        assessment_params: None,
-        ready: false,
+        material,
+        dimensions,
+        guidance,
+        assessment_params,
+        ready,
     })
 }
 
@@ -86,7 +144,9 @@ async fn pick_guidance() -> Result<OkResp, String> {
 }
 
 #[tauri::command]
-async fn clear_guidance() -> Result<OkResp, String> {
+async fn clear_guidance(state: State<'_, Arc<AppState>>) -> Result<OkResp, String> {
+    let mut staged = state.staged.lock().await;
+    staged.domain_guidance = None;
     Ok(OkResp { ok: true })
 }
 
@@ -104,8 +164,8 @@ async fn stop_workflow() -> Result<OkResp, String> {
 }
 
 #[tauri::command]
-async fn read_board() -> Result<Option<Value>, String> {
-    Ok(None)
+async fn read_board(state: State<'_, Arc<AppState>>) -> Result<Option<Blackboard>, String> {
+    Ok(blackboard::read_blackboard(&state.blackboard_path()).await)
 }
 
 // ─── second opinion ─────────────────────────────────────────
@@ -126,7 +186,7 @@ async fn stop_second_opinion() -> Result<OkResp, String> {
 #[tauri::command]
 async fn apply_item_override(
     item_id: String,
-    #[allow(non_snake_case)] r#override: Option<String>,
+    r#override: Option<String>,
 ) -> Result<OkResp, String> {
     let _ = (item_id, r#override);
     Err("apply_item_override not yet implemented (Phase 5)".into())
@@ -158,7 +218,12 @@ async fn regenerate_rejected() -> Result<OkResp, String> {
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
-            let _ = app;
+            let workspace_dir = resolve_workspace_dir();
+            eprintln!("[ulms] workspace_dir = {}", workspace_dir.display());
+            app.manage(Arc::new(AppState {
+                workspace_dir,
+                staged: Mutex::new(StagedInputs::default()),
+            }));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
