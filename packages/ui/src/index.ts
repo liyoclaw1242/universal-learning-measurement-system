@@ -9,6 +9,10 @@ export type { RibbonTab } from './components/Ribbon';
 export { default as StatusBar } from './components/StatusBar';
 
 export { default as NavRail } from './components/NavRail';
+export type { LearnSession } from './components/NavRail';
+
+export { default as TranslationPanel } from './components/TranslationPanel';
+export type { TranslationCapture } from './components/TranslationPanel';
 
 export { default as TabBar } from './components/TabBar';
 export type { Tab, TabId } from './components/TabBar';

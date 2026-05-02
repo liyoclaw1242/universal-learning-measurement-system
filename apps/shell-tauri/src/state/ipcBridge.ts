@@ -327,6 +327,52 @@ export function setupIpcBridge(): () => void {
     }),
   );
 
+  // ─── learn / translation ────────────────────────────
+  track(
+    on<{ capture_index: number; image_path: string }>(
+      'translation:capture-started',
+      ({ capture_index, image_path }) => {
+        useShellStore.getState()._onTranslationCaptureStarted(capture_index, image_path);
+      },
+    ),
+  );
+
+  track(
+    on<{
+      capture_index: number;
+      image_path: string;
+      text: string;
+      notes_path: string;
+    }>('translation:completed', (p) => {
+      useShellStore.getState()._onTranslationCompleted({
+        index: p.capture_index,
+        imagePath: p.image_path,
+        text: p.text,
+        notesPath: p.notes_path,
+      });
+    }),
+  );
+
+  track(
+    on<{ error: string }>('translation:error', ({ error }) => {
+      useShellStore.getState()._onTranslationError(error);
+    }),
+  );
+
+  // translation:stream is currently informational (raw stream-json
+  // messages); subscribe so future UX can show live progress.
+  track(
+    on<{ msg: unknown }>('translation:stream', () => {
+      // no-op for now; placeholder for streaming-text UX
+    }),
+  );
+
+  track(
+    on<unknown>('paper-window:closed', () => {
+      useShellStore.getState()._onPaperSessionClosed();
+    }),
+  );
+
   return () => {
     for (const u of unsubs) u();
   };
@@ -381,5 +427,35 @@ export const bridge = {
   },
   async regenerateRejected(): Promise<void> {
     await invoke('regenerate_rejected');
+  },
+
+  // ─── learn / translation ─────────────────────────────────
+  async startPaperSession(url: string): Promise<void> {
+    const session = (await invoke('start_paper_session', { url })) as {
+      id: string;
+      source_url: string;
+      pdf_path: string;
+      notes_path: string;
+    };
+    useShellStore.getState()._onPaperSessionStarted({
+      sessionId: session.id,
+      sourceUrl: session.source_url,
+      pdfPath: session.pdf_path,
+      notesPath: session.notes_path,
+    });
+  },
+  async translatePage(pageNum: number, imageB64: string): Promise<void> {
+    await invoke('translate_page', { pageNum, imageB64 });
+  },
+  async stopTranslation(): Promise<void> {
+    await invoke('stop_translation');
+  },
+  async closePaperSession(): Promise<void> {
+    await invoke('close_paper_session');
+  },
+  async importTranslationAsMaterial(): Promise<void> {
+    await invoke('import_translation_as_material');
+    useShellStore.getState()._onMaterialImportedFromTranslation();
+    await this.refreshInputsStatus();
   },
 };

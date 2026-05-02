@@ -43,7 +43,7 @@ impl PickResp {
 
 // ─── helpers ────────────────────────────────────────────────
 
-async fn copy_to_inputs_dir(
+pub async fn copy_to_inputs_dir(
     workspace_dir: &Path,
     src_filename: &str,
     contents: &str,

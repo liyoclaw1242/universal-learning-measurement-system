@@ -11,12 +11,16 @@ import {
   OverviewTab,
   ItemDetailTab,
   TerminalTab,
+  TranslationPanel,
   WarningsTray,
   type AgentId,
   type Tab,
+  type UserOverride,
 } from '@ulms/ui';
+import { convertFileSrc } from '@tauri-apps/api/core';
 import { useShellStore } from '@/state/shellStore';
 import { bridge } from '@/state/ipcBridge';
+import PdfReader from '@/components/PdfReader';
 
 export default function App() {
   const stage = useShellStore((s) => s.stage);
@@ -50,6 +54,7 @@ export default function App() {
   const dismissAllWarnings = useShellStore((s) => s.dismissAllWarnings);
   const regeneratingItemId = useShellStore((s) => s.regeneratingItemId);
   const regenerateBatchRemaining = useShellStore((s) => s.regenerateBatchRemaining);
+  const learn = useShellStore((s) => s.learn);
 
   // Derived: count of items user has rejected.
   const rejectedCount = useMemo(() => items.filter((i) => i.user === 'reject').length, [items]);
@@ -67,6 +72,7 @@ export default function App() {
   const centerTabs: Tab[] = useMemo(() => {
     return openTabIds.map<Tab>((id) => {
       if (id === 'overview') return { id, label: 'Overview' };
+      if (id === 'learn') return { id, label: 'Learn', glyph: 'cog', closable: true };
       if (id === 'term-unified') return { id, label: 'unified', glyph: 'cog', closable: true };
       if (id === 'term-gemini') return { id, label: 'gemini', glyph: 'cog', closable: true };
       if (id.startsWith('term-')) {
@@ -97,6 +103,12 @@ export default function App() {
   useEffect(() => {
     if (geminiRunning) openTabAction('term-gemini');
   }, [geminiRunning, openTabAction]);
+
+  // Auto-open Learn tab when a paper window is opened so the side
+  // panel for translations is immediately visible.
+  useEffect(() => {
+    if (learn.sessionId) openTabAction('learn');
+  }, [learn.sessionId, openTabAction]);
 
   return (
     <div className="shell ulms-root" data-density={density}>
@@ -148,6 +160,19 @@ export default function App() {
         agents={agents}
         activeAgentId={activeAgentId}
         onSelectAgent={selectAgent}
+        learnSession={
+          learn.sessionId
+            ? {
+                id: learn.sessionId,
+                sourceUrl: learn.sourceUrl ?? '',
+                captureCount: learn.captures.length,
+                streaming: learn.streaming,
+              }
+            : null
+        }
+        onOpenPaper={(url) =>
+          void bridge.startPaperSession(url).catch((e) => alert(`Start paper failed: ${e}`))
+        }
       />
 
       <section className="center" aria-label="main workspace">
@@ -170,6 +195,7 @@ export default function App() {
             streamLog,
             applyItemOverride,
             regeneratingItemId,
+            learn,
           })}
         </div>
       </section>
@@ -202,10 +228,14 @@ function renderTabBody(
     itemOptions: ReturnType<typeof useShellStore.getState>['itemOptions'];
     sourceExcerpt: ReturnType<typeof useShellStore.getState>['sourceExcerpt'];
     streamLog: ReturnType<typeof useShellStore.getState>['streamLog'];
-    applyItemOverride: ReturnType<typeof useShellStore.getState>['applyItemOverride'];
+    applyItemOverride: (itemId: string, override: UserOverride) => void;
     regeneratingItemId: ReturnType<typeof useShellStore.getState>['regeneratingItemId'];
+    learn: ReturnType<typeof useShellStore.getState>['learn'];
   },
 ) {
+  if (activeId === 'learn') {
+    return <LearnSplit learn={ctx.learn} />;
+  }
   if (activeId === 'overview') {
     if (ctx.items.length === 0) {
       return (
@@ -268,6 +298,50 @@ function EmptyBody({ label }: { label: string }) {
   return (
     <div style={{ padding: 20 }}>
       <p className="ulms-meta">(no body registered for {label})</p>
+    </div>
+  );
+}
+
+interface LearnSplitProps {
+  learn: ReturnType<typeof useShellStore.getState>['learn'];
+}
+
+function LearnSplit({ learn }: LearnSplitProps) {
+  const setCurrentPage = useShellStore((s) => s._setLearnCurrentPage);
+  const setTotalPages = useShellStore((s) => s._setLearnTotalPages);
+  const pdfUrl = useMemo(
+    () => (learn.pdfPath ? convertFileSrc(learn.pdfPath) : null),
+    [learn.pdfPath],
+  );
+  const translatedPages = useMemo(
+    () => new Set(learn.captures.filter((c) => c.text.length > 0).map((c) => c.index)),
+    [learn.captures],
+  );
+  return (
+    <div className="learn-split">
+      <PdfReader
+        pdfUrl={pdfUrl}
+        currentPage={learn.currentPage}
+        isStreaming={learn.streaming}
+        translatedPages={translatedPages}
+        onCurrentPageChange={setCurrentPage}
+        onTotalPagesChange={setTotalPages}
+        onTranslatePage={(pageNum, b64) => bridge.translatePage(pageNum, b64)}
+      />
+      <TranslationPanel
+        sourceUrl={learn.sourceUrl}
+        currentPage={learn.currentPage}
+        totalPages={learn.totalPages}
+        streaming={learn.streaming}
+        captures={learn.captures}
+        imported={learn.imported}
+        onStop={() => void bridge.stopTranslation()}
+        onImport={() =>
+          void bridge.importTranslationAsMaterial().catch((e) =>
+            alert(`Import failed: ${e}`),
+          )
+        }
+      />
     </div>
   );
 }

@@ -18,8 +18,13 @@ import type {
   Session,
   Stage,
   StreamLog,
+  TranslationCapture,
   UserOverride,
 } from '@ulms/ui';
+
+function nowHMS(): string {
+  return new Date().toISOString().slice(11, 19);
+}
 
 // ─── static agent roster (the 4 ULMS agents) ─────────────
 
@@ -105,6 +110,24 @@ export interface ShellState {
   // non-JSON lines / rate-limit events). Capped at 40.
   warnings: string[];
 
+  // ─── Learn (PDF translation) state ─────────────────────
+  learn: {
+    sessionId: string | null;
+    sourceUrl: string | null;
+    /** Absolute path to the downloaded PDF on disk. Renderer feeds
+     *  PDF.js with `convertFileSrc(pdfPath)`. */
+    pdfPath: string | null;
+    notesPath: string | null;
+    /** Which page the renderer is currently displaying. 1-based. */
+    currentPage: number;
+    /** Total pages in the loaded PDF. 0 until PDF.js reports. */
+    totalPages: number;
+    streaming: boolean;
+    captures: TranslationCapture[];
+    /** true once the latest accumulated notes.md has been imported as material */
+    imported: boolean;
+  };
+
   // ─── UI actions ────────────────────────────────────────
   setStage: (s: Stage) => void;
   setDensity: (d: Density) => void;
@@ -152,6 +175,26 @@ export interface ShellState {
   _pushWarning: (msg: string) => void;
   dismissWarning: (index: number) => void;
   dismissAllWarnings: () => void;
+
+  // ─── Learn actions ─────────────────────────────────────
+  _onPaperSessionStarted: (s: {
+    sessionId: string;
+    sourceUrl: string;
+    pdfPath: string;
+    notesPath: string;
+  }) => void;
+  _onPaperSessionClosed: () => void;
+  _setLearnCurrentPage: (n: number) => void;
+  _setLearnTotalPages: (n: number) => void;
+  _onTranslationCaptureStarted: (captureIndex: number, imagePath: string) => void;
+  _onTranslationCompleted: (c: {
+    index: number;
+    imagePath: string;
+    text: string;
+    notesPath: string;
+  }) => void;
+  _onTranslationError: (msg: string) => void;
+  _onMaterialImportedFromTranslation: () => void;
 }
 
 // ─── persisted subset (unchanged from step 6) ───────────
@@ -193,6 +236,18 @@ export const useShellStore = create<ShellState>()(
       regeneratingItemId: null,
       regenerateBatchRemaining: 0,
       warnings: [],
+
+      learn: {
+        sessionId: null,
+        sourceUrl: null,
+        pdfPath: null,
+        notesPath: null,
+        currentPage: 1,
+        totalPages: 0,
+        streaming: false,
+        captures: [],
+        imported: false,
+      },
 
       // ── UI actions ───────────────────────────────────
 
@@ -381,6 +436,77 @@ export const useShellStore = create<ShellState>()(
         set({ regenerateBatchRemaining: remaining }),
       _onRegenerateBatchCompleted: () =>
         set({ regenerateBatchRemaining: 0, regeneratingItemId: null }),
+
+      // ── Learn ─────────────────────────────────────────
+      _onPaperSessionStarted: ({ sessionId, sourceUrl, pdfPath, notesPath }) =>
+        set({
+          learn: {
+            sessionId,
+            sourceUrl,
+            pdfPath,
+            notesPath,
+            currentPage: 1,
+            totalPages: 0,
+            streaming: false,
+            captures: [],
+            imported: false,
+          },
+        }),
+
+      _onPaperSessionClosed: () =>
+        set((st) => ({
+          learn: {
+            ...st.learn,
+            sessionId: null,
+            sourceUrl: null,
+            pdfPath: null,
+            // Keep `captures` so the user can still read previous output
+            // after closing the session. notesPath cleared so the
+            // import button is disabled until a new session starts.
+            notesPath: null,
+            streaming: false,
+          },
+        })),
+
+      _setLearnCurrentPage: (n) =>
+        set((st) => ({ learn: { ...st.learn, currentPage: n } })),
+
+      _setLearnTotalPages: (n) =>
+        set((st) => ({ learn: { ...st.learn, totalPages: n } })),
+
+      _onTranslationCaptureStarted: (captureIndex, imagePath) =>
+        set((st) => ({
+          learn: {
+            ...st.learn,
+            streaming: true,
+            captures: [
+              ...st.learn.captures,
+              { index: captureIndex, imagePath, text: '', ts: nowHMS() },
+            ],
+          },
+        })),
+
+      _onTranslationCompleted: (c) =>
+        set((st) => ({
+          learn: {
+            ...st.learn,
+            streaming: false,
+            // imported flag invalidated — user must re-click to refresh
+            imported: false,
+            captures: st.learn.captures.map((cap) =>
+              cap.index === c.index ? { ...cap, text: c.text } : cap,
+            ),
+          },
+        })),
+
+      _onTranslationError: (msg) =>
+        set((st) => ({
+          learn: { ...st.learn, streaming: false },
+          warnings: [...st.warnings, `[translation] ${msg}`].slice(-40),
+        })),
+
+      _onMaterialImportedFromTranslation: () =>
+        set((st) => ({ learn: { ...st.learn, imported: true } })),
     }),
     {
       name: 'ulms-shell-ui',

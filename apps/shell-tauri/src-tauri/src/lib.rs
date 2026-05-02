@@ -10,6 +10,7 @@ mod blackboard;
 mod export;
 mod gemini;
 mod inputs;
+mod learn;
 mod overrides;
 mod regenerate;
 mod types;
@@ -27,9 +28,10 @@ use tokio::sync::Mutex;
 use crate::export::ExportResp;
 use crate::gemini::GeminiRuntime;
 use crate::inputs::PickResp;
+use crate::learn::{LearnRuntime, SessionState};
 use crate::overrides::OverrideResp;
 use crate::regenerate::RegenerateRuntime;
-use crate::types::{Blackboard, StagedInputs};
+use crate::types::{Blackboard, MaterialInput, StagedInputs};
 use crate::workflow::WorkflowRuntime;
 
 // ─── shared state ───────────────────────────────────────────
@@ -39,15 +41,19 @@ use crate::workflow::WorkflowRuntime;
 /// existing apps/shell/workspace so the Tauri shell shares state with
 /// the Electron shell during the migration.
 fn resolve_workspace_dir() -> PathBuf {
-    if let Ok(d) = std::env::var("ULMS_WORKSPACE_DIR") {
-        return PathBuf::from(d);
-    }
-    let manifest = env!("CARGO_MANIFEST_DIR");
-    PathBuf::from(manifest)
-        .join("..")
-        .join("..")
-        .join("shell")
-        .join("workspace")
+    let raw = if let Ok(d) = std::env::var("ULMS_WORKSPACE_DIR") {
+        PathBuf::from(d)
+    } else {
+        let manifest = env!("CARGO_MANIFEST_DIR");
+        PathBuf::from(manifest)
+            .join("..")
+            .join("..")
+            .join("shell")
+            .join("workspace")
+    };
+    // Canonicalize so downstream paths don't contain `..` segments —
+    // the Tauri asset protocol scope matcher rejects URLs with `..`.
+    std::fs::canonicalize(&raw).unwrap_or(raw)
 }
 
 struct AppState {
@@ -56,6 +62,7 @@ struct AppState {
     workflow: Arc<WorkflowRuntime>,
     gemini: Arc<GeminiRuntime>,
     regen: Arc<RegenerateRuntime>,
+    learn: Arc<LearnRuntime>,
 }
 
 impl AppState {
@@ -299,6 +306,55 @@ async fn regenerate_rejected(
     Ok(OkResp { ok: true })
 }
 
+// ─── learn (PDF + per-page translation) ────────────────────
+
+#[tauri::command]
+async fn start_paper_session(
+    state: State<'_, Arc<AppState>>,
+    url: String,
+) -> Result<SessionState, String> {
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.learn);
+    learn::start_paper_session(workspace, runtime, url).await
+}
+
+#[tauri::command]
+async fn translate_page(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] pageNum: u32,
+    #[allow(non_snake_case)] imageB64: String,
+) -> Result<u32, String> {
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.learn);
+    learn::translate_page(app, workspace, runtime, pageNum, imageB64).await
+}
+
+#[tauri::command]
+async fn stop_translation(state: State<'_, Arc<AppState>>) -> Result<OkResp, String> {
+    state.learn.request_stop().await;
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn close_paper_session(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<OkResp, String> {
+    let runtime = Arc::clone(&state.learn);
+    learn::close_paper_session(app, runtime).await?;
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn import_translation_as_material(
+    state: State<'_, Arc<AppState>>,
+) -> Result<MaterialInput, String> {
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.learn);
+    learn::import_as_material(workspace, runtime, &state.staged).await
+}
+
 // ─── entry point ────────────────────────────────────────────
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -314,6 +370,7 @@ pub fn run() {
                 workflow: Arc::new(WorkflowRuntime::default()),
                 gemini: Arc::new(GeminiRuntime::default()),
                 regen: Arc::new(RegenerateRuntime::default()),
+                learn: Arc::new(LearnRuntime::default()),
             }));
             Ok(())
         })
@@ -332,6 +389,11 @@ pub fn run() {
             export_items,
             regenerate_item,
             regenerate_rejected,
+            start_paper_session,
+            translate_page,
+            stop_translation,
+            close_paper_session,
+            import_translation_as_material,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
