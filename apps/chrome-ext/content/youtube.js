@@ -1,11 +1,16 @@
-// YouTube extractor — runs in MAIN world to access
-// window.ytInitialPlayerResponse, fetches the auto-caption track if
-// available, and returns timestamped markdown + a thumbnail base64.
+// YouTube extractor — runs in MAIN world. ytInitialPlayerResponse is
+// only set on a hard page load; SPA navigation (clicking through from
+// the homepage / a thumbnail) leaves it unset, so we fall back through
+// inline <script> scraping, the <ytd-watch-flexy> element, and finally
+// a same-URL refetch which always returns the server-rendered HTML.
 
 export async function extractYoutube() {
-  const player = window.ytInitialPlayerResponse;
+  const player = await locatePlayerResponse();
   if (!player) {
-    return { error: 'ytInitialPlayerResponse missing — page not ready?' };
+    return {
+      error:
+        'could not locate player data — try a hard refresh (Cmd/Ctrl + Shift + R) and click again',
+    };
   }
   const details = player.videoDetails || {};
   const videoId = details.videoId;
@@ -57,6 +62,79 @@ export async function extractYoutube() {
     transcript: transcriptMd,
     thumbnail_b64: thumbnailB64,
   };
+
+  async function locatePlayerResponse() {
+    // A: hard-loaded /watch page sets the global directly
+    const direct = window.ytInitialPlayerResponse;
+    if (direct?.videoDetails?.videoId) return direct;
+
+    // B: inline <script> tags carry `var ytInitialPlayerResponse = {…};`
+    for (const s of document.querySelectorAll('script')) {
+      const txt = s.textContent;
+      if (!txt || !txt.includes('ytInitialPlayerResponse')) continue;
+      const obj = extractObjectAfter(txt, 'ytInitialPlayerResponse');
+      if (obj?.videoDetails?.videoId) return obj;
+    }
+
+    // C: SPA-mounted <ytd-watch-flexy> Polymer element exposes playerData
+    const flexy = document.querySelector('ytd-watch-flexy');
+    const fromElement = flexy?.playerData ?? flexy?.__data?.playerData;
+    if (fromElement?.videoDetails?.videoId) return fromElement;
+
+    // D: refetch the URL — the server-rendered HTML always has the var
+    try {
+      const res = await fetch(window.location.href, { credentials: 'include' });
+      if (res.ok) {
+        const html = await res.text();
+        const obj = extractObjectAfter(html, 'ytInitialPlayerResponse');
+        if (obj?.videoDetails?.videoId) return obj;
+      }
+    } catch {
+      // ignore — last-resort fallback
+    }
+    return null;
+  }
+
+  // Walk balanced braces from the first `{` after `<name> = ` so we
+  // don't try to regex through nested JSON (which always loses).
+  function extractObjectAfter(source, name) {
+    const re = new RegExp(`(?:var\\s+)?${name}\\s*=\\s*`);
+    const m = re.exec(source);
+    if (!m) return null;
+    const start = source.indexOf('{', m.index + m[0].length);
+    if (start < 0) return null;
+    let depth = 0;
+    let inStr = false;
+    let escape = false;
+    for (let j = start; j < source.length; j++) {
+      const ch = source[j];
+      if (escape) {
+        escape = false;
+        continue;
+      }
+      if (ch === '\\') {
+        escape = true;
+        continue;
+      }
+      if (ch === '"') {
+        inStr = !inStr;
+        continue;
+      }
+      if (inStr) continue;
+      if (ch === '{') depth++;
+      else if (ch === '}') {
+        depth--;
+        if (depth === 0) {
+          try {
+            return JSON.parse(source.slice(start, j + 1));
+          } catch {
+            return null;
+          }
+        }
+      }
+    }
+    return null;
+  }
 
   function parseCaptionXml(xml) {
     const parser = new DOMParser();

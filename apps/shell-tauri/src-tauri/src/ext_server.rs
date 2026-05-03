@@ -91,7 +91,11 @@ pub fn spawn_server(app: AppHandle, token: String) {
         .ok()
         .and_then(|s| s.parse().ok())
         .unwrap_or(DEFAULT_PORT);
-    tokio::spawn(async move {
+    // setup() runs before tokio is the current thread's reactor, so
+    // tokio::spawn would panic. Tauri's async_runtime is a tokio
+    // runtime owned by the framework — futures spawned onto it have
+    // a live reactor for axum / tokio::net.
+    tauri::async_runtime::spawn(async move {
         if let Err(e) = run_server(app, token, port).await {
             eprintln!("[ulms] ext server exited: {e}");
         }
