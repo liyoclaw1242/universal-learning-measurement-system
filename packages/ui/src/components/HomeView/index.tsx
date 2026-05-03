@@ -7,10 +7,20 @@ import {
   BookMarked,
   BookOpen,
   ClipboardCheck,
+  FileCode2,
   FileText,
+  FolderOpen,
+  Image as ImageIcon,
   ListChecks,
+  Newspaper,
+  Youtube,
 } from 'lucide-react';
-import type { LearnSessionMeta, McpSetup, RunMeta } from '../../types/home';
+import type {
+  LearnSessionMeta,
+  McpSetup,
+  RawResourceSummary,
+  RunMeta,
+} from '../../types/home';
 import type { Mode } from '../../types/session';
 import RecentSessionRow from '../RecentSessionRow';
 import McpSetupPanel from '../McpSetupPanel';
@@ -26,6 +36,7 @@ interface HomeViewProps {
   learnHasSession: boolean;
   learnSessions: LearnSessionMeta[];
   runs: RunMeta[];
+  rawImports: RawResourceSummary[];
   loadError: string | null;
 
   /** number of learn sessions with at least 1 capture (drives bulk-import button) */
@@ -47,6 +58,9 @@ interface HomeViewProps {
   onSynthesizeWiki: () => void;
   onMcpToggleOpen: (open: boolean) => void;
   onMcpCopy: (snippet: string) => void;
+  onOpenRawDir: () => void;
+  onDeleteRawImport: (type: string, id: string, label: string) => void;
+  onActivateRawImport: (r: RawResourceSummary) => void;
 }
 
 export default function HomeView(props: HomeViewProps) {
@@ -54,6 +68,7 @@ export default function HomeView(props: HomeViewProps) {
     learnHasSession,
     learnSessions,
     runs,
+    rawImports,
     loadError,
     importableCount,
     synthResult,
@@ -69,6 +84,9 @@ export default function HomeView(props: HomeViewProps) {
     onSynthesizeWiki,
     onMcpToggleOpen,
     onMcpCopy,
+    onOpenRawDir,
+    onDeleteRawImport,
+    onActivateRawImport,
   } = props;
 
   return (
@@ -163,6 +181,49 @@ export default function HomeView(props: HomeViewProps) {
 
         <div className="home-recent">
           <div className="home-recent-head">
+            <h2>Recent raw imports</h2>
+            <button
+              type="button"
+              className="recent-bulk-btn"
+              onClick={onOpenRawDir}
+              title="Reveal ~/.ulms-wiki/raw/ in Finder"
+            >
+              <FolderOpen size={14} strokeWidth={1.75} />
+              Open raw bank
+            </button>
+          </div>
+          {rawImports.length === 0 ? (
+            <div className="empty">
+              No imports yet. Use the <strong>ULMS Learn</strong> Chrome extension on a
+              YouTube watch page or article to capture into{' '}
+              <code>~/.ulms-wiki/raw/</code>.
+            </div>
+          ) : (
+            <ul className="recent-list">
+              {rawImports.map((r) => (
+                <RecentSessionRow
+                  key={`${r.type}/${r.id}`}
+                  icon={rawTypeIcon(r.type)}
+                  title={r.title || r.id}
+                  titleTooltip={r.sourceUrl || r.title || r.id}
+                  meta={
+                    <>
+                      {rawTypeLabel(r.type)}
+                      {r.quizzedCount > 0 ? ` · quizzed ${r.quizzedCount}×` : ''}
+                      {r.verified ? ' · verified' : ''} · {formatRelative(r.capturedAt)}
+                    </>
+                  }
+                  onActivate={() => onActivateRawImport(r)}
+                  onDelete={() => onDeleteRawImport(r.type, r.id, r.title || r.id)}
+                  deleteLabel="delete raw resource (folder + meta)"
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="home-recent">
+          <div className="home-recent-head">
             <h2>Recent quiz runs</h2>
             {runs.length > 0 && (
               <button
@@ -233,6 +294,40 @@ export default function HomeView(props: HomeViewProps) {
       </div>
     </div>
   );
+}
+
+function rawTypeIcon(type: string) {
+  switch (type) {
+    case 'youtube':
+      return <Youtube size={14} strokeWidth={1.5} />;
+    case 'article':
+      return <Newspaper size={14} strokeWidth={1.5} />;
+    case 'paper':
+      return <FileText size={14} strokeWidth={1.5} />;
+    case 'image':
+      return <ImageIcon size={14} strokeWidth={1.5} />;
+    case 'markdown':
+      return <FileCode2 size={14} strokeWidth={1.5} />;
+    default:
+      return <FileText size={14} strokeWidth={1.5} />;
+  }
+}
+
+function rawTypeLabel(type: string): string {
+  switch (type) {
+    case 'youtube':
+      return 'YouTube';
+    case 'article':
+      return 'Article';
+    case 'paper':
+      return 'Paper';
+    case 'image':
+      return 'Image';
+    case 'markdown':
+      return 'Markdown';
+    default:
+      return type;
+  }
 }
 
 function formatRelative(iso: string): string {

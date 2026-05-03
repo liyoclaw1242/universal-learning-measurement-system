@@ -8,10 +8,12 @@
 
 mod blackboard;
 mod export;
+mod ext_server;
 mod gemini;
 mod inputs;
 mod learn;
 mod overrides;
+mod raw_bank;
 mod regenerate;
 mod snapshot;
 mod types;
@@ -473,6 +475,38 @@ async fn write_wiki_concept(slug: String, body: String) -> Result<(), String> {
     wiki::write_wiki_concept(&slug, &body).await
 }
 
+// ─── Chrome ext bridge ─────────────────────────────────────
+
+#[tauri::command]
+async fn get_ext_token() -> Result<String, String> {
+    ext_server::load_or_create_token()
+}
+
+#[tauri::command]
+async fn list_raw_resources() -> Result<Vec<raw_bank::RawResourceSummary>, String> {
+    Ok(raw_bank::list_resources().await)
+}
+
+#[tauri::command]
+async fn delete_raw_resource(
+    #[allow(non_snake_case)] resourceType: String,
+    id: String,
+) -> Result<OkResp, String> {
+    raw_bank::delete_resource(&resourceType, &id).await?;
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn open_raw_dir() -> Result<OkResp, String> {
+    raw_bank::ensure_raw_root().await?;
+    let path = raw_bank::raw_root();
+    std::process::Command::new("open")
+        .arg(&path)
+        .status()
+        .map_err(|e| format!("open {}: {e}", path.display()))?;
+    Ok(OkResp { ok: true })
+}
+
 // ─── entry point ────────────────────────────────────────────
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -490,6 +524,18 @@ pub fn run() {
                 regen: Arc::new(RegenerateRuntime::default()),
                 learn: Arc::new(LearnRuntime::default()),
             }));
+
+            // Bootstrap chrome-ext bridge token + spawn the local
+            // HTTP server. Errors are non-fatal — the app still works
+            // without the ext path, just the import button becomes a
+            // no-op.
+            match ext_server::load_or_create_token() {
+                Ok(token) => {
+                    let app_for_server = app.handle().clone();
+                    ext_server::spawn_server(app_for_server, token);
+                }
+                Err(e) => eprintln!("[ulms] ext token bootstrap failed: {e}"),
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -527,6 +573,10 @@ pub fn run() {
             list_wiki_concepts,
             read_wiki_concept,
             write_wiki_concept,
+            get_ext_token,
+            list_raw_resources,
+            delete_raw_resource,
+            open_raw_dir,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -25,7 +25,14 @@ import {
 } from '@ulms/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { useShellStore } from '@/state/shellStore';
-import { bridge, type LearnSessionMeta, type McpSetup, type RunMeta } from '@/state/ipcBridge';
+import {
+  bridge,
+  type LearnSessionMeta,
+  type McpSetup,
+  type RawResourceSummary,
+  type RunMeta,
+} from '@/state/ipcBridge';
+import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import WikiTab from '@/components/WikiTab';
 
 export default function App() {
@@ -309,6 +316,7 @@ interface HomeShellProps {
 function HomeView({ setMode, learnHasSession }: HomeShellProps) {
   const [sessions, setSessions] = useState<LearnSessionMeta[]>([]);
   const [runs, setRuns] = useState<RunMeta[]>([]);
+  const [rawImports, setRawImports] = useState<RawResourceSummary[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [synthesizing, setSynthesizing] = useState(false);
   const [synthResult, setSynthResult] = useState<{
@@ -322,17 +330,43 @@ function HomeView({ setMode, learnHasSession }: HomeShellProps) {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([bridge.listLearnSessions(), bridge.listRuns()])
-      .then(([s, r]) => {
+    Promise.all([bridge.listLearnSessions(), bridge.listRuns(), bridge.listRawResources()])
+      .then(([s, r, raws]) => {
         if (cancelled) return;
         setSessions(s);
         setRuns(r);
+        setRawImports(raws);
       })
       .catch((e) => {
         if (!cancelled) setLoadError(String(e));
       });
     return () => {
       cancelled = true;
+    };
+  }, []);
+
+  // Live-refresh raw imports list whenever the chrome-ext bridge POSTs
+  // a new resource. The HTTP server emits 'raw:imported' on success.
+  useEffect(() => {
+    let unlisten: UnlistenFn | null = null;
+    let cancelled = false;
+    listen<unknown>('raw:imported', () => {
+      bridge
+        .listRawResources()
+        .then((rs) => {
+          if (!cancelled) setRawImports(rs);
+        })
+        .catch(() => {});
+    }).then((fn) => {
+      if (cancelled) {
+        fn();
+      } else {
+        unlisten = fn;
+      }
+    });
+    return () => {
+      cancelled = true;
+      if (unlisten) unlisten();
     };
   }, []);
 
@@ -351,6 +385,7 @@ function HomeView({ setMode, learnHasSession }: HomeShellProps) {
       learnHasSession={learnHasSession}
       learnSessions={sessions}
       runs={runs}
+      rawImports={rawImports}
       loadError={loadError}
       importableCount={importableCount}
       synthResult={synthResult}
@@ -428,6 +463,27 @@ function HomeView({ setMode, learnHasSession }: HomeShellProps) {
           setTimeout(() => setMcpCopied(false), 1500);
         } catch {
           // Fallback if clipboard API blocked
+        }
+      }}
+      onOpenRawDir={async () => {
+        try {
+          await bridge.openRawDir();
+        } catch (e) {
+          alert(`Open failed: ${e}`);
+        }
+      }}
+      onDeleteRawImport={async (type, id, label) => {
+        if (!confirm(`Delete raw resource "${label}"? Folder will be removed.`)) return;
+        try {
+          await bridge.deleteRawResource(type, id);
+          setRawImports((prev) => prev.filter((r) => !(r.type === type && r.id === id)));
+        } catch (e) {
+          alert(`Delete failed: ${e}`);
+        }
+      }}
+      onActivateRawImport={(r) => {
+        if (r.sourceUrl && /^https?:\/\//.test(r.sourceUrl)) {
+          window.open(r.sourceUrl, '_blank', 'noopener,noreferrer');
         }
       }}
     />

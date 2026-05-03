@@ -33,3 +33,15 @@ export interface WikiSynthesizeReport {
   conceptsWritten: number;
   skippedHumanEdited: string[];
 }
+
+/** Summary of a single resource in `~/.ulms-wiki/raw/<type>/<id>/`. */
+export interface RawResourceSummary {
+  id: string;
+  /** "article" | "youtube" | "paper" | "image" | "markdown" — string for forward-compat. */
+  type: string;
+  sourceUrl: string;
+  title: string;
+  capturedAt: string;
+  verified: boolean;
+  quizzedCount: number;
+}

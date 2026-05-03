@@ -7,6 +7,7 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import type {
   LearnSessionMeta,
   McpSetup,
+  RawResourceSummary,
   RunMeta,
   WikiConceptMeta as UiWikiConceptMeta,
   WikiSynthesizeReport,
@@ -599,6 +600,37 @@ export const bridge = {
   async writeWikiConcept(slug: string, body: string): Promise<void> {
     await invoke('write_wiki_concept', { slug, body });
   },
+
+  // ─── chrome-ext / raw bank ───────────────────────────────
+  async getExtToken(): Promise<string> {
+    return (await invoke('get_ext_token')) as string;
+  },
+  async listRawResources(): Promise<RawResourceSummary[]> {
+    const raw = (await invoke('list_raw_resources')) as Array<{
+      id: string;
+      type: string;
+      source_url: string;
+      title: string;
+      captured_at: string;
+      verified: boolean;
+      quizzed_count: number;
+    }>;
+    return raw.map((r) => ({
+      id: r.id,
+      type: r.type,
+      sourceUrl: r.source_url,
+      title: r.title,
+      capturedAt: r.captured_at,
+      verified: r.verified,
+      quizzedCount: r.quizzed_count,
+    }));
+  },
+  async deleteRawResource(resourceType: string, id: string): Promise<void> {
+    await invoke('delete_raw_resource', { resourceType, id });
+  },
+  async openRawDir(): Promise<void> {
+    await invoke('open_raw_dir');
+  },
   async getMcpSetup(): Promise<McpSetup> {
     const r = (await invoke('get_mcp_setup')) as {
       mcp_binary_path: string;
@@ -625,6 +657,7 @@ export const bridge = {
 export type {
   LearnSessionMeta,
   McpSetup,
+  RawResourceSummary,
   RunMeta,
   WikiConceptMeta,
   WikiSynthesizeReport,
