@@ -4,6 +4,13 @@
 
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+import type {
+  LearnSessionMeta,
+  McpSetup,
+  RunMeta,
+  WikiConceptMeta as UiWikiConceptMeta,
+  WikiSynthesizeReport,
+} from '@ulms/ui';
 import { useShellStore } from './shellStore';
 import { translateBoard, type TranslateInput } from './translateBoard';
 
@@ -570,7 +577,7 @@ export const bridge = {
   async getWikiDir(): Promise<string> {
     return (await invoke('get_wiki_dir')) as string;
   },
-  async listWikiConcepts(): Promise<WikiConceptMeta[]> {
+  async listWikiConcepts(): Promise<UiWikiConceptMeta[]> {
     const raw = (await invoke('list_wiki_concepts')) as Array<{
       slug: string;
       title: string;
@@ -612,43 +619,13 @@ export const bridge = {
   },
 };
 
-export interface McpSetup {
-  mcpBinaryPath: string;
-  binaryExists: boolean;
-  wikiDir: string;
-  workspaceDir: string;
-  claudeDesktopConfigPath: string;
-  configSnippet: string;
-}
-
-export interface WikiConceptMeta {
-  slug: string;
-  title: string;
-  tags: string[];
-  humanEdited: boolean;
-  lastSynthesized: string;
-}
-
-export interface WikiSynthesizeReport {
-  wikiDir: string;
-  runCount: number;
-  kuCount: number;
-  conceptsWritten: number;
-  skippedHumanEdited: string[];
-}
-
-export interface RunMeta {
-  id: string;
-  timestamp: string;
-  materialFilename: string | null;
-  itemCount: number;
-  dimensionCount: number;
-  totalCostUsd: number;
-}
-
-export interface LearnSessionMeta {
-  id: string;
-  sourceUrl: string | null;
-  captureCount: number;
-  modifiedAt: string;
-}
+// Type surface for renderer consumers — all DTO shapes live in @ulms/ui
+// so presentational components can consume them without importing the
+// Tauri bridge.
+export type {
+  LearnSessionMeta,
+  McpSetup,
+  RunMeta,
+  WikiConceptMeta,
+  WikiSynthesizeReport,
+} from '@ulms/ui';

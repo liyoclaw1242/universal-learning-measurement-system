@@ -54,12 +54,17 @@ export default function ModeBar({
               onClick={() => onModeChange(m.id)}
               title={m.hint}
             >
-              <Icon size={14} strokeWidth={1.75} />
+              <Icon size={12} strokeWidth={1.5} />
               <span>{m.label}</span>
               {dot && <span className="mode-dot" aria-hidden />}
             </button>
           );
         })}
+      </div>
+      <div className="mode-bar-meta">
+        <span className="meta-cell">v0.2 · modes</span>
+        <span className="meta-sep">·</span>
+        <span className="meta-cell">tauri 2 · darwin</span>
       </div>
     </nav>
   );

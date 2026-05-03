@@ -1,199 +1,240 @@
 /* ============================================================
-   ULMS Design System — colors & type
-   Derived from spike/renderer.html + architecture principles:
-   "cold, Anki-like, reading-first, high information density,
-   minimal chrome, reading UI for domain experts."
+   ULMS Design System — Quiet Tech (semantic layer)
+   ----------------------------------------------------------------
+   This file maps PRIMITIVE tokens (primitives.css) to SEMANTIC
+   tokens consumed by component CSS. To re-theme: swap the imported
+   primitives.css and (optionally) override any --ulms-* var here.
    ============================================================ */
 
+@import url('./primitives.css');
+
 :root {
-  /* ----- Neutral scale (cold grey, near-macOS system) ----- */
-  --ulms-ink:        #1d1d1f;   /* primary text                      */
-  --ulms-ink-2:      #424245;   /* secondary text, section headers   */
-  --ulms-muted:      #86868b;   /* labels, metadata, placeholders    */
-  --ulms-line:       #d2d2d7;   /* hairlines, borders, dividers      */
-  --ulms-line-soft:  #e5e5ea;   /* disabled bg, inline chip bg       */
-  --ulms-surface:    #ffffff;   /* cards, slots, panels              */
-  --ulms-canvas:     #f5f5f7;   /* page background                   */
-  --ulms-canvas-2:   #fafafc;   /* nested panel bg                   */
+  /* ----- Surfaces ----- */
+  --ulms-canvas:     var(--c-navy-950);   /* page background       */
+  --ulms-canvas-2:   var(--c-navy-900);   /* nested panels          */
+  --ulms-surface:    var(--c-navy-850);   /* cards, slots, ribbon  */
+  --ulms-surface-2:  var(--c-navy-800);   /* hover-on-surface      */
 
-  /* ----- Status / semantic ----- */
-  --ulms-blue:       #0071e3;   /* primary action, links             */
-  --ulms-blue-ink:   #0559b5;   /* pressed / on-light text           */
-  --ulms-green:      #7cb342;   /* loaded / done                     */
-  --ulms-green-bg:   #f1f8e9;   /* loaded slot bg                    */
-  --ulms-green-ink:  #33691e;   /* accept verdict text               */
-  --ulms-yellow:     #fbc02d;   /* active / running                  */
-  --ulms-yellow-bg:  #fff9c4;   /* active step bg                    */
-  --ulms-yellow-ink: #f57f17;   /* needs_revision text               */
-  --ulms-red:        #c62828;   /* error / reject                    */
-  --ulms-red-bg:     #ffcdd2;   /* reject verdict bg                 */
-  --ulms-red-ink:    #b71c1c;   /* reject verdict ink                */
+  /* ----- Text — cool white over navy at four opacity tiers ----- */
+  --ulms-ink:        rgba(var(--rgb-cool-white), var(--o-92));
+  --ulms-ink-2:      rgba(var(--rgb-cool-white), var(--o-62));
+  --ulms-muted:      rgba(var(--rgb-cool-white), var(--o-38));
+  --ulms-faint:      rgba(var(--rgb-cool-white), var(--o-18));
 
-  /* ----- Verdict / state accent stripes (4px left-border) ----- */
+  /* ----- Lines (hairline, semi-transparent over surface) ----- */
+  --ulms-line:        rgba(var(--rgb-cool-white), var(--o-08));
+  --ulms-line-soft:   rgba(var(--rgb-cool-white), var(--o-04));
+  --ulms-line-strong: rgba(var(--rgb-cool-white), var(--o-18));
+
+  /* ----- Interaction overlays (no fill change — only opacity) ----- */
+  --ulms-hover-bg:    rgba(var(--rgb-cool-white), var(--o-04));
+  --ulms-active-bg:   rgba(var(--rgb-cool-white), var(--o-08));
+
+  /* ----- Status — only used where semantics matter ----- */
+  --ulms-blue:        var(--c-blue);
+  --ulms-blue-ink:    var(--c-blue-light);
+  --ulms-blue-bg:     rgba(var(--rgb-blue), var(--o-08));
+
+  --ulms-green:       var(--c-green);
+  --ulms-green-ink:   var(--c-green-light);
+  --ulms-green-bg:    rgba(var(--rgb-green), var(--o-08));
+
+  --ulms-yellow:      var(--c-yellow);
+  --ulms-yellow-ink:  var(--c-yellow-light);
+  --ulms-yellow-bg:   rgba(var(--rgb-yellow), var(--o-08));
+
+  --ulms-red:         var(--c-red);
+  --ulms-red-ink:     var(--c-red-light);
+  --ulms-red-bg:      rgba(var(--rgb-red), var(--o-08));
+
+  /* ----- Verdict / state stripes ----- */
   --ulms-stripe-accept:  var(--ulms-green);
   --ulms-stripe-revise:  var(--ulms-yellow);
   --ulms-stripe-reject:  var(--ulms-red);
   --ulms-stripe-pending: var(--ulms-line);
 
   /* ----- Terminal / stream log ----- */
-  --ulms-term-bg:    #0a0a0a;   /* stream log background (darkest)   */
-  --ulms-term-fg:    #d0d0d0;   /* default term text                 */
-  --ulms-term-accent:#a0d468;   /* blackboard JSON highlight         */
-  --ulms-term-warn:  #ffab91;   /* schema warnings                   */
-  --ulms-term-quote: #dce775;   /* summary highlight                 */
+  --ulms-term-bg:    var(--c-navy-1000);
+  --ulms-term-fg:    rgba(var(--rgb-cool-white), var(--o-78));
+  --ulms-term-accent: var(--ulms-blue-ink);
+  --ulms-term-warn:  var(--ulms-yellow-ink);
+  --ulms-term-quote: var(--ulms-blue);
 
-  /* ----- Cost budget bar (new semantic — ulms_architecture §9) ----- */
+  /* ----- Cost budget ----- */
   --ulms-budget-ok:   var(--ulms-green);
   --ulms-budget-warn: var(--ulms-yellow);
   --ulms-budget-over: var(--ulms-red);
 
-  /* ----- Spacing (4px base) ----- */
-  --ulms-s1:  4px;
-  --ulms-s2:  6px;
-  --ulms-s3:  8px;
-  --ulms-s4:  10px;
-  --ulms-s5:  14px;
-  --ulms-s6:  20px;
-  --ulms-s7:  32px;
+  /* ----- Spacing aliases (for component CSS that already uses
+   * the legacy --ulms-s* names; new code should reach for --space-*) */
+  --ulms-s1:  var(--space-1);
+  --ulms-s2:  var(--space-2);
+  --ulms-s3:  var(--space-3);
+  --ulms-s4:  var(--space-4);
+  --ulms-s5:  var(--space-5);
+  --ulms-s6:  var(--space-6);
+  --ulms-s7:  var(--space-7);
 
-  /* ----- Radii (small; Anki/reading tool, not iOS) ----- */
-  --ulms-r-xs: 3px;
-  --ulms-r-sm: 4px;
-  --ulms-r-md: 6px;
-  --ulms-r-lg: 8px;
+  /* ----- Radii aliases ----- */
+  --ulms-r-xs: var(--radius-xs);
+  --ulms-r-sm: var(--radius-sm);
+  --ulms-r-md: var(--radius-md);
+  --ulms-r-lg: var(--radius-lg);
 
   /* ----- Borders ----- */
-  --ulms-border:        1px solid var(--ulms-line);
-  --ulms-border-strong: 1px solid var(--ulms-ink-2);
-  --ulms-border-dashed: 1px dashed var(--ulms-line);
+  --ulms-border:        var(--border-w) solid var(--ulms-line);
+  --ulms-border-strong: var(--border-w) solid var(--ulms-line-strong);
+  --ulms-border-dashed: var(--border-w) dashed var(--ulms-line);
 
-  /* ----- Shadows (single soft layer only; reading-first) ----- */
+  /* ----- No shadows in Quiet Tech — depth via borders + opacity ----- */
   --ulms-shadow-0: none;
-  --ulms-shadow-1: 0 1px 2px rgba(29,29,31,0.06);
-  --ulms-shadow-2: 0 2px 8px rgba(29,29,31,0.08);
+  --ulms-shadow-1: none;
+  --ulms-shadow-2: none;
 
-  /* ----- Type families ----- */
-  --ulms-font-ui:   -apple-system, BlinkMacSystemFont, "SF Pro Text",
-                    "Helvetica Neue", Arial, "PingFang TC",
-                    "Noto Sans TC", sans-serif;
-  --ulms-font-mono: "SF Mono", Menlo, Consolas, "Roboto Mono",
-                    "JetBrains Mono", monospace;
+  /* ----- Type families (alias for component CSS using --ulms-font-*) */
+  --ulms-font-mono: var(--font-mono);
+  --ulms-font-ui:   var(--font-sans);
 
-  /* ----- Type scale (reading-first; UI 11–14, content 13–20) ----- */
-  --ulms-fs-micro:   10px;  /* badge text, agreement rate             */
-  --ulms-fs-label:   11px;  /* UPPERCASE tracked labels               */
-  --ulms-fs-meta:    11px;  /* item_id, timestamps, cost              */
-  --ulms-fs-body-s:  12px;  /* step rows, table body                  */
-  --ulms-fs-body:    13px;  /* default body / item stems              */
-  --ulms-fs-h3:      12px;  /* UPPERCASE section header               */
-  --ulms-fs-h2:      16px;
-  --ulms-fs-h1:      20px;
+  /* ----- Type scale aliases ----- */
+  --ulms-fs-micro:   var(--fs-10);
+  --ulms-fs-label:   var(--fs-10);
+  --ulms-fs-meta:    var(--fs-11);
+  --ulms-fs-body-s:  var(--fs-12);
+  --ulms-fs-body:    var(--fs-13);
+  --ulms-fs-h3:      var(--fs-11);
+  --ulms-fs-h2:      var(--fs-15);
+  --ulms-fs-h1:      var(--fs-19);
 
   /* ----- Line heights ----- */
-  --ulms-lh-tight:   1.25;
-  --ulms-lh-snug:    1.35;
-  --ulms-lh-body:    1.45;
-  --ulms-lh-read:    1.55;
+  --ulms-lh-tight:   var(--lh-tight);
+  --ulms-lh-snug:    var(--lh-snug);
+  --ulms-lh-body:    var(--lh-body);
+  --ulms-lh-read:    var(--lh-read);
 
-  /* ----- Letter spacing (labels are tracked, text is not) ----- */
-  --ulms-track-label: 0.5px;
-  --ulms-track-micro: 0.3px;
+  /* ----- Tracking ----- */
+  --ulms-track-label: var(--tr-label);
+  --ulms-track-meta:  var(--tr-meta);
+  --ulms-track-micro: var(--tr-micro);
 }
 
 /* ============================================================
-   Semantic type presets — use these in components
+   Semantic type presets — components opt-in via these classes
    ============================================================ */
 
 .ulms-h1 {
-  font-family: var(--ulms-font-ui);
-  font-size: var(--ulms-fs-h1);
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: var(--fs-19);
+  font-weight: 500;
   color: var(--ulms-ink);
-  line-height: var(--ulms-lh-tight);
-  letter-spacing: -0.01em;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tr-meta);
   margin: 0;
 }
 
 .ulms-h2 {
-  font-family: var(--ulms-font-ui);
-  font-size: var(--ulms-fs-h2);
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: var(--fs-15);
+  font-weight: 500;
   color: var(--ulms-ink);
-  line-height: var(--ulms-lh-snug);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tr-meta);
   margin: 0;
 }
 
-.ulms-h3 { /* section eyebrow; UPPERCASE, tracked */
-  font-family: var(--ulms-font-ui);
-  font-size: var(--ulms-fs-h3);
-  font-weight: 600;
-  color: var(--ulms-ink-2);
-  text-transform: uppercase;
-  letter-spacing: var(--ulms-track-label);
-  line-height: var(--ulms-lh-snug);
-  margin: 0;
-}
-
-.ulms-label { /* in-slot label; UPPERCASE, muted */
-  font-family: var(--ulms-font-ui);
-  font-size: var(--ulms-fs-label);
+.ulms-h3 {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
   font-weight: 500;
   color: var(--ulms-muted);
   text-transform: uppercase;
-  letter-spacing: var(--ulms-track-label);
-  line-height: var(--ulms-lh-snug);
+  letter-spacing: var(--tr-label);
+  line-height: var(--lh-snug);
+  margin: 0;
+}
+
+.ulms-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  font-weight: 500;
+  color: var(--ulms-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tr-label);
+  line-height: var(--lh-snug);
 }
 
 .ulms-body {
-  font-family: var(--ulms-font-ui);
-  font-size: var(--ulms-fs-body);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
   color: var(--ulms-ink);
-  line-height: var(--ulms-lh-body);
+  line-height: var(--lh-body);
 }
 
 .ulms-body-s {
-  font-family: var(--ulms-font-ui);
-  font-size: var(--ulms-fs-body-s);
+  font-family: var(--font-sans);
+  font-size: var(--fs-12);
   color: var(--ulms-ink);
-  line-height: var(--ulms-lh-body);
+  line-height: var(--lh-body);
 }
 
-.ulms-meta { /* muted metadata row */
-  font-family: var(--ulms-font-ui);
-  font-size: var(--ulms-fs-meta);
+.ulms-meta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
   color: var(--ulms-muted);
-  line-height: var(--ulms-lh-snug);
+  letter-spacing: var(--tr-meta);
+  line-height: var(--lh-snug);
 }
 
-.ulms-mono { /* code / item_id / ku_id */
-  font-family: var(--ulms-font-mono);
-  font-size: var(--ulms-fs-meta);
+.ulms-mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
   color: var(--ulms-ink-2);
-  line-height: var(--ulms-lh-snug);
+  letter-spacing: var(--tr-meta);
+  line-height: var(--lh-snug);
 }
 
 .ulms-mono-block {
-  font-family: var(--ulms-font-mono);
-  font-size: var(--ulms-fs-meta);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
   color: var(--ulms-ink);
-  line-height: var(--ulms-lh-body);
-  background: #f7f7f9;
+  line-height: var(--lh-body);
+  background: var(--ulms-canvas-2);
+  border: var(--ulms-border);
   padding: 6px 10px;
-  border-radius: var(--ulms-r-sm);
+  border-radius: var(--radius-sm);
   white-space: pre-wrap;
 }
 
 .ulms-term {
-  font-family: var(--ulms-font-mono);
-  font-size: var(--ulms-fs-meta);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
   color: var(--ulms-term-fg);
   background: var(--ulms-term-bg);
-  line-height: var(--ulms-lh-snug);
+  line-height: var(--lh-snug);
   padding: 10px;
-  border-radius: 0 var(--ulms-r-md) var(--ulms-r-md) var(--ulms-r-md);
+  border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
   white-space: pre-wrap;
   word-break: break-all;
   overflow: auto;
+}
+
+/* ============================================================
+   Keyboard hint chip — quiet-tech decorative element
+   ============================================================ */
+
+.ulms-kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: var(--tr-meta);
+  color: var(--ulms-muted);
+  border: var(--ulms-border);
+  border-radius: var(--radius-xs);
+  padding: 1px 5px;
+  min-width: 16px;
+  text-align: center;
+  background: transparent;
 }
 
 /* ============================================================
@@ -201,11 +242,11 @@
    ============================================================ */
 
 .ulms-root {
-  font-family: var(--ulms-font-ui);
-  font-size: var(--ulms-fs-body);
+  font-family: var(--font-sans);
+  font-size: var(--fs-13);
   color: var(--ulms-ink);
   background: var(--ulms-canvas);
-  line-height: var(--ulms-lh-body);
+  line-height: var(--lh-body);
   -webkit-font-smoothing: antialiased;
 }
 

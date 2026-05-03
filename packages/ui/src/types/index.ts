@@ -6,3 +6,5 @@ export * from './session';
 export * from './agent';
 export * from './item';
 export * from './dimension';
+export * from './wiki';
+export * from './home';

@@ -18,6 +18,15 @@ export type { TranslationCapture } from './components/TranslationPanel';
 
 export { default as DimensionsEditor } from './components/DimensionsEditor';
 
+export { default as WikiSidebar } from './components/WikiSidebar';
+export { default as WikiViewer } from './components/WikiViewer';
+
+export { default as PdfReader } from './components/PdfReader';
+
+export { default as HomeView } from './components/HomeView';
+export { default as RecentSessionRow } from './components/RecentSessionRow';
+export { default as McpSetupPanel } from './components/McpSetupPanel';
+
 export { default as TabBar } from './components/TabBar';
 export type { Tab, TabId } from './components/TabBar';
 
