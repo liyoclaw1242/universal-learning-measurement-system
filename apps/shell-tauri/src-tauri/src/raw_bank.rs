@@ -64,7 +64,7 @@ fn validate_id(id: &str) -> Result<(), String> {
 
 pub async fn ensure_raw_root() -> Result<(), String> {
     let root = raw_root();
-    for sub in ["articles", "youtube", "papers", "images", "markdown"] {
+    for sub in ["articles", "youtube", "papers", "books", "images", "markdown"] {
         let dir = root.join(sub);
         fs::create_dir_all(&dir)
             .await
@@ -229,6 +229,176 @@ pub async fn write_youtube(input: YoutubeIngest) -> Result<RawMeta, String> {
             .map_err(|e| format!("write thumbnails/cover.jpg: {e}"))?;
     }
     Ok(meta)
+}
+
+// ─── book ingest (chrome-ext multi-page capture) ───────────
+
+pub struct BookPage {
+    pub source_url: String,
+    pub content_markdown: String,
+}
+
+pub struct BookIngest {
+    /// First-page URL (used as the canonical source_url)
+    pub source_url: String,
+    pub title: String,
+    pub author: Option<String>,
+    pub pages: Vec<BookPage>,
+}
+
+/// Write a multi-page capture to `~/.ulms-wiki/raw/books/<slug>/`.
+/// Append-on-existing: re-using the same title resumes an in-progress
+/// book (later sessions extend the page sequence) instead of clobbering
+/// it. The slug is the dedup key, so users must keep titles consistent.
+///
+/// Layout:
+///   meta.yaml                 — full RawMeta (page_count = total)
+///   body.md                   — full concatenation, regenerated on
+///                                every write
+///   pages/001.md, 002.md, …   — each page verbatim, frontmatter
+///                                preserves source URL
+pub async fn write_book(input: BookIngest) -> Result<RawMeta, String> {
+    ensure_raw_root().await?;
+    if input.pages.is_empty() {
+        return Err("book ingest had zero pages".into());
+    }
+    let id = slugify(&input.title);
+    validate_id(&id)?;
+
+    let dir = raw_root().join("books").join(&id);
+    let pages_dir = dir.join("pages");
+    fs::create_dir_all(&pages_dir)
+        .await
+        .map_err(|e| format!("mkdir {}/pages: {e}", dir.display()))?;
+
+    // Existing pages — count files in pages/ to find the next index.
+    // Don't rely on meta.yaml.page_count alone; legacy folders may have
+    // mismatched values, the filesystem is the source of truth.
+    let existing_pages = count_existing_pages(&pages_dir).await;
+    let starting_at = existing_pages + 1;
+
+    // Append the new pages on disk.
+    for (offset, page) in input.pages.iter().enumerate() {
+        let n = starting_at + offset;
+        let page_filename = format!("{n:03}.md");
+        let page_body = format!(
+            "---\npage: {n}\nsource_url: {}\n---\n\n{}\n",
+            page.source_url, page.content_markdown
+        );
+        fs::write(pages_dir.join(&page_filename), &page_body)
+            .await
+            .map_err(|e| format!("write pages/{page_filename}: {e}"))?;
+    }
+
+    let total_pages = existing_pages + input.pages.len();
+
+    // Regenerate body.md from the entire pages/ directory so re-reads
+    // always reflect every session's contribution.
+    let combined = render_book_body(&pages_dir, &input.title, input.author.as_deref()).await?;
+    fs::write(dir.join("body.md"), &combined)
+        .await
+        .map_err(|e| format!("write body.md: {e}"))?;
+
+    // Preserve the original captured_at on resume so the wiki sidebar
+    // still sorts the book by its first capture.
+    let captured_at = match fs::read_to_string(dir.join("meta.yaml")).await {
+        Ok(yaml) => serde_yaml::from_str::<RawMeta>(&yaml)
+            .ok()
+            .map(|m| m.captured_at)
+            .unwrap_or_else(iso8601_now),
+        Err(_) => iso8601_now(),
+    };
+
+    let meta = RawMeta {
+        id: id.clone(),
+        resource_type: "book".into(),
+        source_url: input.source_url,
+        title: input.title,
+        captured_at,
+        captured_via: "chrome-ext".into(),
+        quizzed_in: vec![],
+        verdict_summary: None,
+        verified: false,
+        char_count: Some(combined.chars().count()),
+        duration_s: None,
+        channel: None,
+        caption_lang: None,
+        page_count: Some(total_pages as u32),
+        author: input.author,
+    };
+    write_meta(&dir, &meta).await?;
+    Ok(meta)
+}
+
+async fn count_existing_pages(pages_dir: &std::path::Path) -> usize {
+    let mut rd = match fs::read_dir(pages_dir).await {
+        Ok(r) => r,
+        Err(_) => return 0,
+    };
+    let mut n = 0usize;
+    while let Ok(Some(entry)) = rd.next_entry().await {
+        if entry
+            .file_name()
+            .to_string_lossy()
+            .ends_with(".md")
+        {
+            n += 1;
+        }
+    }
+    n
+}
+
+async fn render_book_body(
+    pages_dir: &std::path::Path,
+    title: &str,
+    author: Option<&str>,
+) -> Result<String, String> {
+    let mut entries: Vec<(usize, std::path::PathBuf)> = Vec::new();
+    let mut rd = fs::read_dir(pages_dir)
+        .await
+        .map_err(|e| format!("read pages/: {e}"))?;
+    while let Ok(Some(entry)) = rd.next_entry().await {
+        let p = entry.path();
+        if let Some(name) = p.file_name().and_then(|s| s.to_str()) {
+            if let Some(stem) = name.strip_suffix(".md") {
+                if let Ok(n) = stem.parse::<usize>() {
+                    entries.push((n, p));
+                }
+            }
+        }
+    }
+    entries.sort_by_key(|(n, _)| *n);
+
+    let mut out = String::new();
+    out.push_str(&format!("# {title}\n\n"));
+    if let Some(a) = author {
+        out.push_str(&format!("_by {a}_\n\n"));
+    }
+    for (n, path) in entries {
+        let raw = fs::read_to_string(&path)
+            .await
+            .map_err(|e| format!("read {}: {e}", path.display()))?;
+        // Strip the frontmatter we wrote earlier.
+        let body = strip_frontmatter(&raw);
+        out.push_str(&format!("\n## Page {n}\n\n"));
+        out.push_str(body.trim());
+        out.push_str("\n\n");
+    }
+    Ok(out)
+}
+
+fn strip_frontmatter(raw: &str) -> &str {
+    let trimmed = raw.trim_start();
+    if !trimmed.starts_with("---") {
+        return raw;
+    }
+    let after = &trimmed[3..];
+    if let Some(close) = after.find("\n---") {
+        let rest = &after[close + 4..];
+        rest.strip_prefix('\n').unwrap_or(rest)
+    } else {
+        raw
+    }
 }
 
 // ─── image manual upload ───────────────────────────────────
@@ -414,7 +584,7 @@ pub struct RawResourceSummary {
 pub async fn list_resources() -> Vec<RawResourceSummary> {
     let mut out = Vec::new();
     let root = raw_root();
-    for sub in ["articles", "youtube", "papers", "images", "markdown"] {
+    for sub in ["articles", "youtube", "papers", "books", "images", "markdown"] {
         let dir = root.join(sub);
         let mut rd = match fs::read_dir(&dir).await {
             Ok(r) => r,
@@ -465,7 +635,7 @@ pub async fn read_resource(
     id: &str,
 ) -> Result<RawResourceDetail, String> {
     validate_id(id)?;
-    let allowed = ["articles", "youtube", "papers", "images", "markdown"];
+    let allowed = ["articles", "youtube", "papers", "books", "images", "markdown"];
     if !allowed.contains(&resource_type) {
         return Err(format!("invalid type: {resource_type:?}"));
     }
@@ -536,7 +706,7 @@ async fn read_first_data_url(paths: &[PathBuf]) -> Option<String> {
 
 pub async fn delete_resource(resource_type: &str, id: &str) -> Result<(), String> {
     validate_id(id)?;
-    let allowed = ["articles", "youtube", "papers", "images", "markdown"];
+    let allowed = ["articles", "youtube", "papers", "books", "images", "markdown"];
     if !allowed.contains(&resource_type) {
         return Err(format!("invalid type: {resource_type:?}"));
     }

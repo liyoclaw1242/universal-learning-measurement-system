@@ -4,6 +4,7 @@
 
 import { useState, type DragEvent } from 'react';
 import {
+  BookOpen,
   FileCode2,
   FileText,
   Image as ImageIcon,
@@ -30,6 +31,7 @@ interface RawSidebarProps {
 
 const GROUP_ORDER: Array<{ key: string; label: string }> = [
   { key: 'paper', label: 'Papers' },
+  { key: 'book', label: 'Books' },
   { key: 'youtube', label: 'YouTube' },
   { key: 'article', label: 'Articles' },
   { key: 'image', label: 'Images' },
@@ -178,6 +180,8 @@ function iconForType(type: string) {
       return <Newspaper size={12} strokeWidth={1.5} />;
     case 'paper':
       return <FileText size={12} strokeWidth={1.5} />;
+    case 'book':
+      return <BookOpen size={12} strokeWidth={1.5} />;
     case 'image':
       return <ImageIcon size={12} strokeWidth={1.5} />;
     case 'markdown':

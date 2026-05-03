@@ -16,7 +16,28 @@
         <span id="page-title" class="title">(loading)</span>
       </div>
 
-      <button id="send-btn" class="send" disabled>Send to ULMS</button>
+      <div class="mode-tabs" role="tablist">
+        <button id="mode-single" class="mode-tab active" data-mode="single" role="tab">Single page</button>
+        <button id="mode-book" class="mode-tab" data-mode="book" role="tab">Book session</button>
+      </div>
+
+      <div id="single-pane" class="pane">
+        <button id="send-btn" class="send" disabled>Send to ULMS</button>
+      </div>
+
+      <div id="book-pane" class="pane" hidden>
+        <div id="book-status" class="book-status">no active session</div>
+        <label id="book-title-row" class="book-title-row">
+          book title
+          <input id="book-title" type="text" placeholder="e.g. 賈伯斯傳" spellcheck="false" />
+        </label>
+        <div class="book-actions">
+          <button id="book-start" class="send">Start (or resume) book</button>
+          <button id="book-add" class="send" hidden>Add this page</button>
+          <button id="book-finish" class="send" hidden>Finish &amp; send</button>
+          <button id="book-cancel" class="save" hidden>cancel</button>
+        </div>
+      </div>
 
       <div id="result" class="result" aria-live="polite"></div>
     </main>

@@ -25,7 +25,7 @@ use tower_http::cors::CorsLayer;
 use uuid::Uuid;
 
 use crate::raw_bank::{
-    self, ArticleIngest, RawMeta, YoutubeIngest,
+    self, ArticleIngest, BookIngest, BookPage, RawMeta, YoutubeIngest,
 };
 
 const DEFAULT_PORT: u16 = 9527;
@@ -132,6 +132,7 @@ fn check_auth(headers: &HeaderMap, expected: &str) -> Result<(), (StatusCode, St
 enum ImportRequest {
     Article(ArticlePayload),
     Youtube(YoutubePayload),
+    Book(BookPayload),
 }
 
 #[derive(Debug, Deserialize)]
@@ -142,6 +143,23 @@ struct ArticlePayload {
     author: Option<String>,
     /// Markdown extracted from the page (Readability output).
     content: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct BookPagePayload {
+    source_url: String,
+    /// Markdown extracted from this single page (Readability output).
+    content: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct BookPayload {
+    /// First-page URL — becomes the canonical source_url.
+    source_url: String,
+    title: String,
+    #[serde(default)]
+    author: Option<String>,
+    pages: Vec<BookPagePayload>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -178,6 +196,21 @@ async fn import(
             title: p.title,
             author: p.author,
             content_markdown: p.content,
+        })
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?,
+        ImportRequest::Book(p) => raw_bank::write_book(BookIngest {
+            source_url: p.source_url,
+            title: p.title,
+            author: p.author,
+            pages: p
+                .pages
+                .into_iter()
+                .map(|pp| BookPage {
+                    source_url: pp.source_url,
+                    content_markdown: pp.content,
+                })
+                .collect(),
         })
         .await
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?,

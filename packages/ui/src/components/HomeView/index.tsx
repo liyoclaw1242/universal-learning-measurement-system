@@ -304,6 +304,8 @@ function rawTypeIcon(type: string) {
       return <Newspaper size={14} strokeWidth={1.5} />;
     case 'paper':
       return <FileText size={14} strokeWidth={1.5} />;
+    case 'book':
+      return <BookOpen size={14} strokeWidth={1.5} />;
     case 'image':
       return <ImageIcon size={14} strokeWidth={1.5} />;
     case 'markdown':
@@ -321,6 +323,8 @@ function rawTypeLabel(type: string): string {
       return 'Article';
     case 'paper':
       return 'Paper';
+    case 'book':
+      return 'Book';
     case 'image':
       return 'Image';
     case 'markdown':

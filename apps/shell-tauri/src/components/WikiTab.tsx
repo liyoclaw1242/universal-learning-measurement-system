@@ -369,6 +369,8 @@ function pluralizeType(t: string): string {
       return 'youtube';
     case 'paper':
       return 'papers';
+    case 'book':
+      return 'books';
     case 'image':
       return 'images';
     case 'markdown':
