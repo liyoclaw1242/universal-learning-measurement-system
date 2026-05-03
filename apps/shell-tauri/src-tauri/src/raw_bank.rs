@@ -231,6 +231,62 @@ pub async fn write_youtube(input: YoutubeIngest) -> Result<RawMeta, String> {
     Ok(meta)
 }
 
+// ─── paper init (PDF Learn) ────────────────────────────────
+
+pub struct PaperIngest {
+    pub id: String,
+    pub source_url: String,
+    pub title: String,
+}
+
+/// Seed `~/.ulms-wiki/raw/papers/<id>/` with `meta.yaml` + an empty
+/// `body.md`. Idempotent on the body — re-imports don't clobber an
+/// in-progress translation. Returns the body path so the caller can
+/// append per-page output as gemini produces it.
+pub async fn init_paper_resource(
+    input: PaperIngest,
+) -> Result<(std::path::PathBuf, RawMeta), String> {
+    ensure_raw_root().await?;
+    validate_id(&input.id)?;
+
+    let dir = raw_root().join("papers").join(&input.id);
+    fs::create_dir_all(&dir)
+        .await
+        .map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
+
+    let meta = RawMeta {
+        id: input.id.clone(),
+        resource_type: "paper".into(),
+        source_url: input.source_url.clone(),
+        title: input.title,
+        captured_at: iso8601_now(),
+        captured_via: "pdf-learn".into(),
+        quizzed_in: vec![],
+        verdict_summary: None,
+        verified: false,
+        char_count: None,
+        duration_s: None,
+        channel: None,
+        caption_lang: None,
+        page_count: None,
+        author: None,
+    };
+    write_meta(&dir, &meta).await?;
+
+    let body_path = dir.join("body.md");
+    if !body_path.exists() {
+        let header = format!(
+            "# {}\n\nSource: {}\n\nCaptured: {}\n",
+            meta.title, meta.source_url, meta.captured_at
+        );
+        fs::write(&body_path, &header)
+            .await
+            .map_err(|e| format!("write body.md: {e}"))?;
+    }
+
+    Ok((body_path, meta))
+}
+
 // ─── meta i/o ──────────────────────────────────────────────
 
 async fn write_meta(dir: &std::path::Path, meta: &RawMeta) -> Result<(), String> {

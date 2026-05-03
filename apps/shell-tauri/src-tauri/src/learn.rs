@@ -21,7 +21,7 @@ use base64::Engine;
 use serde::Serialize;
 use serde_json::{json, Value};
 use tauri::{AppHandle, Emitter};
-use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 use tokio::sync::Mutex;
 use tokio::time::timeout;
@@ -44,6 +44,14 @@ pub struct SessionState {
     pub session_dir: PathBuf,
     pub notes_path: PathBuf,
     pub capture_count: u32,
+    /// Stable id for the corresponding `~/.ulms-wiki/raw/papers/<id>/`
+    /// resource (e.g. `arxiv-2401.12345`). Lets the Wiki Raw view see
+    /// the paper as soon as the session starts.
+    pub raw_paper_id: String,
+    /// Mirror path for body.md inside the raw bank — every page
+    /// translation appends here in addition to `notes_path` so the
+    /// wiki body stays current without a separate import step.
+    pub raw_body_path: PathBuf,
 }
 
 #[derive(Default)]
@@ -116,9 +124,43 @@ fn derive_material_filename(url: &str) -> String {
     "translated.md".to_string()
 }
 
+/// Stable id for the raw/papers/<id>/ folder. arxiv URLs collapse to
+/// `arxiv-<id>` (so re-imports of the same paper merge into the same
+/// resource); other PDF URLs slug the trailing filename. `slugify`
+/// already enforces the validator's no-slash / no-space invariants.
+fn derive_paper_id(url: &str) -> String {
+    if let Some(after) = url.split("arxiv.org/").nth(1) {
+        let id = after
+            .trim_start_matches("pdf/")
+            .trim_start_matches("abs/")
+            .split('?')
+            .next()
+            .unwrap_or("")
+            .trim_end_matches(".pdf");
+        if !id.is_empty() {
+            return format!("arxiv-{}", id.replace('/', "-"));
+        }
+    }
+    let tail = url
+        .rsplit('/')
+        .next()
+        .unwrap_or(url)
+        .split('?')
+        .next()
+        .unwrap_or("")
+        .trim_end_matches(".pdf");
+    let slug = crate::raw_bank::slugify(tail);
+    if slug.starts_with("untitled-") {
+        format!("paper-{}", &slug[9..])
+    } else {
+        slug
+    }
+}
+
 // ─── start session: download PDF ────────────────────────────
 
 pub async fn start_paper_session(
+    app: AppHandle,
     workspace_dir: PathBuf,
     runtime: Arc<LearnRuntime>,
     url: String,
@@ -195,6 +237,20 @@ pub async fn start_paper_session(
         .await
         .map_err(|e| format!("write notes.md: {e}"))?;
 
+    // Mirror into ~/.ulms-wiki/raw/papers/<id>/ so the resource is
+    // visible in the Wiki Raw view from the moment the session starts.
+    // Re-imports of the same arxiv id merge into the existing folder
+    // (init_paper_resource skips body.md when present).
+    let raw_paper_id = derive_paper_id(&url);
+    let raw_title = derive_paper_id(&url).replacen("arxiv-", "arXiv ", 1);
+    let (raw_body_path, _raw_meta) =
+        crate::raw_bank::init_paper_resource(crate::raw_bank::PaperIngest {
+            id: raw_paper_id.clone(),
+            source_url: url.clone(),
+            title: raw_title,
+        })
+        .await?;
+
     let session = SessionState {
         id: session_id,
         source_url: url,
@@ -202,12 +258,23 @@ pub async fn start_paper_session(
         session_dir,
         notes_path,
         capture_count: 0,
+        raw_paper_id,
+        raw_body_path,
     };
 
     {
         let mut g = runtime.current_session.lock().await;
         *g = Some(session.clone());
     }
+
+    let _ = app.emit(
+        "raw:imported",
+        json!({
+            "type": "paper",
+            "id": session.raw_paper_id,
+            "via": "pdf-learn",
+        }),
+    );
 
     Ok(session)
 }
@@ -380,14 +447,36 @@ async fn translate_page_inner(
 
     let header = format!("\n## Page {page_num} · {}\n\n", iso8601_now());
     let body = format!("{header}{}\n\n", translation_text.trim());
-    let mut file = tokio::fs::OpenOptions::new()
-        .append(true)
-        .open(&session.notes_path)
+
+    // Re-translation replaces the prior section instead of stacking.
+    let existing_notes = tokio::fs::read_to_string(&session.notes_path)
         .await
-        .map_err(|e| format!("open notes.md: {e}"))?;
-    file.write_all(body.as_bytes())
+        .map_err(|e| format!("read notes.md: {e}"))?;
+    let updated_notes = upsert_page_section(&existing_notes, page_num, &body);
+    tokio::fs::write(&session.notes_path, updated_notes)
         .await
-        .map_err(|e| format!("append notes.md: {e}"))?;
+        .map_err(|e| format!("write notes.md: {e}"))?;
+
+    // Mirror into ~/.ulms-wiki/raw/papers/<id>/body.md with the same
+    // upsert semantics so the wiki body matches notes.md exactly.
+    // Failures here are non-fatal — workspace notes.md is the source
+    // of truth for resume.
+    if let Ok(existing_raw) = tokio::fs::read_to_string(&session.raw_body_path).await {
+        let updated_raw = upsert_page_section(&existing_raw, page_num, &body);
+        if tokio::fs::write(&session.raw_body_path, updated_raw)
+            .await
+            .is_ok()
+        {
+            let _ = app.emit(
+                "raw:imported",
+                json!({
+                    "type": "paper",
+                    "id": session.raw_paper_id,
+                    "via": "pdf-learn",
+                }),
+            );
+        }
+    }
 
     let _ = app.emit(
         "translation:completed",
@@ -613,6 +702,40 @@ fn parse_source_url_from_notes(notes: &str) -> Option<String> {
     first.strip_prefix(prefix).map(|s| s.trim().to_string())
 }
 
+/// Replace (or append) the section for `page_num` in `existing`.
+/// Sections are delimited by `## Page <N> ·` headers. Re-translation
+/// must not stack — the new content fully supplants the prior one,
+/// and any legacy duplicates of the same page are also dropped.
+fn upsert_page_section(existing: &str, page_num: u32, new_section: &str) -> String {
+    let target_prefix = format!("## Page {page_num} ·");
+    let mut out = String::with_capacity(existing.len() + new_section.len());
+    let mut skip = false;
+    let mut replaced = false;
+    for line in existing.split_inclusive('\n') {
+        let trimmed = line.trim_start();
+        let is_section_header = trimmed.starts_with("## Page ");
+        let is_target_header = trimmed.starts_with(&target_prefix);
+        if is_section_header {
+            if is_target_header {
+                if !replaced {
+                    out.push_str(new_section);
+                    replaced = true;
+                }
+                skip = true;
+                continue;
+            }
+            skip = false;
+        }
+        if !skip {
+            out.push_str(line);
+        }
+    }
+    if !replaced {
+        out.push_str(new_section);
+    }
+    out
+}
+
 /// Parse notes.md into per-page sections. Sections start with
 /// "## Page N · timestamp" and the body is everything until the next
 /// such header. Pages without a header are ignored.
@@ -806,6 +929,18 @@ pub async fn resume_learn_session(
     let captures = parse_notes_into_captures(&notes, &session_dir);
     let capture_count = captures.iter().map(|c| c.index).max().unwrap_or(0);
 
+    // Resume — re-init the raw resource (idempotent) so Wiki Raw stays
+    // consistent even for sessions started before this lane existed.
+    let raw_paper_id = derive_paper_id(&source_url);
+    let raw_title = raw_paper_id.replacen("arxiv-", "arXiv ", 1);
+    let (raw_body_path, _) =
+        crate::raw_bank::init_paper_resource(crate::raw_bank::PaperIngest {
+            id: raw_paper_id.clone(),
+            source_url: source_url.clone(),
+            title: raw_title,
+        })
+        .await?;
+
     let session = SessionState {
         id: session_id,
         source_url,
@@ -813,6 +948,8 @@ pub async fn resume_learn_session(
         session_dir,
         notes_path,
         capture_count,
+        raw_paper_id,
+        raw_body_path,
     };
     {
         let mut g = runtime.current_session.lock().await;

@@ -15,8 +15,12 @@ graded competency assessments and a durable knowledge base.
 
 The shell is a Tauri 2 desktop app. Heavy work is delegated to the local
 `claude` CLI (the four assessment agents) and `gemini` CLI (PDF translation,
-second-opinion review, wiki synthesis). State lives on disk as plain
-JSON / YAML / Markdown — there is no server, no database, and no cloud.
+second-opinion review, wiki synthesis); both shell out to Anthropic /
+Google APIs on each call. State lives on disk as plain JSON / YAML /
+Markdown — no database, no cloud-hosted state, nothing remote that we
+run. Two local-only servers do exist: an axum HTTP bridge on
+`127.0.0.1:9527` for the chrome extension, and a stdio MCP server for
+external Claude Desktop integration.
 
 ---
 
@@ -39,7 +43,7 @@ Path overrides: `ULMS_WIKI_DIR`, `ULMS_WORKSPACE_DIR`.
 ## Four modes (top-bar `ModeBar`)
 
 - **Home** — landing view: recent learn sessions, recent quiz runs, recent raw imports, MCP setup, "Synthesize wiki" CTA. `apps/shell-tauri/src/App.tsx:147` → `apps/shell-tauri/src/App.tsx:316–491`.
-- **Learn** — focused 1-vs-1 reader (PDF.js + per-page translation). Sidebar `NavRail` + `LearnSplit` (PDF + `TranslationPanel`). Auto-switches in when a paper session starts.
+- **Learn** — focused 1-vs-1 reader for a single raw resource. Intended to be the type-aware reader for everything in `~/.ulms-wiki/raw/`: paper (PDF.js viewer), youtube (embedded player + transcript), article / markdown (markdown reader), image (image viewer + OCR). Right-pane `TranslationPanel` produces a per-page artefact in one of two modes — **translate to 繁中** (current) or **extract to markdown** (TODO). Currently only arxiv PDFs are wired (auto-switches in when a paper session starts); other raw types still flow through the Wiki **Raw materials** browser, whose `Go to Learn` button is a stub until phase 2.
 - **Quiz** — IDE-style workspace for the 4-agent assessment pipeline. `Ribbon` (top: pickers + Start) + `NavRail` + `TabBar` (`OverviewTab` / `ItemDetailTab` / `TerminalTab` / `DimensionsEditor`).
 - **Wiki** — local KB browser with two sub-modes: **Concepts** (synthesised pages, `WikiSidebar` + `WikiViewer`) and **Raw materials** (`RawSidebar` + `RawViewer` over `~/.ulms-wiki/raw/`).
 
@@ -403,10 +407,35 @@ cross-origin to 127.0.0.1).
 
 ## Open work / phase-2 items
 
-- Migrate **PDF Learn** sessions to write into `~/.ulms-wiki/raw/papers/` so all material types live in one bank. Currently they sit only in `workspace/learn/<id>/`.
-- **Image** ingestion (X/Twitter screenshots, 博客來) — chrome-ext + OCR step, write to `~/.ulms-wiki/raw/images/<id>/`.
-- **Markdown** manual upload — drag-and-drop, write to `~/.ulms-wiki/raw/markdown/<id>/`.
-- **Wiki Raw → Learn** integration: `RawViewer.onGoToLearn` is currently a stub. Phase 2 should load the resource into a type-aware Learn workspace (embedded YouTube + transcript translation, image viewer + OCR, markdown reader + notes).
+**Chrome extension — single mandate: web tab → raw**
+
+The extension's job is converting whatever is in the active browser tab into
+the raw format; nothing else. Three capture lanes:
+
+- **YouTube** — transcript (current) + cover thumbnail (current) + **user-triggered video frame snapshots** (TODO). Pressing a button while the player is at time `t` should grab the current frame as a JPEG and append it to `~/.ulms-wiki/raw/youtube/<videoId>/snapshots/<seconds>.jpg`, with a reference line in `transcript.md`.
+- **Article-style pages** — X threads, Medium posts, blogs, generic news. Currently a minimal Readability-style extractor; X threads need a dedicated extractor that walks the conversation tree, Medium needs paywall-aware fallback. Output: `~/.ulms-wiki/raw/articles/<slug>/content.md`.
+- **博客來 (and similar paginated readers)** — multi-page e-book / preview readers serve one page at a time. The extension needs to detect page-turn events (DOM mutation or button click) and accumulate pages into a single `content.md` until the user clicks Done. Output: `~/.ulms-wiki/raw/articles/<slug>/content.md` (or a new `books/` lane — see "Raw format" below).
+
+**Other capture lanes (not chrome-ext)**
+
+- **PDF Learn → raw/papers/** — currently a paper session writes only to `workspace/learn/<id>/source.pdf`; should also seed `~/.ulms-wiki/raw/papers/<id>/` with `meta.yaml` + `notes.md` (or `content.md`) so all material types live in one bank.
+- **Image manual upload** — drag-and-drop for screenshots / photos that have no web context (X and 博客來 are now extracted by chrome-ext, not screenshotted). OCR step (gemini or tesseract); write to `~/.ulms-wiki/raw/images/<id>/`.
+- **Markdown manual upload** — drag-and-drop a `.md` file → `~/.ulms-wiki/raw/markdown/<id>/`.
+
+**Raw format — open question**
+
+Current schema is one folder per resource: `meta.yaml` + a single body file (`content.md` / `transcript.md`) + optional `thumbnails/`. This works for one-shot captures, but multi-page books and frame-stamped videos may want richer asset layouts (e.g. `pages/01.md`, `snapshots/<t>.jpg`, an index field in meta). Schema is intentionally still small until the new lanes force a decision.
+
+**Learn mode — become the unified reader**
+
+The current Learn mode only handles arxiv PDFs. Intended scope:
+
+- **Type-aware viewers** for every raw type — paper (PDF.js, in place), youtube (embedded player + transcript-side scroll), article / markdown (markdown reader), image (image viewer + OCR text). `RawViewer.onGoToLearn` should hand the resource to the right viewer.
+- **Per-page output mode toggle** — for paper/image, the right-pane `TranslationPanel` should accept either **translate to 繁中** (current behaviour) or **extract to markdown** (gemini prompt change, no translation step), so the same reader works as a study tool *or* as a "produce raw markdown" tool. Output appends to the raw resource's body file.
+- **Resume** — opening a raw resource that has prior captures should rehydrate the panel from disk, mirroring the existing `resume_learn_session` flow.
+
+**Quality + cross-cutting**
+
 - **STT fallback** for YouTube videos without captions (yt-dlp + ffmpeg + Whisper).
-- **Verdict reverse-write**: when a quiz run completes, push `quizzed_in` + `verdict_summary` back to the source raw resource's `meta.yaml` so the wiki sidebar can show "used 3× in quizzes".
-- The legacy `apps/shell/` Electron tree is retained but frozen — no commits should touch it; remove once the Tauri port is fully validated.
+- **Verdict reverse-write** — when a quiz run completes, push `quizzed_in` + `verdict_summary` back to the source raw resource's `meta.yaml` so the wiki sidebar can show "used 3× in quizzes".
+- Remove the legacy `apps/shell/` Electron tree once the Tauri port is fully validated. Currently retained, frozen — no commits should touch it.

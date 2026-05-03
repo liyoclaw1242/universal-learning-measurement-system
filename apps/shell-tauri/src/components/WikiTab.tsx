@@ -211,6 +211,10 @@ function RawPane() {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [detail, setDetail] = useState<RawResourceDetail | null>(null);
   const [readError, setReadError] = useState<string | null>(null);
+  // Bumps every time `raw:imported` fires; the detail useEffect
+  // depends on it so the body re-fetches mid-translation when PDF
+  // Learn appends another page to body.md.
+  const [refreshTick, setRefreshTick] = useState(0);
 
   const reloadList = () => {
     setLoadError(null);
@@ -229,7 +233,9 @@ function RawPane() {
     let unlisten: UnlistenFn | null = null;
     let cancelled = false;
     listen<unknown>('raw:imported', () => {
-      if (!cancelled) reloadList();
+      if (cancelled) return;
+      reloadList();
+      setRefreshTick((t) => t + 1);
     }).then((fn) => {
       if (cancelled) fn();
       else unlisten = fn;
@@ -248,7 +254,8 @@ function RawPane() {
     }
   }, [resources, selectedKey]);
 
-  // Load detail on selection change.
+  // Load detail on selection change OR when raw:imported bumps the
+  // refreshTick (live PDF-Learn body.md growth).
   useEffect(() => {
     if (!selectedKey) {
       setDetail(null);
@@ -273,7 +280,7 @@ function RawPane() {
     return () => {
       cancelled = true;
     };
-  }, [selectedKey]);
+  }, [selectedKey, refreshTick]);
 
   return (
     <div className="wiki-tab">

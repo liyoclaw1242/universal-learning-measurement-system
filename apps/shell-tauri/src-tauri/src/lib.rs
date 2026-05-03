@@ -314,12 +314,13 @@ async fn regenerate_rejected(
 
 #[tauri::command]
 async fn start_paper_session(
+    app: AppHandle,
     state: State<'_, Arc<AppState>>,
     url: String,
 ) -> Result<SessionState, String> {
     let workspace = state.workspace_dir.clone();
     let runtime = Arc::clone(&state.learn);
-    learn::start_paper_session(workspace, runtime, url).await
+    learn::start_paper_session(app, workspace, runtime, url).await
 }
 
 #[tauri::command]
