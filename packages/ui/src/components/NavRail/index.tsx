@@ -37,11 +37,16 @@ interface NavRailProps {
 }
 
 export default function NavRail(props: NavRailProps) {
+  // RailLearn only shows when the host explicitly passes the
+  // `onOpenPaper` callback (i.e. Learn mode). Without it, fall through
+  // to RailReview's items list — Quiz-mode inputs stage just shows an
+  // empty items rail until the workflow runs.
+  const showLearn = props.stage === 'inputs' && !!props.onOpenPaper;
   return (
     <aside className="rail" aria-label="navigation rail">
       {props.stage === 'running' ? (
         <RailRunning {...props} />
-      ) : props.stage === 'inputs' ? (
+      ) : showLearn ? (
         <RailLearn {...props} />
       ) : (
         <RailReview {...props} />
@@ -65,8 +70,8 @@ function RailLearn({ learnSession, onOpenPaper }: NavRailProps) {
         </span>
       </div>
       <div className="rail-scroll" style={{ padding: 12 }}>
-        {learnSession ? (
-          <div className="learn-session">
+        {learnSession && (
+          <div className="learn-session" style={{ marginBottom: 16 }}>
             <div className="learn-session-row">
               <Globe size={12} strokeWidth={1.5} />
               <span
@@ -77,7 +82,7 @@ function RailLearn({ learnSession, onOpenPaper }: NavRailProps) {
               </span>
             </div>
             <div className="learn-session-meta">
-              session <code>{learnSession.id}</code> · {learnSession.captureCount} capture
+              session <code>{learnSession.id}</code> · {learnSession.captureCount} page
               {learnSession.captureCount === 1 ? '' : 's'}
             </div>
             {learnSession.streaming && (
@@ -86,41 +91,43 @@ function RailLearn({ learnSession, onOpenPaper }: NavRailProps) {
                 translating…
               </div>
             )}
-            <div className="ulms-meta" style={{ marginTop: 12 }}>
-              switch to the <strong>Learn</strong> tab to capture &amp; review translations.
-            </div>
           </div>
-        ) : (
-          <form
-            className="learn-form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (trimmed && onOpenPaper) onOpenPaper(trimmed);
-            }}
-          >
-            <label className="ulms-meta">paper / arxiv URL</label>
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://arxiv.org/pdf/2401.10515"
-              className="learn-url-input"
-              autoComplete="off"
-              spellCheck={false}
-            />
-            <button
-              type="submit"
-              className="learn-open-btn"
-              disabled={!trimmed || !onOpenPaper}
-            >
-              Open paper
-            </button>
-            <p className="ulms-meta" style={{ marginTop: 12, lineHeight: 1.4 }}>
-              Opens a separate window with the page. Capturing requires
-              macOS Screen Recording permission (one-time prompt).
-            </p>
-          </form>
         )}
+        <form
+          className="learn-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (trimmed && onOpenPaper) {
+              onOpenPaper(trimmed);
+              setUrl('');
+            }
+          }}
+        >
+          <label className="ulms-meta">
+            {learnSession ? 'open a different paper' : 'paper / arxiv URL'}
+          </label>
+          <input
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://arxiv.org/pdf/2401.10515"
+            className="learn-url-input"
+            autoComplete="off"
+            spellCheck={false}
+          />
+          <button
+            type="submit"
+            className="learn-open-btn"
+            disabled={!trimmed || !onOpenPaper}
+          >
+            {learnSession ? 'Open new paper' : 'Open paper'}
+          </button>
+          {!learnSession && (
+            <p className="ulms-meta" style={{ marginTop: 12, lineHeight: 1.4 }}>
+              Loads the PDF inside the app. Per-page Chinese translation via gemini-cli.
+            </p>
+          )}
+        </form>
       </div>
     </>
   );

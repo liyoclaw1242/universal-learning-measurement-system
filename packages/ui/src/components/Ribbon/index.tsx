@@ -7,6 +7,7 @@
 // This is the step 5.1 static version: props-driven, no store wiring.
 // Step 6 swaps the hand-rolled `session` prop for Zustand state.
 
+import type { ReactNode } from 'react';
 import type { Session, Stage, Density } from '../../types/session';
 import { costStateOf } from '../../types/session';
 import { Download, Sparkles } from 'lucide-react';
@@ -40,6 +41,13 @@ interface RibbonProps {
   onPickMaterial?: () => void;
   /** Handler for picking the dimensions YAML */
   onPickDimensions?: () => void;
+  /** Handler for auto-generating dimensions from staged material via gemini */
+  onGenerateDimensions?: () => void;
+  /** True while a dimensions:generate call is in flight */
+  generatingDimensions?: boolean;
+  /** Handler for opening the inline dimensions editor — only meaningful
+   *  when dimensions are already loaded. */
+  onEditDimensions?: () => void;
   /** Handler for picking the optional guidance file */
   onPickGuidance?: () => void;
   /** Handler for clearing the staged guidance file */
@@ -105,6 +113,9 @@ export default function Ribbon(props: RibbonProps) {
         stage={props.stage}
         onPickMaterial={props.onPickMaterial}
         onPickDimensions={props.onPickDimensions}
+        onGenerateDimensions={props.onGenerateDimensions}
+        generatingDimensions={props.generatingDimensions}
+        onEditDimensions={props.onEditDimensions}
         onPickGuidance={props.onPickGuidance}
         onClearGuidance={props.onClearGuidance}
         onStartWorkflow={props.onStartWorkflow}
@@ -274,6 +285,9 @@ interface BodyProps {
   stage: Stage;
   onPickMaterial?: () => void;
   onPickDimensions?: () => void;
+  onGenerateDimensions?: () => void;
+  generatingDimensions?: boolean;
+  onEditDimensions?: () => void;
   onPickGuidance?: () => void;
   onClearGuidance?: () => void;
   onStartWorkflow?: () => void;
@@ -348,6 +362,9 @@ function HomeBody({
 function InputsBody({
   onPickMaterial,
   onPickDimensions,
+  onGenerateDimensions,
+  generatingDimensions,
+  onEditDimensions,
   onPickGuidance,
   onClearGuidance,
   materialFilename,
@@ -359,6 +376,40 @@ function InputsBody({
     materialFilename && materialSourceCount > 1
       ? `${materialFilename} · ${materialSourceCount} files`
       : materialFilename;
+  const hasMaterial = !!materialFilename;
+  const dimensionsExtra = (
+    <span style={{ display: 'inline-flex', gap: 6 }}>
+      {onGenerateDimensions && (
+        <button
+          className="btn xs ghost"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!generatingDimensions) onGenerateDimensions();
+          }}
+          disabled={generatingDimensions || !hasMaterial}
+          title={
+            !hasMaterial
+              ? '先載入 MATERIAL,再用 LLM 自動產生維度'
+              : '用 gemini 從 material 自動抽出 5-7 個能力維度'
+          }
+        >
+          {generatingDimensions ? '產生中…' : 'Auto'}
+        </button>
+      )}
+      {onEditDimensions && dimensionCount > 0 && (
+        <button
+          className="btn xs ghost"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEditDimensions();
+          }}
+          title="開啟編輯器修改 dim_id / name / description"
+        >
+          Edit
+        </button>
+      )}
+    </span>
+  );
   return (
     <div className="inputs-body">
       <InputSlot
@@ -374,6 +425,7 @@ function InputsBody({
         loadedText={dimensionCount > 0 ? `${dimensionCount} 維度` : null}
         emptyHint="選擇 .yaml · 必填"
         onPick={onPickDimensions}
+        extraAction={dimensionsExtra}
       />
       <InputSlot
         label="GUIDANCE"
@@ -393,9 +445,20 @@ interface InputSlotProps {
   required?: boolean;
   onPick?: () => void;
   onClear?: () => void;
+  /** Optional extra control rendered inside the slot (e.g. an "Auto"
+   *  button next to MATERIAL or DIMENSIONS). */
+  extraAction?: ReactNode;
 }
 
-function InputSlot({ label, emptyHint, loadedText, required, onPick, onClear }: InputSlotProps) {
+function InputSlot({
+  label,
+  emptyHint,
+  loadedText,
+  required,
+  onPick,
+  onClear,
+  extraAction,
+}: InputSlotProps) {
   const loaded = !!loadedText;
   return (
     <div
@@ -417,6 +480,9 @@ function InputSlot({ label, emptyHint, loadedText, required, onPick, onClear }: 
         >
           清除
         </button>
+      )}
+      {extraAction && (
+        <span style={{ alignSelf: 'flex-start', marginTop: 2 }}>{extraAction}</span>
       )}
     </div>
   );

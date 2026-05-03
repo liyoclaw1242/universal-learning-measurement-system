@@ -597,5 +597,34 @@ async fn run_workflow_inner(
         }),
     );
 
+    // Snapshot the completed run into workspace/runs/<id>/ for the
+    // knowledge-base raw layer. Best-effort: failures emit a warning
+    // but don't fail the workflow itself.
+    if let Some(board_for_snap) = final_board.as_ref() {
+        match crate::snapshot::snapshot_run(
+            workspace_dir,
+            board_for_snap,
+            total_cost,
+            total_duration,
+            &per_agent,
+        )
+        .await
+        {
+            Ok(meta) => {
+                let _ = app.emit(
+                    "kb:snapshot-saved",
+                    json!({
+                        "id": meta.id,
+                        "run_dir": meta.run_dir.to_string_lossy(),
+                        "item_count": meta.item_count,
+                    }),
+                );
+            }
+            Err(e) => {
+                let _ = app.emit("kb:snapshot-error", json!({ "error": e }));
+            }
+        }
+    }
+
     Ok(())
 }

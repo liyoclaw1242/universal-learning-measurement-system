@@ -14,6 +14,7 @@ import type {
   Item,
   ItemChecks,
   ItemOption,
+  Mode,
   RibbonTab,
   Session,
   Stage,
@@ -59,6 +60,8 @@ function mapCoordinatorId(id: string): AgentId | null {
 
 export interface ShellState {
   // UI state
+  /** top-level workspace selector */
+  mode: Mode;
   stage: Stage;
   density: Density;
   activeRibbonTab: RibbonTab;
@@ -129,6 +132,7 @@ export interface ShellState {
   };
 
   // ─── UI actions ────────────────────────────────────────
+  setMode: (m: Mode) => void;
   setStage: (s: Stage) => void;
   setDensity: (d: Density) => void;
   setRibbonTab: (t: RibbonTab) => void;
@@ -195,17 +199,25 @@ export interface ShellState {
   }) => void;
   _onTranslationError: (msg: string) => void;
   _onMaterialImportedFromTranslation: () => void;
+  _onResumeLearnSession: (s: {
+    sessionId: string;
+    sourceUrl: string;
+    pdfPath: string;
+    notesPath: string;
+    captures: TranslationCapture[];
+  }) => void;
 }
 
 // ─── persisted subset (unchanged from step 6) ───────────
 
-type PersistedShape = Pick<ShellState, 'density' | 'activeCenterTab' | 'openTabIds'>;
+type PersistedShape = Pick<ShellState, 'mode' | 'density' | 'activeCenterTab' | 'openTabIds'>;
 
 // ─── store ──────────────────────────────────────────────
 
 export const useShellStore = create<ShellState>()(
   persist(
     (set) => ({
+      mode: 'home',
       stage: 'inputs',
       density: 'standard',
       activeRibbonTab: 'home',
@@ -251,6 +263,7 @@ export const useShellStore = create<ShellState>()(
 
       // ── UI actions ───────────────────────────────────
 
+      setMode: (m) => set({ mode: m }),
       setStage: (s) => set({ stage: s }),
       setDensity: (d) => set({ density: d }),
       setRibbonTab: (t) => set({ activeRibbonTab: t }),
@@ -507,16 +520,32 @@ export const useShellStore = create<ShellState>()(
 
       _onMaterialImportedFromTranslation: () =>
         set((st) => ({ learn: { ...st.learn, imported: true } })),
+
+      _onResumeLearnSession: ({ sessionId, sourceUrl, pdfPath, notesPath, captures }) =>
+        set({
+          learn: {
+            sessionId,
+            sourceUrl,
+            pdfPath,
+            notesPath,
+            currentPage: 1,
+            totalPages: 0,
+            streaming: false,
+            captures,
+            imported: false,
+          },
+        }),
     }),
     {
       name: 'ulms-shell-ui',
       storage: createJSONStorage(() => localStorage),
       partialize: (state): PersistedShape => ({
+        mode: state.mode,
         density: state.density,
         activeCenterTab: state.activeCenterTab,
         openTabIds: state.openTabIds,
       }),
-      version: 1,
+      version: 2,
     },
   ),
 );

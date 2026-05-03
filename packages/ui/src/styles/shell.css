@@ -17,6 +17,61 @@ html, body, #root {
 }
 
 /* ============================================================
+   App root — top-level mode bar + mode-specific shell
+   ============================================================ */
+.app-root {
+  display: grid;
+  grid-template-rows: 40px 1fr;
+  height: 100vh;
+  background: var(--ulms-canvas);
+}
+.mode-bar {
+  display: flex;
+  align-items: stretch;
+  background: var(--ulms-ink);
+  color: white;
+  padding: 0 12px 0 16px;
+  border-bottom: 1px solid #000;
+}
+.mode-bar-brand {
+  display: flex; align-items: center;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-right: 24px;
+  user-select: none;
+}
+.mode-bar-tabs {
+  display: flex; gap: 2px; align-items: stretch;
+}
+.mode-tab {
+  font: inherit;
+  font-size: var(--ulms-fs-body-s);
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0 14px;
+  display: inline-flex; align-items: center; gap: 6px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  position: relative;
+}
+.mode-tab:hover { color: white; background: rgba(255, 255, 255, 0.06); }
+.mode-tab.active {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom-color: var(--ulms-blue);
+}
+.mode-tab .mode-dot {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 6px; height: 6px;
+  background: var(--ulms-yellow-ink, #f5a623);
+  border-radius: 50%;
+}
+
+/* ============================================================
    Shell layout — CSS grid
    rows: ribbon-strip / ribbon-tabs / ribbon-body / main / status
    cols: rail / center
@@ -25,8 +80,545 @@ html, body, #root {
   display: grid;
   grid-template-rows: 36px 32px auto 1fr 22px;
   grid-template-columns: 260px 1fr;
-  height: 100vh;
+  height: 100%;
+  min-height: 0;
   background: var(--ulms-canvas);
+}
+
+/* Learn-mode shell: drop the Ribbon (3 rows) — just rail + center + status. */
+.learn-shell {
+  display: grid;
+  grid-template-rows: 1fr 22px;
+  grid-template-columns: 260px 1fr;
+  height: 100%;
+  min-height: 0;
+  background: var(--ulms-canvas);
+}
+.learn-shell .rail { grid-row: 1; grid-column: 1; }
+.learn-shell .center { grid-row: 1; grid-column: 2; min-width: 0; }
+.learn-shell .statusbar { grid-row: 2; grid-column: 1 / -1; }
+
+/* In Learn mode, the tab-body's default overflow:auto would let the
+ * outer pane scroll instead of the inner panels. Forcing hidden here
+ * pins the .learn-split height so PdfReader + TranslationPanel each
+ * handle their own scroll, and the right pane stays as tall as the
+ * left pane. */
+.learn-shell .tab-body { overflow: hidden; }
+
+/* Wiki-mode shell: full-width WikiTab + status. */
+.wiki-shell {
+  display: grid;
+  grid-template-rows: 1fr 22px;
+  height: 100%;
+  min-height: 0;
+  background: var(--ulms-canvas);
+}
+.wiki-shell .statusbar { grid-row: 2; grid-column: 1 / -1; }
+
+.wiki-tab {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: 100%;
+  min-height: 0;
+}
+.wiki-sidebar {
+  display: flex;
+  flex-direction: column;
+  background: var(--ulms-surface);
+  border-right: var(--ulms-border);
+  min-height: 0;
+}
+.wiki-sidebar-head {
+  padding: 10px 12px;
+  border-bottom: var(--ulms-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wiki-sidebar-head .search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--ulms-canvas);
+  border: 1px solid var(--ulms-line);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: var(--ulms-muted);
+}
+.wiki-sidebar-head .search-box:focus-within { border-color: var(--ulms-blue); }
+.wiki-sidebar-head .search-box input {
+  flex: 1;
+  font: inherit;
+  font-size: 13px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--ulms-ink);
+}
+.wiki-sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+}
+.wiki-sidebar-list .empty {
+  padding: 16px 12px;
+  color: var(--ulms-muted);
+  font-size: 13px;
+  font-style: italic;
+}
+.wiki-sidebar-list .concept-row {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  border-bottom: 1px solid var(--ulms-line-soft);
+}
+.wiki-sidebar-list .concept-row:hover {
+  background: var(--ulms-canvas-2);
+}
+.wiki-sidebar-list .concept-row.selected {
+  background: var(--ulms-yellow-bg);
+  border-left-color: var(--ulms-yellow);
+}
+.wiki-sidebar-list .concept-title {
+  font-size: 13px;
+  font-weight: 500;
+}
+.wiki-sidebar-list .concept-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ulms-muted);
+}
+.wiki-sidebar-list .concept-meta .slug {
+  font-family: var(--ulms-font-mono);
+}
+.wiki-sidebar-list .badge.edited {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--ulms-blue);
+}
+
+.wiki-view {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.wiki-view-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: var(--ulms-surface);
+  border-bottom: var(--ulms-border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.wiki-view-head .title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wiki-view-head h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.wiki-view-head .badge.edited {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--ulms-blue-bg, rgba(0, 113, 227, 0.1));
+  color: var(--ulms-blue);
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
+}
+.wiki-view-head .actions {
+  display: flex;
+  gap: 6px;
+}
+.wiki-view-head .btn {
+  font: inherit;
+  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--ulms-line);
+  background: var(--ulms-canvas);
+  color: var(--ulms-ink);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.wiki-view-head .btn.ghost { background: transparent; }
+.wiki-view-head .btn:hover:not(:disabled) { background: var(--ulms-canvas-2); }
+.wiki-view-head .btn.primary {
+  background: var(--ulms-blue);
+  border-color: var(--ulms-blue);
+  color: white;
+}
+.wiki-view-head .btn.primary:hover:not(:disabled) { filter: brightness(0.95); }
+.wiki-view-head .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.wiki-view-head .spin { animation: spin 1s linear infinite; }
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.wiki-synth-msg {
+  padding: 6px 24px;
+  font-size: 12px;
+  color: var(--ulms-green);
+  background: var(--ulms-canvas-2);
+  border-bottom: var(--ulms-border);
+}
+
+.wiki-view-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+  min-height: 0;
+}
+.wiki-view-body .markdown-body {
+  font-family: var(--ulms-font-ui);
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.wiki-view-body .markdown-body > :first-child { margin-top: 0; }
+.wiki-view-body .markdown-body h1 { font-size: 1.6em; margin: 0.5em 0 0.5em; font-weight: 600; }
+.wiki-view-body .markdown-body h2 { font-size: 1.3em; margin: 1.2em 0 0.4em; font-weight: 600; }
+.wiki-view-body .markdown-body h3 { font-size: 1.1em; margin: 1em 0 0.3em; font-weight: 600; color: var(--ulms-ink-2); }
+.wiki-view-body .markdown-body p { margin: 0.6em 0; }
+.wiki-view-body .markdown-body ul,
+.wiki-view-body .markdown-body ol { margin: 0.6em 0; padding-left: 1.6em; }
+.wiki-view-body .markdown-body code {
+  font-family: var(--ulms-font-mono);
+  font-size: 0.9em;
+  background: var(--ulms-canvas-2);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.wiki-view-body .markdown-body pre {
+  font-family: var(--ulms-font-mono);
+  font-size: 0.85em;
+  background: var(--ulms-canvas-2);
+  padding: 12px 14px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+.wiki-view-body .markdown-body pre code {
+  background: transparent;
+  padding: 0;
+}
+.wiki-view-body .markdown-body blockquote {
+  margin: 0.6em 0;
+  padding: 4px 12px;
+  border-left: 3px solid var(--ulms-line);
+  color: var(--ulms-ink-2);
+}
+.wiki-view-body .markdown-body table {
+  border-collapse: collapse;
+  margin: 0.8em 0;
+}
+.wiki-view-body .markdown-body th,
+.wiki-view-body .markdown-body td {
+  border: 1px solid var(--ulms-line);
+  padding: 4px 10px;
+}
+.wiki-view-body .markdown-body th { background: var(--ulms-canvas-2); }
+.wiki-view-body .markdown-body .katex-display {
+  margin: 0.8em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.wiki-view-body .empty {
+  color: var(--ulms-muted);
+  font-style: italic;
+  text-align: center;
+  margin-top: 60px;
+}
+
+.wiki-edit-area {
+  font: inherit;
+  font-family: var(--ulms-font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  border: 1px solid var(--ulms-line);
+  border-radius: 6px;
+  padding: 14px 16px;
+  background: var(--ulms-canvas);
+  color: var(--ulms-ink);
+  outline: none;
+  resize: vertical;
+}
+.wiki-edit-area:focus { border-color: var(--ulms-blue); }
+
+/* Home-mode shell: a single full-width content area. */
+.home-shell {
+  display: grid;
+  grid-template-rows: 1fr 22px;
+  height: 100%;
+  min-height: 0;
+  background: var(--ulms-canvas);
+}
+.home-shell .home-content {
+  overflow-y: auto;
+  padding: 48px 64px;
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
+}
+.home-shell .home-content h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 600;
+}
+.home-shell .home-content .home-tagline {
+  color: var(--ulms-muted);
+  margin: 0 0 32px;
+  font-size: 15px;
+}
+.home-shell .home-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.home-shell .home-card {
+  background: var(--ulms-surface);
+  border: var(--ulms-border);
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.05s;
+}
+.home-shell .home-card:hover {
+  border-color: var(--ulms-blue);
+}
+.home-shell .home-card:active { transform: translateY(1px); }
+.home-shell .home-card h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.home-shell .home-card p {
+  margin: 0;
+  color: var(--ulms-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.home-shell .home-recent {
+  border-top: var(--ulms-border);
+  padding-top: 20px;
+}
+.home-shell .home-recent-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+.home-shell .home-recent h2 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ulms-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+.home-shell .recent-bulk-btn {
+  font: inherit;
+  font-size: 13px;
+  background: var(--ulms-blue);
+  color: white;
+  border: 1px solid var(--ulms-blue);
+  border-radius: 6px;
+  padding: 6px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: filter 0.1s;
+}
+.home-shell .recent-bulk-btn:hover {
+  filter: brightness(0.95);
+}
+
+/* MCP setup disclosure */
+.home-shell .mcp-setup {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: var(--ulms-canvas-2);
+  border: var(--ulms-border);
+  border-radius: 6px;
+}
+.home-shell .mcp-setup summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ulms-ink-2);
+  user-select: none;
+}
+.home-shell .mcp-setup[open] summary {
+  margin-bottom: 12px;
+  font-weight: 500;
+  color: var(--ulms-ink);
+}
+.home-shell .mcp-body p {
+  margin: 4px 0 12px;
+  font-size: 13px;
+  color: var(--ulms-ink-2);
+  line-height: 1.5;
+}
+.home-shell .mcp-body ol {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+}
+.home-shell .mcp-body li {
+  margin-bottom: 12px;
+}
+.home-shell .mcp-body code {
+  font-family: var(--ulms-font-mono);
+  font-size: 12px;
+  background: var(--ulms-canvas);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.home-shell .mcp-code {
+  font-family: var(--ulms-font-mono);
+  font-size: 12px;
+  background: var(--ulms-ink);
+  color: #e8e8ed;
+  padding: 10px 12px;
+  border-radius: 4px;
+  margin: 6px 0;
+  white-space: pre;
+  overflow-x: auto;
+}
+.home-shell .mcp-snippet-wrap {
+  position: relative;
+}
+.home-shell .mcp-copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font: inherit;
+  font-size: 11px;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e8e8ed;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.home-shell .mcp-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.home-shell .mcp-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ulms-green);
+  margin-top: 4px;
+}
+.home-shell .mcp-warn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ulms-yellow-ink, #d4a017);
+  margin-top: 4px;
+}
+.home-shell .home-recent .empty {
+  color: var(--ulms-muted);
+  font-style: italic;
+  font-size: 13px;
+}
+.home-shell .recent-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.home-shell .recent-row {
+  display: flex;
+  align-items: stretch;
+  border-radius: 6px;
+  transition: background 0.1s;
+}
+.home-shell .recent-row:hover {
+  background: var(--ulms-canvas-2);
+}
+.home-shell .recent-row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+.home-shell .recent-row .recent-url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--ulms-font-mono);
+  font-size: 13px;
+  color: var(--ulms-ink);
+}
+.home-shell .recent-row .recent-meta {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--ulms-muted);
+  font-family: var(--ulms-font-mono);
+}
+.home-shell .recent-row-delete {
+  flex-shrink: 0;
+  padding: 0 14px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid transparent;
+  color: var(--ulms-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.1s, color 0.1s;
+}
+.home-shell .recent-row:hover .recent-row-delete {
+  opacity: 1;
+}
+.home-shell .recent-row-delete:hover {
+  color: var(--ulms-red, #c0392b);
+  border-left-color: var(--ulms-line);
 }
 .shell[data-density="compact"] {
   grid-template-rows: 30px 26px auto 1fr 20px;
@@ -876,6 +1468,7 @@ html, body, #root {
   display: grid;
   grid-template-rows: auto 1fr auto;
   height: 100%;
+  min-height: 0;
   background: var(--ulms-canvas);
 }
 .translation-panel-header {
@@ -928,10 +1521,12 @@ html, body, #root {
 }
 .translation-panel-body {
   overflow-y: auto;
-  padding: 16px 24px;
+  padding: 16px 24px 24px;
   font-family: var(--ulms-font-ui);
   font-size: var(--ulms-fs-body);
   line-height: 1.65;
+  min-height: 0;
+  position: relative;
 }
 .translation-panel-body .empty {
   color: var(--ulms-muted);
@@ -1024,6 +1619,136 @@ html, body, #root {
   overflow-x: auto;
   overflow-y: hidden;
 }
+
+/* ============================================================
+   DimensionsEditor (Quiz inputs stage — center tab body)
+   ============================================================ */
+.dimensions-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--ulms-canvas);
+}
+.dimensions-editor-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.dimensions-editor-head h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
+.dimensions-editor-head .ulms-meta { margin: 0; font-size: 12px; }
+.dimensions-editor-head code {
+  font-family: var(--ulms-font-mono);
+  background: var(--ulms-canvas-2);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.dimensions-editor-actions {
+  display: flex; gap: 8px; flex-shrink: 0;
+}
+.dimensions-editor-error {
+  background: var(--ulms-red-bg, #fdecea);
+  color: var(--ulms-red, #c0392b);
+  border: 1px solid var(--ulms-red, #c0392b);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.dimensions-editor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dimension-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 14px;
+  background: var(--ulms-surface);
+  border: var(--ulms-border);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.dimension-row-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-top: 4px;
+}
+.dimension-row-meta .row-index {
+  font-family: var(--ulms-font-mono);
+  font-size: 12px;
+  color: var(--ulms-muted);
+  margin-bottom: 4px;
+}
+.dimension-row-meta .row-icon-btn {
+  background: transparent;
+  border: 1px solid var(--ulms-line);
+  border-radius: 4px;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ulms-ink-2);
+  cursor: pointer;
+}
+.dimension-row-meta .row-icon-btn:hover:not(:disabled) {
+  background: var(--ulms-canvas-2);
+}
+.dimension-row-meta .row-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.dimension-row-meta .row-icon-btn.danger:hover {
+  background: var(--ulms-red-bg, #fdecea);
+  border-color: var(--ulms-red, #c0392b);
+  color: var(--ulms-red, #c0392b);
+}
+.dimension-row-fields {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 8px 12px;
+  align-items: start;
+}
+.dimension-row-fields .ulms-label {
+  align-self: center;
+  font-size: 11px;
+}
+.dimension-row-fields .dim-input,
+.dimension-row-fields .dim-textarea {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid var(--ulms-line);
+  border-radius: 4px;
+  background: var(--ulms-canvas);
+  color: var(--ulms-ink);
+  outline: none;
+  resize: vertical;
+}
+.dimension-row-fields .dim-input:focus,
+.dimension-row-fields .dim-textarea:focus {
+  border-color: var(--ulms-blue);
+}
+.dimension-row-fields .dim-input {
+  font-family: var(--ulms-font-mono);
+}
+.dimension-row-fields .dim-textarea {
+  min-height: 60px;
+  line-height: 1.5;
+}
+.dimensions-editor-add {
+  align-self: flex-start;
+  margin-top: 4px;
+}
 .translation-panel-footer {
   padding: 10px 16px;
   border-top: var(--ulms-border);
@@ -1054,6 +1779,44 @@ html, body, #root {
 .translation-panel-footer .import-btn.imported {
   border-color: var(--ulms-green);
   color: var(--ulms-green);
+}
+
+/* Floating "next page" CTA at the bottom of the translation body.
+ * Sits at end of content; semi-transparent so it doesn't dominate
+ * until the user scrolls to it; full opacity on hover. */
+.next-page-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+  padding-bottom: 8px;
+}
+.next-page-btn {
+  font: inherit;
+  font-size: 13px;
+  padding: 9px 22px;
+  border: 1px solid var(--ulms-blue);
+  border-radius: 999px;
+  background: var(--ulms-blue);
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.4;
+  transition: opacity 0.15s, transform 0.05s, background 0.15s;
+}
+.next-page-btn:hover:not(:disabled) {
+  opacity: 1;
+}
+.next-page-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.next-page-btn:disabled {
+  background: transparent;
+  color: var(--ulms-muted);
+  border-color: var(--ulms-line);
+  cursor: default;
+  opacity: 0.7;
 }
 
 /* ============================================================

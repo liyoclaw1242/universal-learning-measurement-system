@@ -13,7 +13,9 @@ mod inputs;
 mod learn;
 mod overrides;
 mod regenerate;
+mod snapshot;
 mod types;
+mod wiki;
 mod workflow;
 
 use std::path::PathBuf;
@@ -28,7 +30,7 @@ use tokio::sync::Mutex;
 use crate::export::ExportResp;
 use crate::gemini::GeminiRuntime;
 use crate::inputs::PickResp;
-use crate::learn::{LearnRuntime, SessionState};
+use crate::learn::{LearnRuntime, LearnSessionMeta, ResumeResp, SessionState};
 use crate::overrides::OverrideResp;
 use crate::regenerate::RegenerateRuntime;
 use crate::types::{Blackboard, MaterialInput, StagedInputs};
@@ -355,6 +357,122 @@ async fn import_translation_as_material(
     learn::import_as_material(workspace, runtime, &state.staged).await
 }
 
+#[tauri::command]
+async fn list_learn_sessions(
+    state: State<'_, Arc<AppState>>,
+) -> Result<Vec<LearnSessionMeta>, String> {
+    Ok(learn::list_learn_sessions(&state.workspace_dir).await)
+}
+
+#[tauri::command]
+async fn resume_learn_session(
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] sessionId: String,
+) -> Result<ResumeResp, String> {
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.learn);
+    learn::resume_learn_session(workspace, runtime, sessionId).await
+}
+
+#[tauri::command]
+async fn delete_learn_session(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] sessionId: String,
+) -> Result<OkResp, String> {
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.learn);
+    learn::delete_learn_session(app, workspace, runtime, sessionId).await?;
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn import_sessions_as_material(
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] sessionIds: Vec<String>,
+) -> Result<MaterialInput, String> {
+    let workspace = state.workspace_dir.clone();
+    learn::import_sessions_as_material(workspace, &state.staged, sessionIds).await
+}
+
+#[tauri::command]
+async fn generate_dimensions(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<Vec<crate::types::Dimension>, String> {
+    let workspace = state.workspace_dir.clone();
+    learn::generate_dimensions(app, workspace, &state.staged).await
+}
+
+#[tauri::command]
+async fn get_dimensions(
+    state: State<'_, Arc<AppState>>,
+) -> Result<Vec<crate::types::Dimension>, String> {
+    Ok(learn::get_staged_dimensions(&state.staged).await)
+}
+
+#[tauri::command]
+async fn update_dimensions(
+    state: State<'_, Arc<AppState>>,
+    dimensions: Vec<crate::types::Dimension>,
+) -> Result<usize, String> {
+    learn::update_staged_dimensions(&state.workspace_dir, &state.staged, dimensions).await
+}
+
+// ─── KB raw-layer (run snapshots) ──────────────────────────
+
+#[tauri::command]
+async fn list_runs(
+    state: State<'_, Arc<AppState>>,
+) -> Result<Vec<snapshot::RunMeta>, String> {
+    Ok(snapshot::list_runs(&state.workspace_dir).await)
+}
+
+#[tauri::command]
+async fn delete_run(
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] runId: String,
+) -> Result<OkResp, String> {
+    snapshot::delete_run(&state.workspace_dir, &runId).await?;
+    Ok(OkResp { ok: true })
+}
+
+// ─── KB wiki layer ─────────────────────────────────────────
+
+#[tauri::command]
+async fn synthesize_wiki(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<wiki::SynthesizeReport, String> {
+    let workspace = state.workspace_dir.clone();
+    wiki::synthesize_wiki(app, workspace).await
+}
+
+#[tauri::command]
+async fn get_wiki_dir() -> Result<String, String> {
+    Ok(wiki::resolve_wiki_dir().to_string_lossy().into_owned())
+}
+
+#[tauri::command]
+async fn get_mcp_setup(state: State<'_, Arc<AppState>>) -> Result<wiki::McpSetup, String> {
+    Ok(wiki::mcp_setup_info(&state.workspace_dir))
+}
+
+#[tauri::command]
+async fn list_wiki_concepts() -> Result<Vec<wiki::WikiConceptMeta>, String> {
+    wiki::list_wiki_concepts().await
+}
+
+#[tauri::command]
+async fn read_wiki_concept(slug: String) -> Result<String, String> {
+    wiki::read_wiki_concept(&slug).await
+}
+
+#[tauri::command]
+async fn write_wiki_concept(slug: String, body: String) -> Result<(), String> {
+    wiki::write_wiki_concept(&slug, &body).await
+}
+
 // ─── entry point ────────────────────────────────────────────
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -394,6 +512,21 @@ pub fn run() {
             stop_translation,
             close_paper_session,
             import_translation_as_material,
+            list_learn_sessions,
+            resume_learn_session,
+            delete_learn_session,
+            import_sessions_as_material,
+            generate_dimensions,
+            get_dimensions,
+            update_dimensions,
+            list_runs,
+            delete_run,
+            synthesize_wiki,
+            get_wiki_dir,
+            get_mcp_setup,
+            list_wiki_concepts,
+            read_wiki_concept,
+            write_wiki_concept,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

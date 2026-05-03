@@ -458,4 +458,197 @@ export const bridge = {
     useShellStore.getState()._onMaterialImportedFromTranslation();
     await this.refreshInputsStatus();
   },
+  async listLearnSessions(): Promise<LearnSessionMeta[]> {
+    const raw = (await invoke('list_learn_sessions')) as Array<{
+      id: string;
+      source_url: string | null;
+      capture_count: number;
+      modified_at: string;
+    }>;
+    return raw.map((r) => ({
+      id: r.id,
+      sourceUrl: r.source_url,
+      captureCount: r.capture_count,
+      modifiedAt: r.modified_at,
+    }));
+  },
+  async deleteLearnSession(sessionId: string): Promise<void> {
+    await invoke('delete_learn_session', { sessionId });
+  },
+  async importSessionsAsMaterial(sessionIds: string[]): Promise<void> {
+    await invoke('import_sessions_as_material', { sessionIds });
+    useShellStore.getState()._onMaterialImportedFromTranslation();
+    await this.refreshInputsStatus();
+  },
+  async generateDimensions(): Promise<number> {
+    const dims = (await invoke('generate_dimensions')) as Array<unknown>;
+    await this.refreshInputsStatus();
+    return dims.length;
+  },
+  async getDimensions(): Promise<
+    Array<{ dim_id: string; name: string; description: string }>
+  > {
+    return (await invoke('get_dimensions')) as Array<{
+      dim_id: string;
+      name: string;
+      description: string;
+    }>;
+  },
+  async updateDimensions(
+    dimensions: Array<{ dim_id: string; name: string; description: string }>,
+  ): Promise<number> {
+    const n = (await invoke('update_dimensions', { dimensions })) as number;
+    await this.refreshInputsStatus();
+    return n;
+  },
+  async resumeLearnSession(sessionId: string): Promise<void> {
+    const resp = (await invoke('resume_learn_session', { sessionId })) as {
+      session: {
+        id: string;
+        source_url: string;
+        pdf_path: string;
+        notes_path: string;
+        capture_count: number;
+      };
+      captures: Array<{
+        index: number;
+        image_path: string;
+        text: string;
+        ts: string;
+      }>;
+    };
+    useShellStore.getState()._onResumeLearnSession({
+      sessionId: resp.session.id,
+      sourceUrl: resp.session.source_url,
+      pdfPath: resp.session.pdf_path,
+      notesPath: resp.session.notes_path,
+      captures: resp.captures.map((c) => ({
+        index: c.index,
+        imagePath: c.image_path,
+        text: c.text,
+        ts: c.ts,
+      })),
+    });
+  },
+  async listRuns(): Promise<RunMeta[]> {
+    const raw = (await invoke('list_runs')) as Array<{
+      id: string;
+      timestamp: string;
+      material_filename: string | null;
+      item_count: number;
+      dimension_count: number;
+      total_cost_usd: number;
+    }>;
+    return raw.map((r) => ({
+      id: r.id,
+      timestamp: r.timestamp,
+      materialFilename: r.material_filename,
+      itemCount: r.item_count,
+      dimensionCount: r.dimension_count,
+      totalCostUsd: r.total_cost_usd,
+    }));
+  },
+  async deleteRun(runId: string): Promise<void> {
+    await invoke('delete_run', { runId });
+  },
+  async synthesizeWiki(): Promise<WikiSynthesizeReport> {
+    const r = (await invoke('synthesize_wiki')) as {
+      wiki_dir: string;
+      run_count: number;
+      ku_count: number;
+      concepts_written: number;
+      skipped_human_edited: string[];
+    };
+    return {
+      wikiDir: r.wiki_dir,
+      runCount: r.run_count,
+      kuCount: r.ku_count,
+      conceptsWritten: r.concepts_written,
+      skippedHumanEdited: r.skipped_human_edited,
+    };
+  },
+  async getWikiDir(): Promise<string> {
+    return (await invoke('get_wiki_dir')) as string;
+  },
+  async listWikiConcepts(): Promise<WikiConceptMeta[]> {
+    const raw = (await invoke('list_wiki_concepts')) as Array<{
+      slug: string;
+      title: string;
+      tags: string[];
+      human_edited: boolean;
+      last_synthesized: string;
+    }>;
+    return raw.map((r) => ({
+      slug: r.slug,
+      title: r.title,
+      tags: r.tags,
+      humanEdited: r.human_edited,
+      lastSynthesized: r.last_synthesized,
+    }));
+  },
+  async readWikiConcept(slug: string): Promise<string> {
+    return (await invoke('read_wiki_concept', { slug })) as string;
+  },
+  async writeWikiConcept(slug: string, body: string): Promise<void> {
+    await invoke('write_wiki_concept', { slug, body });
+  },
+  async getMcpSetup(): Promise<McpSetup> {
+    const r = (await invoke('get_mcp_setup')) as {
+      mcp_binary_path: string;
+      binary_exists: boolean;
+      wiki_dir: string;
+      workspace_dir: string;
+      claude_desktop_config_path: string;
+      config_snippet: string;
+    };
+    return {
+      mcpBinaryPath: r.mcp_binary_path,
+      binaryExists: r.binary_exists,
+      wikiDir: r.wiki_dir,
+      workspaceDir: r.workspace_dir,
+      claudeDesktopConfigPath: r.claude_desktop_config_path,
+      configSnippet: r.config_snippet,
+    };
+  },
 };
+
+export interface McpSetup {
+  mcpBinaryPath: string;
+  binaryExists: boolean;
+  wikiDir: string;
+  workspaceDir: string;
+  claudeDesktopConfigPath: string;
+  configSnippet: string;
+}
+
+export interface WikiConceptMeta {
+  slug: string;
+  title: string;
+  tags: string[];
+  humanEdited: boolean;
+  lastSynthesized: string;
+}
+
+export interface WikiSynthesizeReport {
+  wikiDir: string;
+  runCount: number;
+  kuCount: number;
+  conceptsWritten: number;
+  skippedHumanEdited: string[];
+}
+
+export interface RunMeta {
+  id: string;
+  timestamp: string;
+  materialFilename: string | null;
+  itemCount: number;
+  dimensionCount: number;
+  totalCostUsd: number;
+}
+
+export interface LearnSessionMeta {
+  id: string;
+  sourceUrl: string | null;
+  captureCount: number;
+  modifiedAt: string;
+}

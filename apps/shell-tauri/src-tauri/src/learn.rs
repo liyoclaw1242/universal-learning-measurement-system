@@ -27,7 +27,7 @@ use tokio::sync::Mutex;
 use tokio::time::timeout;
 use uuid::Uuid;
 
-use crate::types::{MaterialInput, StagedInputs};
+use crate::types::{Dimension, MaterialInput, MaterialSource, StagedInputs};
 
 const TRANSLATION_TIMEOUT: Duration = Duration::from_secs(300);
 const PDF_DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(120);
@@ -415,7 +415,497 @@ pub async fn close_paper_session(
     Ok(())
 }
 
+// ─── dimension CRUD (for the inline editor) ────────────────
+
+pub async fn get_staged_dimensions(staged: &Mutex<StagedInputs>) -> Vec<Dimension> {
+    let g = staged.lock().await;
+    g.dimensions.clone().unwrap_or_default()
+}
+
+pub async fn update_staged_dimensions(
+    workspace_dir: &Path,
+    staged: &Mutex<StagedInputs>,
+    dimensions: Vec<Dimension>,
+) -> Result<usize, String> {
+    if dimensions.is_empty() {
+        return Err("dimensions list is empty".into());
+    }
+    // Validate unique dim_id and non-empty fields.
+    let mut seen: std::collections::HashSet<&str> = std::collections::HashSet::new();
+    for (i, d) in dimensions.iter().enumerate() {
+        if d.dim_id.trim().is_empty() {
+            return Err(format!("row {}: dim_id is empty", i + 1));
+        }
+        if d.name.trim().is_empty() {
+            return Err(format!("row {} ({}): name is empty", i + 1, d.dim_id));
+        }
+        if !seen.insert(d.dim_id.as_str()) {
+            return Err(format!("duplicate dim_id: {}", d.dim_id));
+        }
+    }
+
+    {
+        let mut g = staged.lock().await;
+        g.dimensions = Some(dimensions.clone());
+    }
+
+    let yaml_dump = serde_yaml::to_string(&serde_json::json!({
+        "dimensions": dimensions,
+    }))
+    .unwrap_or_default();
+    let _ =
+        crate::inputs::copy_to_inputs_dir(workspace_dir, "edited-dimensions.yaml", &yaml_dump)
+            .await;
+    Ok(dimensions.len())
+}
+
+// ─── auto-generate competency dimensions ───────────────────
+
+const DIMENSIONS_PROMPT: &str = r#"你的任務:從以下教材內容,抽出 5-7 個能力維度 (competency dimensions),用於後續評量設計。
+
+每個維度需有三個欄位:
+- dim_id: snake_case 識別碼,英文 (例: spatial_reasoning, gradient_descent_intuition)
+- name: 簡短中文名稱 (5-15 字)
+- description: 該維度具體描述 (30-80 字),說明學習者應達成的理解程度與可觀察行為
+
+維度間應彼此正交、覆蓋教材的不同層面 (概念辨識 / 因果推理 / 應用遷移 / 計算操作 等)。
+
+輸出必須是純 YAML,絕對不要任何說明文字、不要 markdown code fence 例如 ```yaml。
+
+範例輸出格式:
+
+dimensions:
+  - dim_id: example_one
+    name: 範例維度一
+    description: 學習者應能...
+  - dim_id: example_two
+    name: 範例維度二
+    description: 學習者應能...
+
+教材內容如下:
+---
+"#;
+
+#[derive(serde::Deserialize)]
+struct DimensionsYaml {
+    dimensions: Vec<Dimension>,
+}
+
+fn strip_markdown_fences(s: &str) -> &str {
+    let trimmed = s.trim();
+    // Strip ```yaml ... ``` or ``` ... ``` if present
+    if let Some(rest) = trimmed.strip_prefix("```yaml") {
+        return rest.trim_start_matches('\n').trim_end_matches("```").trim();
+    }
+    if let Some(rest) = trimmed.strip_prefix("```") {
+        return rest.trim_start_matches('\n').trim_end_matches("```").trim();
+    }
+    trimmed
+}
+
+pub async fn generate_dimensions(
+    app: AppHandle,
+    workspace_dir: PathBuf,
+    staged: &Mutex<StagedInputs>,
+) -> Result<Vec<Dimension>, String> {
+    let material_content = {
+        let g = staged.lock().await;
+        g.material
+            .as_ref()
+            .ok_or_else(|| "no material staged — load or import material first".to_string())?
+            .content
+            .clone()
+    };
+
+    if material_content.trim().is_empty() {
+        return Err("staged material is empty".into());
+    }
+
+    // Cap absurdly large papers so the prompt fits within reasonable
+    // gemini context. 200k chars (~50k tokens) is plenty for a paper.
+    let truncated = if material_content.chars().count() > 200_000 {
+        material_content.chars().take(200_000).collect::<String>()
+    } else {
+        material_content.clone()
+    };
+
+    let prompt = format!("{DIMENSIONS_PROMPT}{truncated}\n---\n");
+
+    let _ = app.emit("dimensions:generating", json!({}));
+
+    // Plain text output (no stream-json) — we just need the final YAML.
+    let output = Command::new(gemini_bin())
+        .args(["-y", "-p", &prompt])
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .kill_on_drop(true)
+        .output()
+        .await
+        .map_err(|e| format!("gemini spawn: {e}"))?;
+
+    if !output.status.success() {
+        return Err(format!(
+            "gemini exited {:?}: {}",
+            output.status.code(),
+            String::from_utf8_lossy(&output.stderr).trim()
+        ));
+    }
+
+    let raw = String::from_utf8_lossy(&output.stdout).into_owned();
+    let yaml_str = strip_markdown_fences(&raw);
+    let parsed: DimensionsYaml = serde_yaml::from_str(yaml_str).map_err(|e| {
+        format!("parse YAML: {e}\nLLM output was:\n{}\n", raw.chars().take(500).collect::<String>())
+    })?;
+
+    if parsed.dimensions.is_empty() {
+        return Err("LLM returned no dimensions".into());
+    }
+
+    // Stage them.
+    {
+        let mut g = staged.lock().await;
+        g.dimensions = Some(parsed.dimensions.clone());
+    }
+
+    // Persist a copy to workspace/inputs/auto-dimensions.yaml so the
+    // user can edit/version-control it later.
+    let yaml_dump = serde_yaml::to_string(&serde_json::json!({
+        "dimensions": parsed.dimensions,
+    }))
+    .unwrap_or_else(|_| String::new());
+    let _ = crate::inputs::copy_to_inputs_dir(&workspace_dir, "auto-dimensions.yaml", &yaml_dump)
+        .await;
+
+    let _ = app.emit("dimensions:generated", json!({ "count": parsed.dimensions.len() }));
+
+    Ok(parsed.dimensions)
+}
+
+// ─── list / resume past sessions ───────────────────────────
+
+#[derive(Debug, Clone, Serialize)]
+pub struct LearnSessionMeta {
+    pub id: String,
+    pub source_url: Option<String>,
+    pub capture_count: u32,
+    pub modified_at: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct TranslationCaptureMeta {
+    pub index: u32,
+    pub image_path: String,
+    pub text: String,
+    pub ts: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct ResumeResp {
+    pub session: SessionState,
+    pub captures: Vec<TranslationCaptureMeta>,
+}
+
+fn parse_source_url_from_notes(notes: &str) -> Option<String> {
+    // First line is "# Translation notes — <url>".
+    let first = notes.lines().next()?;
+    let prefix = "# Translation notes — ";
+    first.strip_prefix(prefix).map(|s| s.trim().to_string())
+}
+
+/// Parse notes.md into per-page sections. Sections start with
+/// "## Page N · timestamp" and the body is everything until the next
+/// such header. Pages without a header are ignored.
+fn parse_notes_into_captures(notes: &str, session_dir: &Path) -> Vec<TranslationCaptureMeta> {
+    let mut out: Vec<TranslationCaptureMeta> = Vec::new();
+    let mut current_index: Option<u32> = None;
+    let mut current_ts = String::new();
+    let mut current_body: Vec<&str> = Vec::new();
+    for line in notes.lines() {
+        if let Some(rest) = line.strip_prefix("## Page ") {
+            // Flush previous section
+            if let Some(idx) = current_index.take() {
+                let text = current_body.join("\n").trim().to_string();
+                let image_path = session_dir
+                    .join(format!("page-{idx}.png"))
+                    .to_string_lossy()
+                    .into_owned();
+                out.push(TranslationCaptureMeta {
+                    index: idx,
+                    image_path,
+                    text,
+                    ts: std::mem::take(&mut current_ts),
+                });
+                current_body.clear();
+            }
+            // Parse "N · timestamp"
+            let mut parts = rest.splitn(2, " · ");
+            let num = parts
+                .next()
+                .and_then(|s| s.trim().parse::<u32>().ok());
+            let ts = parts.next().unwrap_or("").trim().to_string();
+            if let Some(n) = num {
+                current_index = Some(n);
+                current_ts = ts;
+            }
+        } else if current_index.is_some() {
+            current_body.push(line);
+        }
+    }
+    if let Some(idx) = current_index.take() {
+        let text = current_body.join("\n").trim().to_string();
+        let image_path = session_dir
+            .join(format!("page-{idx}.png"))
+            .to_string_lossy()
+            .into_owned();
+        out.push(TranslationCaptureMeta {
+            index: idx,
+            image_path,
+            text,
+            ts: current_ts,
+        });
+    }
+    out
+}
+
+fn iso8601_from_systemtime(t: SystemTime) -> String {
+    let dur = t.duration_since(UNIX_EPOCH).unwrap_or_default();
+    let secs = dur.as_secs() as i64;
+    let days = secs.div_euclid(86_400);
+    let rem = secs.rem_euclid(86_400);
+    let h = rem / 3_600;
+    let m = (rem % 3_600) / 60;
+    let s = rem % 60;
+    let z = days + 719_468;
+    let era = if z >= 0 { z / 146_097 } else { (z - 146_096) / 146_097 };
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1_460 + doe / 36_524 - doe / 146_096) / 365;
+    let y = yoe + era * 400;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = doy - (153 * mp + 2) / 5 + 1;
+    let mth = if mp < 10 { mp + 3 } else { mp - 9 };
+    let y = if mth <= 2 { y + 1 } else { y };
+    format!("{y:04}-{mth:02}-{d:02}T{h:02}:{m:02}:{s:02}Z")
+}
+
+pub async fn list_learn_sessions(workspace_dir: &Path) -> Vec<LearnSessionMeta> {
+    let learn_root = workspace_dir.join("learn");
+    let mut entries: Vec<LearnSessionMeta> = Vec::new();
+    let mut rd = match tokio::fs::read_dir(&learn_root).await {
+        Ok(r) => r,
+        Err(_) => return entries,
+    };
+    while let Ok(Some(entry)) = rd.next_entry().await {
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
+        }
+        let id = match path.file_name().and_then(|s| s.to_str()) {
+            Some(s) => s.to_string(),
+            None => continue,
+        };
+        let notes_path = path.join("notes.md");
+        let notes = match tokio::fs::read_to_string(&notes_path).await {
+            Ok(s) => s,
+            Err(_) => continue,
+        };
+        let source_url = parse_source_url_from_notes(&notes);
+        let mut capture_count: u32 = 0;
+        if let Ok(mut rd2) = tokio::fs::read_dir(&path).await {
+            while let Ok(Some(file)) = rd2.next_entry().await {
+                let n = file
+                    .file_name()
+                    .to_string_lossy()
+                    .into_owned();
+                if n.starts_with("page-") && n.ends_with(".png") {
+                    capture_count += 1;
+                }
+            }
+        }
+        let modified_at = entry
+            .metadata()
+            .await
+            .ok()
+            .and_then(|m| m.modified().ok())
+            .map(iso8601_from_systemtime)
+            .unwrap_or_default();
+        entries.push(LearnSessionMeta {
+            id,
+            source_url,
+            capture_count,
+            modified_at,
+        });
+    }
+    entries.sort_by(|a, b| b.modified_at.cmp(&a.modified_at));
+    entries
+}
+
+pub async fn delete_learn_session(
+    app: AppHandle,
+    workspace_dir: PathBuf,
+    runtime: Arc<LearnRuntime>,
+    session_id: String,
+) -> Result<(), String> {
+    if session_id.is_empty()
+        || session_id.contains('/')
+        || session_id.contains('\\')
+        || session_id.contains("..")
+    {
+        return Err(format!("invalid session id: {session_id:?}"));
+    }
+    let session_dir = workspace_dir.join("learn").join(&session_id);
+    if !session_dir.is_dir() {
+        return Err(format!("session '{session_id}' not found"));
+    }
+
+    // If we're deleting the active session, kill any in-flight gemini
+    // and clear runtime so the renderer state stays consistent.
+    let is_active = {
+        let g = runtime.current_session.lock().await;
+        g.as_ref().map(|s| s.id == session_id).unwrap_or(false)
+    };
+    if is_active {
+        runtime.request_stop().await;
+        let mut g = runtime.current_session.lock().await;
+        *g = None;
+        let _ = app.emit("paper-window:closed", json!({}));
+    }
+
+    tokio::fs::remove_dir_all(&session_dir)
+        .await
+        .map_err(|e| format!("rm -rf {}: {e}", session_dir.display()))?;
+    Ok(())
+}
+
+pub async fn resume_learn_session(
+    workspace_dir: PathBuf,
+    runtime: Arc<LearnRuntime>,
+    session_id: String,
+) -> Result<ResumeResp, String> {
+    // Cancel any in-flight gemini, drop existing session.
+    runtime.request_stop().await;
+    {
+        let mut g = runtime.current_session.lock().await;
+        *g = None;
+    }
+
+    let session_dir = workspace_dir.join("learn").join(&session_id);
+    if !session_dir.is_dir() {
+        return Err(format!("session '{session_id}' not found"));
+    }
+    let pdf_path = session_dir.join("source.pdf");
+    if !pdf_path.is_file() {
+        return Err(format!("session '{session_id}' has no source.pdf"));
+    }
+    let notes_path = session_dir.join("notes.md");
+    let notes = tokio::fs::read_to_string(&notes_path)
+        .await
+        .map_err(|e| format!("read notes.md: {e}"))?;
+    let source_url = parse_source_url_from_notes(&notes).unwrap_or_default();
+    let captures = parse_notes_into_captures(&notes, &session_dir);
+    let capture_count = captures.iter().map(|c| c.index).max().unwrap_or(0);
+
+    let session = SessionState {
+        id: session_id,
+        source_url,
+        pdf_path,
+        session_dir,
+        notes_path,
+        capture_count,
+    };
+    {
+        let mut g = runtime.current_session.lock().await;
+        *g = Some(session.clone());
+    }
+    Ok(ResumeResp { session, captures })
+}
+
 // ─── import accumulated translations as material ──────────
+
+/// Bulk import: take a set of session ids, concatenate their notes.md
+/// with HTML-comment file separators (mirrors the multi-file material
+/// upload format), stage as a single MaterialInput.sources entry list.
+pub async fn import_sessions_as_material(
+    workspace_dir: PathBuf,
+    staged: &Mutex<StagedInputs>,
+    session_ids: Vec<String>,
+) -> Result<MaterialInput, String> {
+    if session_ids.is_empty() {
+        return Err("no sessions selected".into());
+    }
+    let mut sources: Vec<MaterialSource> = Vec::with_capacity(session_ids.len());
+    let mut parts: Vec<(String, String)> = Vec::with_capacity(session_ids.len());
+
+    for id in &session_ids {
+        if id.contains('/') || id.contains('\\') || id.contains("..") {
+            return Err(format!("invalid session id: {id:?}"));
+        }
+        let notes_path = workspace_dir.join("learn").join(id).join("notes.md");
+        let content = tokio::fs::read_to_string(&notes_path)
+            .await
+            .map_err(|e| format!("read {id}/notes.md: {e}"))?;
+        if content.trim().is_empty() {
+            // Skip empty sessions silently.
+            continue;
+        }
+        let url = parse_source_url_from_notes(&content).unwrap_or_default();
+        let filename = if url.is_empty() {
+            format!("{id}-translated.md")
+        } else {
+            derive_material_filename(&url)
+        };
+        sources.push(MaterialSource {
+            filename: filename.clone(),
+            char_count: content.chars().count(),
+        });
+        parts.push((filename, content));
+    }
+
+    if sources.is_empty() {
+        return Err("all selected sessions are empty (no translations yet)".into());
+    }
+
+    let joined = if parts.len() == 1 {
+        parts[0].1.clone()
+    } else {
+        parts
+            .iter()
+            .map(|(name, content)| {
+                format!("<!-- === FILE: {name} === -->\n\n{}\n", content.trim_end())
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
+    };
+
+    // Combined filename for the inputs/ copy: short label for single,
+    // generic bundle name for multi.
+    let combined_filename = if sources.len() == 1 {
+        sources[0].filename.clone()
+    } else {
+        format!("learn-bundle-{}-papers.md", sources.len())
+    };
+    crate::inputs::copy_to_inputs_dir(&workspace_dir, &combined_filename, &joined).await?;
+
+    // UI display label (matches inputs::build_combined_filename style)
+    let display_filename = match sources.len() {
+        1 => sources[0].filename.clone(),
+        2 => format!("{} + {}", sources[0].filename, sources[1].filename),
+        n => format!("{} + {} others", sources[0].filename, n - 1),
+    };
+
+    let material = MaterialInput {
+        filename: display_filename,
+        content: joined,
+        content_type: "markdown".into(),
+        sources: if sources.len() > 1 { Some(sources) } else { None },
+    };
+    {
+        let mut g = staged.lock().await;
+        g.material = Some(material.clone());
+    }
+    Ok(material)
+}
 
 pub async fn import_as_material(
     workspace_dir: PathBuf,

@@ -5,3 +5,4 @@
 export * from './session';
 export * from './agent';
 export * from './item';
+export * from './dimension';

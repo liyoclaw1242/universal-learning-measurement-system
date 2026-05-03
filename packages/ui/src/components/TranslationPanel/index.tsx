@@ -3,7 +3,8 @@
 // the left-pane PDF nav. Aggregate state (total captures, chars,
 // import) lives in the footer.
 
-import { Camera, FileDown, StopCircle } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { Camera, ChevronRight, FileDown, StopCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -35,6 +36,9 @@ interface TranslationPanelProps {
   onCapture?: () => void;
   onStop?: () => void;
   onImport?: () => void;
+  /** Advance the left-pane PDF to the next page. Wired from the
+   *  floating CTA at the bottom of the translation body. */
+  onNextPage?: () => void;
 }
 
 export default function TranslationPanel({
@@ -47,12 +51,20 @@ export default function TranslationPanel({
   onCapture,
   onStop,
   onImport,
+  onNextPage,
 }: TranslationPanelProps) {
   const totalChars = captures.reduce((s, c) => s + c.text.length, 0);
   const translatedCount = captures.filter((c) => c.text.length > 0).length;
   const canImport = translatedCount > 0 && !streaming;
   const current = captures.find((c) => c.index === currentPage);
   const hasText = !!current && current.text.length > 0;
+
+  // Reset scroll to top whenever the page changes so the user reads the
+  // new translation from the start.
+  const bodyRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (bodyRef.current) bodyRef.current.scrollTop = 0;
+  }, [currentPage]);
 
   return (
     <div className="translation-panel">
@@ -91,7 +103,7 @@ export default function TranslationPanel({
         )}
       </div>
 
-      <div className="translation-panel-body">
+      <div className="translation-panel-body" ref={bodyRef}>
         {!sourceUrl ? (
           <div className="empty">Open a paper URL from the left rail to begin.</div>
         ) : hasText ? (
@@ -116,6 +128,13 @@ export default function TranslationPanel({
             Click <strong>Translate page {currentPage}</strong> on the left.
           </div>
         )}
+        {sourceUrl && hasText && totalPages > 0 && onNextPage && (
+          <NextPageCta
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onNext={onNextPage}
+          />
+        )}
       </div>
 
       <div className="translation-panel-footer">
@@ -136,6 +155,40 @@ export default function TranslationPanel({
           {imported ? 'Re-import as material' : 'Import as material'}
         </button>
       </div>
+    </div>
+  );
+}
+
+function NextPageCta({
+  currentPage,
+  totalPages,
+  onNext,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onNext: () => void;
+}) {
+  const isLast = currentPage >= totalPages;
+  return (
+    <div className="next-page-cta">
+      <button
+        type="button"
+        className="next-page-btn"
+        onClick={() => {
+          if (!isLast) onNext();
+        }}
+        disabled={isLast}
+        aria-label={isLast ? '本教材結束' : `前往下一頁 page ${currentPage + 1}`}
+      >
+        {isLast ? (
+          '本教材結束'
+        ) : (
+          <>
+            下一頁 · page {currentPage + 1}
+            <ChevronRight size={14} strokeWidth={1.75} />
+          </>
+        )}
+      </button>
     </div>
   );
 }
