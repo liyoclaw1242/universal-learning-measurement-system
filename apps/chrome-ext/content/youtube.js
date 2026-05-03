@@ -93,22 +93,39 @@ export async function extractYoutube() {
   };
 
   async function locatePlayerResponse() {
+    // SPA navigations leave window.ytInitialPlayerResponse holding the
+    // PREVIOUS video's data. Cross-check every source against the
+    // current URL's ?v= and skip any that mismatch — otherwise a new
+    // capture overwrites the prior video's raw/youtube/<id>/ folder.
+    const urlId = (() => {
+      try {
+        return new URL(window.location.href).searchParams.get('v');
+      } catch {
+        return null;
+      }
+    })();
+    const ok = (p) => {
+      const id = p?.videoDetails?.videoId;
+      if (!id) return false;
+      if (urlId && id !== urlId) return false;
+      return true;
+    };
+
     // A: hard-loaded /watch page sets the global directly
-    const direct = window.ytInitialPlayerResponse;
-    if (direct?.videoDetails?.videoId) return direct;
+    if (ok(window.ytInitialPlayerResponse)) return window.ytInitialPlayerResponse;
 
     // B: inline <script> tags carry `var ytInitialPlayerResponse = {…};`
     for (const s of document.querySelectorAll('script')) {
       const txt = s.textContent;
       if (!txt || !txt.includes('ytInitialPlayerResponse')) continue;
       const obj = extractObjectAfter(txt, 'ytInitialPlayerResponse');
-      if (obj?.videoDetails?.videoId) return obj;
+      if (ok(obj)) return obj;
     }
 
     // C: SPA-mounted <ytd-watch-flexy> Polymer element exposes playerData
     const flexy = document.querySelector('ytd-watch-flexy');
     const fromElement = flexy?.playerData ?? flexy?.__data?.playerData;
-    if (fromElement?.videoDetails?.videoId) return fromElement;
+    if (ok(fromElement)) return fromElement;
 
     // D: refetch the URL — the server-rendered HTML always has the var
     try {
@@ -116,7 +133,7 @@ export async function extractYoutube() {
       if (res.ok) {
         const html = await res.text();
         const obj = extractObjectAfter(html, 'ytInitialPlayerResponse');
-        if (obj?.videoDetails?.videoId) return obj;
+        if (ok(obj)) return obj;
       }
     } catch {
       // ignore — last-resort fallback
