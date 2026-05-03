@@ -291,6 +291,87 @@ pub async fn list_resources() -> Vec<RawResourceSummary> {
     out
 }
 
+// ─── read single resource ─────────────────────────────────
+
+#[derive(Debug, Clone, Serialize)]
+pub struct RawResourceDetail {
+    pub meta: RawMeta,
+    /// Body file content — content.md for article/paper/markdown,
+    /// transcript.md for youtube, may be empty for image-only entries.
+    pub body: String,
+    /// data: URL for the cover thumbnail (youtube) or the captured
+    /// image (image type). None when no asset is on disk.
+    pub thumbnail_data_url: Option<String>,
+}
+
+pub async fn read_resource(
+    resource_type: &str,
+    id: &str,
+) -> Result<RawResourceDetail, String> {
+    validate_id(id)?;
+    let allowed = ["articles", "youtube", "papers", "images", "markdown"];
+    if !allowed.contains(&resource_type) {
+        return Err(format!("invalid type: {resource_type:?}"));
+    }
+    let dir = raw_root().join(resource_type).join(id);
+    if !dir.is_dir() {
+        return Err(format!("resource not found: {resource_type}/{id}"));
+    }
+
+    let yaml = fs::read_to_string(dir.join("meta.yaml"))
+        .await
+        .map_err(|e| format!("read meta.yaml: {e}"))?;
+    let meta: RawMeta =
+        serde_yaml::from_str(&yaml).map_err(|e| format!("parse meta.yaml: {e}"))?;
+
+    // Body file location is type-dependent.
+    let body_candidates: &[&str] = match resource_type {
+        "youtube" => &["transcript.md"],
+        _ => &["content.md", "body.md", "notes.md"],
+    };
+    let mut body = String::new();
+    for name in body_candidates {
+        if let Ok(s) = fs::read_to_string(dir.join(name)).await {
+            body = s;
+            break;
+        }
+    }
+
+    // Cover thumbnail: youtube/<id>/thumbnails/cover.jpg, or for an
+    // image resource the captured file itself (image.png / cover.jpg).
+    let thumbnail_data_url = read_first_data_url(&[
+        dir.join("thumbnails").join("cover.jpg"),
+        dir.join("thumbnails").join("cover.png"),
+        dir.join("image.png"),
+        dir.join("image.jpg"),
+        dir.join("cover.jpg"),
+    ])
+    .await;
+
+    Ok(RawResourceDetail {
+        meta,
+        body,
+        thumbnail_data_url,
+    })
+}
+
+async fn read_first_data_url(paths: &[PathBuf]) -> Option<String> {
+    use base64::Engine;
+    for p in paths {
+        if let Ok(bytes) = fs::read(p).await {
+            let mime = match p.extension().and_then(|e| e.to_str()) {
+                Some("png") => "image/png",
+                Some("jpg") | Some("jpeg") => "image/jpeg",
+                Some("webp") => "image/webp",
+                _ => "application/octet-stream",
+            };
+            let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
+            return Some(format!("data:{mime};base64,{b64}"));
+        }
+    }
+    None
+}
+
 pub async fn delete_resource(resource_type: &str, id: &str) -> Result<(), String> {
     validate_id(id)?;
     let allowed = ["articles", "youtube", "papers", "images", "markdown"];

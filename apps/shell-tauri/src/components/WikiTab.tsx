@@ -1,12 +1,70 @@
-// WikiTab — thin Tauri-side orchestrator that owns concept list +
-// content state and threads bridge calls into the pure presentational
-// WikiSidebar / WikiViewer components in @ulms/ui.
+// WikiTab — thin Tauri-side orchestrator for the Wiki tab.
+// Owns two sub-modes: "concepts" (gemini-synthesized topic pages) and
+// "raw" (browse ~/.ulms-wiki/raw/<type>/<id>/). Both share a sidebar
+// + viewer two-pane layout but render different content.
 
 import { useEffect, useRef, useState } from 'react';
-import { WikiSidebar, WikiViewer, type WikiConceptMeta } from '@ulms/ui';
+import {
+  RawSidebar,
+  RawViewer,
+  WikiSidebar,
+  WikiViewer,
+  type RawResourceDetail,
+  type RawResourceSummary,
+  type WikiConceptMeta,
+} from '@ulms/ui';
+import { useShellStore } from '@/state/shellStore';
 import { bridge } from '@/state/ipcBridge';
+import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+
+type WikiMode = 'concepts' | 'raw';
 
 export default function WikiTab() {
+  const [wikiMode, setWikiMode] = useState<WikiMode>('concepts');
+  return (
+    <div className="wiki-tab-shell" style={{ display: 'flex', flexDirection: 'column', minHeight: 0, height: '100%' }}>
+      <ModeToggle value={wikiMode} onChange={setWikiMode} />
+      <div style={{ flex: 1, minHeight: 0 }}>
+        {wikiMode === 'concepts' ? <ConceptsPane /> : <RawPane />}
+      </div>
+    </div>
+  );
+}
+
+function ModeToggle({
+  value,
+  onChange,
+}: {
+  value: WikiMode;
+  onChange: (m: WikiMode) => void;
+}) {
+  return (
+    <div className="wiki-mode-toggle" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        aria-selected={value === 'concepts'}
+        className={value === 'concepts' ? 'active' : ''}
+        onClick={() => onChange('concepts')}
+      >
+        Concepts
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={value === 'raw'}
+        className={value === 'raw' ? 'active' : ''}
+        onClick={() => onChange('raw')}
+      >
+        Raw materials
+      </button>
+    </div>
+  );
+}
+
+// ─── concepts pane (existing behavior) ────────────────────
+
+function ConceptsPane() {
   const [concepts, setConcepts] = useState<WikiConceptMeta[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
@@ -32,14 +90,12 @@ export default function WikiTab() {
     reloadList();
   }, []);
 
-  // Auto-select first concept once list arrives.
   useEffect(() => {
     if (!selectedSlug && concepts.length > 0) {
       setSelectedSlug(concepts[0].slug);
     }
   }, [concepts, selectedSlug]);
 
-  // Load body whenever selection or reload-tick changes.
   useEffect(() => {
     if (!selectedSlug) {
       setContent('');
@@ -83,7 +139,7 @@ export default function WikiTab() {
       setContent(fresh);
       setEditing(false);
       setDraft('');
-      reloadList(); // refresh sidebar so the human-edited badge appears
+      reloadList();
     } catch (e) {
       alert(`Save failed: ${e}`);
     } finally {
@@ -103,7 +159,7 @@ export default function WikiTab() {
             : ''),
       );
       reloadList();
-      reloadTick.current++; // re-read current selection in case it changed
+      reloadTick.current++;
     } catch (e) {
       alert(`Synthesize failed: ${e}`);
     } finally {
@@ -143,4 +199,143 @@ export default function WikiTab() {
       />
     </div>
   );
+}
+
+// ─── raw materials pane ───────────────────────────────────
+
+function RawPane() {
+  const setMode = useShellStore((s) => s.setMode);
+  const [resources, setResources] = useState<RawResourceSummary[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [filter, setFilter] = useState('');
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [detail, setDetail] = useState<RawResourceDetail | null>(null);
+  const [readError, setReadError] = useState<string | null>(null);
+
+  const reloadList = () => {
+    setLoadError(null);
+    bridge
+      .listRawResources()
+      .then(setResources)
+      .catch((e) => setLoadError(String(e)));
+  };
+
+  useEffect(() => {
+    reloadList();
+  }, []);
+
+  // Refresh on chrome-ext imports / pdf-learn syncs.
+  useEffect(() => {
+    let unlisten: UnlistenFn | null = null;
+    let cancelled = false;
+    listen<unknown>('raw:imported', () => {
+      if (!cancelled) reloadList();
+    }).then((fn) => {
+      if (cancelled) fn();
+      else unlisten = fn;
+    });
+    return () => {
+      cancelled = true;
+      if (unlisten) unlisten();
+    };
+  }, []);
+
+  // Auto-select first resource once list arrives.
+  useEffect(() => {
+    if (!selectedKey && resources.length > 0) {
+      const first = resources[0];
+      setSelectedKey(`${first.type}/${first.id}`);
+    }
+  }, [resources, selectedKey]);
+
+  // Load detail on selection change.
+  useEffect(() => {
+    if (!selectedKey) {
+      setDetail(null);
+      return;
+    }
+    const slash = selectedKey.indexOf('/');
+    if (slash < 0) return;
+    const type = selectedKey.slice(0, slash);
+    const id = selectedKey.slice(slash + 1);
+    let cancelled = false;
+    setReadError(null);
+    bridge
+      .readRawResource(pluralizeType(type), id)
+      .then((d) => {
+        if (cancelled) return;
+        setDetail(d);
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setReadError(String(e));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedKey]);
+
+  return (
+    <div className="wiki-tab">
+      <RawSidebar
+        resources={resources}
+        filter={filter}
+        selectedKey={selectedKey}
+        loadError={loadError}
+        onFilterChange={setFilter}
+        onSelect={(type, id) => setSelectedKey(`${type}/${id}`)}
+      />
+      <RawViewer
+        detail={detail}
+        loadError={readError}
+        hasAnyResource={resources.length > 0}
+        onGoToLearn={(d) => {
+          // Phase 1 stub — just switch mode. Phase 2 will load the
+          // resource into a type-aware Learn workspace.
+          setMode('learn');
+          alert(
+            `Opening "${d.meta.title}" in Learn — full ${d.meta.type} reader coming next phase.`,
+          );
+        }}
+        onOpenSource={(url) => {
+          if (/^https?:\/\//.test(url)) {
+            window.open(url, '_blank', 'noopener,noreferrer');
+          }
+        }}
+        onDelete={async (type, id, label) => {
+          if (!confirm(`Delete raw resource "${label}"? Folder will be removed.`)) return;
+          try {
+            await bridge.deleteRawResource(pluralizeType(type), id);
+            setResources((prev) => prev.filter((r) => !(r.type === type && r.id === id)));
+            const key = `${type}/${id}`;
+            if (selectedKey === key) {
+              setSelectedKey(null);
+              setDetail(null);
+            }
+          } catch (e) {
+            alert(`Delete failed: ${e}`);
+          }
+        }}
+      />
+    </div>
+  );
+}
+
+// raw_bank stores under plural directory names but the meta.type is
+// singular ("article" not "articles"). Bridge expects the plural.
+function pluralizeType(t: string): string {
+  switch (t) {
+    case 'article':
+      return 'articles';
+    case 'youtube':
+      return 'youtube';
+    case 'paper':
+      return 'papers';
+    case 'image':
+      return 'images';
+    case 'markdown':
+      return 'markdown';
+    default:
+      return t;
+  }
 }

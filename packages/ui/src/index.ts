@@ -20,6 +20,8 @@ export { default as DimensionsEditor } from './components/DimensionsEditor';
 
 export { default as WikiSidebar } from './components/WikiSidebar';
 export { default as WikiViewer } from './components/WikiViewer';
+export { default as RawSidebar } from './components/RawSidebar';
+export { default as RawViewer } from './components/RawViewer';
 
 export { default as PdfReader } from './components/PdfReader';
 

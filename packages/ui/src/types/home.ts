@@ -45,3 +45,29 @@ export interface RawResourceSummary {
   verified: boolean;
   quizzedCount: number;
 }
+
+/** Full meta + body returned by read_raw_resource. */
+export interface RawResourceMetaFull {
+  id: string;
+  type: string;
+  sourceUrl: string;
+  title: string;
+  capturedAt: string;
+  capturedVia: string;
+  verified: boolean;
+  quizzedIn: string[];
+  charCount: number | null;
+  durationS: number | null;
+  channel: string | null;
+  captionLang: string | null;
+  pageCount: number | null;
+  author: string | null;
+}
+
+export interface RawResourceDetail {
+  meta: RawResourceMetaFull;
+  /** content.md / transcript.md content; empty when no body file exists. */
+  body: string;
+  /** data: URL for cover thumbnail (youtube) or captured image. null otherwise. */
+  thumbnailDataUrl: string | null;
+}

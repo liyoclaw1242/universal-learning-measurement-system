@@ -7,6 +7,7 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import type {
   LearnSessionMeta,
   McpSetup,
+  RawResourceDetail,
   RawResourceSummary,
   RunMeta,
   WikiConceptMeta as UiWikiConceptMeta,
@@ -605,6 +606,48 @@ export const bridge = {
   async getExtToken(): Promise<string> {
     return (await invoke('get_ext_token')) as string;
   },
+  async readRawResource(resourceType: string, id: string): Promise<RawResourceDetail> {
+    const r = (await invoke('read_raw_resource', { resourceType, id })) as {
+      meta: {
+        id: string;
+        type: string;
+        source_url: string;
+        title: string;
+        captured_at: string;
+        captured_via: string;
+        verified: boolean;
+        quizzed_in: string[];
+        char_count: number | null;
+        duration_s: number | null;
+        channel: string | null;
+        caption_lang: string | null;
+        page_count: number | null;
+        author: string | null;
+      };
+      body: string;
+      thumbnail_data_url: string | null;
+    };
+    return {
+      meta: {
+        id: r.meta.id,
+        type: r.meta.type,
+        sourceUrl: r.meta.source_url,
+        title: r.meta.title,
+        capturedAt: r.meta.captured_at,
+        capturedVia: r.meta.captured_via,
+        verified: r.meta.verified,
+        quizzedIn: r.meta.quizzed_in,
+        charCount: r.meta.char_count,
+        durationS: r.meta.duration_s,
+        channel: r.meta.channel,
+        captionLang: r.meta.caption_lang,
+        pageCount: r.meta.page_count,
+        author: r.meta.author,
+      },
+      body: r.body,
+      thumbnailDataUrl: r.thumbnail_data_url,
+    };
+  },
   async listRawResources(): Promise<RawResourceSummary[]> {
     const raw = (await invoke('list_raw_resources')) as Array<{
       id: string;
@@ -657,6 +700,7 @@ export const bridge = {
 export type {
   LearnSessionMeta,
   McpSetup,
+  RawResourceDetail,
   RawResourceSummary,
   RunMeta,
   WikiConceptMeta,

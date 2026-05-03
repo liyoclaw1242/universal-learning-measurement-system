@@ -488,6 +488,14 @@ async fn list_raw_resources() -> Result<Vec<raw_bank::RawResourceSummary>, Strin
 }
 
 #[tauri::command]
+async fn read_raw_resource(
+    #[allow(non_snake_case)] resourceType: String,
+    id: String,
+) -> Result<raw_bank::RawResourceDetail, String> {
+    raw_bank::read_resource(&resourceType, &id).await
+}
+
+#[tauri::command]
 async fn delete_raw_resource(
     #[allow(non_snake_case)] resourceType: String,
     id: String,
@@ -575,6 +583,7 @@ pub fn run() {
             write_wiki_concept,
             get_ext_token,
             list_raw_resources,
+            read_raw_resource,
             delete_raw_resource,
             open_raw_dir,
         ])
