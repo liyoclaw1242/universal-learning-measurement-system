@@ -1,14 +1,23 @@
-// NavRail — left rail (260px). Two mode variants:
-//   - Review  : item outline (step 5.3, this file's primary mode)
-//   - Running : agent tree (step 5.8, added in its own step)
+// NavRail — left rail (260px). Three mode variants:
+//   - Inputs  : learn entry point (URL → open paper window)
+//   - Running : agent tree
+//   - Review  : item outline
 //
-// Mode switches based on `stage` prop. In Running stage the outline is
-// irrelevant; in Review stage the agent tree is historical and hidden.
+// Mode switches based on `stage` prop.
 
-import { BookOpen, Bot, Flag, ArrowDown, ArrowUp, Check } from 'lucide-react';
+import { useState } from 'react';
+import { BookOpen, Bot, Flag, ArrowDown, ArrowUp, Check, Globe } from 'lucide-react';
 import type { Agent, AgentId, ToolCall } from '../../types/agent';
 import type { Item, Agreement, UserOverride } from '../../types/item';
 import type { Stage } from '../../types/session';
+
+export interface LearnSession {
+  /** session id (8-char uuid prefix) */
+  id: string;
+  sourceUrl: string;
+  captureCount: number;
+  streaming: boolean;
+}
 
 interface NavRailProps {
   stage: Stage;
@@ -16,20 +25,122 @@ interface NavRailProps {
   items?: Item[];
   selectedItemId?: string | null;
   onSelectItem?: (id: string) => void;
-  // running variant (step 5.8)
+  // running variant
   agents?: Agent[];
   activeAgentId?: AgentId | null;
   onSelectAgent?: (id: AgentId) => void;
   /** optional expanded agent showing tool list; defaults to activeAgentId */
   expandedAgentId?: AgentId | null;
+  // inputs / learn variant
+  learnSession?: LearnSession | null;
+  onOpenPaper?: (url: string) => void;
 }
 
 export default function NavRail(props: NavRailProps) {
+  // RailLearn only shows when the host explicitly passes the
+  // `onOpenPaper` callback (i.e. Learn mode). Without it, fall through
+  // to RailReview's items list — Quiz-mode inputs stage just shows an
+  // empty items rail until the workflow runs.
+  const showLearn = props.stage === 'inputs' && !!props.onOpenPaper;
   return (
     <aside className="rail" aria-label="navigation rail">
-      {props.stage === 'running' ? <RailRunning {...props} /> : <RailReview {...props} />}
+      {props.stage === 'running' ? (
+        <RailRunning {...props} />
+      ) : showLearn ? (
+        <RailLearn {...props} />
+      ) : (
+        <RailReview {...props} />
+      )}
     </aside>
   );
+}
+
+// ─── inputs state — learn entry point (Open paper) ───────────
+
+function RailLearn({ learnSession, onOpenPaper }: NavRailProps) {
+  const [url, setUrl] = useState('');
+  const trimmed = url.trim();
+
+  return (
+    <>
+      <div className="rail-head">
+        <span className="ulms-label">
+          <BookOpen size={12} strokeWidth={1.5} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+          learn
+        </span>
+      </div>
+      <div className="rail-scroll" style={{ padding: 12 }}>
+        {learnSession && (
+          <div className="learn-session" style={{ marginBottom: 16 }}>
+            <div className="learn-session-row">
+              <Globe size={12} strokeWidth={1.5} />
+              <span
+                className="learn-session-url"
+                title={learnSession.sourceUrl}
+              >
+                {shortenUrl(learnSession.sourceUrl)}
+              </span>
+            </div>
+            <div className="learn-session-meta">
+              session <code>{learnSession.id}</code> · {learnSession.captureCount} page
+              {learnSession.captureCount === 1 ? '' : 's'}
+            </div>
+            {learnSession.streaming && (
+              <div className="learn-session-status">
+                <span className="status-dot pulse" />
+                translating…
+              </div>
+            )}
+          </div>
+        )}
+        <form
+          className="learn-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (trimmed && onOpenPaper) {
+              onOpenPaper(trimmed);
+              setUrl('');
+            }
+          }}
+        >
+          <label className="ulms-meta">
+            {learnSession ? 'open a different paper' : 'paper / arxiv URL'}
+          </label>
+          <input
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://arxiv.org/pdf/2401.10515"
+            className="learn-url-input"
+            autoComplete="off"
+            spellCheck={false}
+          />
+          <button
+            type="submit"
+            className="learn-open-btn"
+            disabled={!trimmed || !onOpenPaper}
+          >
+            {learnSession ? 'Open new paper' : 'Open paper'}
+          </button>
+          {!learnSession && (
+            <p className="ulms-meta" style={{ marginTop: 12, lineHeight: 1.4 }}>
+              Loads the PDF inside the app. Per-page Chinese translation via gemini-cli.
+            </p>
+          )}
+        </form>
+      </div>
+    </>
+  );
+}
+
+function shortenUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    const tail = u.pathname.length > 30 ? '…' + u.pathname.slice(-28) : u.pathname;
+    return u.host + tail;
+  } catch {
+    return url.length > 40 ? url.slice(0, 38) + '…' : url;
+  }
 }
 
 // ─── review state — item outline ─────────────────────────────
@@ -118,7 +229,7 @@ function ItemRow({ item, selected, onSelect }: ItemRowProps) {
   );
 }
 
-// ─── running state — agent tree (step 5.8) ───────────────────
+// ─── running state — agent tree ──────────────────────────────
 
 function RailRunning({
   agents = [],

@@ -1,0 +1,33 @@
+[package]
+name = "ulms-shell-tauri"
+version = "0.1.0"
+description = "ULMS shell — Tauri spike"
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "ulms_shell_tauri_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+tokio = { version = "1", features = ["full"] }
+uuid = { version = "1", features = ["v4"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"] }
+base64 = "0.22"
+axum = "0.7"
+tower-http = { version = "0.6", features = ["cors"] }
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

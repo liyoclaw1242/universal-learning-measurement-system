@@ -6,7 +6,13 @@ export type UserOverride = 'flag' | 'reject' | 'promote' | 'ship' | null;
 export type Agreement = 'accept' | 'reject' | 'revise' | 'disagree';
 export type Difficulty = 'low' | 'med' | 'high';
 export type Bloom = 'recall' | 'understand' | 'apply' | 'analyze' | 'evaluate' | 'create';
-export type ItemType = 'mc_single' | 'mc_multi' | 'fill' | 'ordering' | 'short_answer';
+export type ItemType =
+  | 'mc_single'
+  | 'mc_multi'
+  | 'true_false'
+  | 'fill'
+  | 'ordering'
+  | 'short_answer';
 
 export interface Item {
   id: string;

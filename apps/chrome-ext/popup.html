@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="hdr">
+      <span class="brand">ULMS · LEARN</span>
+      <span id="conn" class="conn" data-state="unknown" title="checking connection">●</span>
+    </header>
+
+    <main class="body">
+      <div id="page-info" class="page-info">
+        <span id="page-type" class="badge">—</span>
+        <span id="page-title" class="title">(loading)</span>
+      </div>
+
+      <div class="mode-tabs" role="tablist">
+        <button id="mode-single" class="mode-tab active" data-mode="single" role="tab">Single page</button>
+        <button id="mode-book" class="mode-tab" data-mode="book" role="tab">Book session</button>
+      </div>
+
+      <div id="single-pane" class="pane">
+        <button id="send-btn" class="send" disabled>Send to ULMS</button>
+      </div>
+
+      <div id="book-pane" class="pane" hidden>
+        <div id="book-status" class="book-status">no active session</div>
+        <label id="book-title-row" class="book-title-row">
+          book title
+          <input id="book-title" type="text" placeholder="e.g. 賈伯斯傳" spellcheck="false" />
+        </label>
+        <div class="book-actions">
+          <button id="book-start" class="send">Start (or resume) book</button>
+          <button id="book-add" class="send" hidden>Add this page</button>
+          <button id="book-finish" class="send" hidden>Finish &amp; send</button>
+          <button id="book-cancel" class="save" hidden>cancel</button>
+        </div>
+      </div>
+
+      <div id="result" class="result" aria-live="polite"></div>
+    </main>
+
+    <footer class="ftr">
+      <details>
+        <summary>Settings</summary>
+        <label>
+          server
+          <input id="server-url" type="text" value="http://127.0.0.1:9527" spellcheck="false" />
+        </label>
+        <label>
+          token
+          <input id="token" type="password" placeholder="paste token from ULMS Home" />
+        </label>
+        <button id="save-cfg" class="save">save</button>
+      </details>
+    </footer>
+
+    <script src="popup.js" type="module"></script>
+  </body>
+</html>

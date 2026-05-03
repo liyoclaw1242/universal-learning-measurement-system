@@ -6,6 +6,11 @@ export type Stage = 'inputs' | 'running' | 'review';
 
 export type Density = 'compact' | 'standard' | 'focus';
 
+/** Top-level workspace mode selector — sits above stage. Each mode has
+ *  its own layout: Home (landing), Learn (PDF + translation), Quiz
+ *  (4-agent assessment pipeline), Wiki (synthesised KB browser). */
+export type Mode = 'home' | 'learn' | 'quiz' | 'wiki';
+
 export interface Session {
   /** short id shown in breadcrumb / statusbar, e.g. "7f3a8c2d" */
   id: string;

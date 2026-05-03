@@ -1,0 +1,772 @@
+// ULMS Tauri shell — phase 2 (types + blackboard wired).
+//
+// All 14 IPC commands are registered. Implementations land in phases:
+//   ✓ 2. read_board — real disk read; types ported
+//     3. pick_*, inputs_status — file dialog + fs (next)
+//     4. start/stop_workflow — claude CLI spawn
+//     5. second_opinion / regenerate / overrides / export
+
+mod blackboard;
+mod export;
+mod ext_server;
+mod gemini;
+mod inputs;
+mod learn;
+mod overrides;
+mod raw_bank;
+mod regenerate;
+mod snapshot;
+mod types;
+mod wiki;
+mod workflow;
+
+use std::path::PathBuf;
+use std::sync::atomic::Ordering;
+use std::sync::Arc;
+
+use serde::Serialize;
+use serde_json::Value;
+use tauri::{AppHandle, Emitter, Manager, State};
+use tokio::sync::Mutex;
+
+use crate::export::ExportResp;
+use crate::gemini::GeminiRuntime;
+use crate::inputs::PickResp;
+use crate::learn::{LearnRuntime, LearnSessionMeta, ResumeResp, SessionState};
+use crate::overrides::OverrideResp;
+use crate::regenerate::RegenerateRuntime;
+use crate::types::{Blackboard, MaterialInput, StagedInputs};
+use crate::workflow::WorkflowRuntime;
+
+// ─── shared state ───────────────────────────────────────────
+
+/// Resolves the workspace dir (where blackboard.json + .claude/skills/
+/// live). Override via ULMS_WORKSPACE_DIR; default points at the
+/// existing apps/shell/workspace so the Tauri shell shares state with
+/// the Electron shell during the migration.
+fn resolve_workspace_dir() -> PathBuf {
+    let raw = if let Ok(d) = std::env::var("ULMS_WORKSPACE_DIR") {
+        PathBuf::from(d)
+    } else {
+        let manifest = env!("CARGO_MANIFEST_DIR");
+        PathBuf::from(manifest)
+            .join("..")
+            .join("..")
+            .join("shell")
+            .join("workspace")
+    };
+    // Canonicalize so downstream paths don't contain `..` segments —
+    // the Tauri asset protocol scope matcher rejects URLs with `..`.
+    std::fs::canonicalize(&raw).unwrap_or(raw)
+}
+
+struct AppState {
+    workspace_dir: PathBuf,
+    staged: Mutex<StagedInputs>,
+    workflow: Arc<WorkflowRuntime>,
+    gemini: Arc<GeminiRuntime>,
+    regen: Arc<RegenerateRuntime>,
+    learn: Arc<LearnRuntime>,
+}
+
+impl AppState {
+    fn blackboard_path(&self) -> PathBuf {
+        self.workspace_dir.join("blackboard.json")
+    }
+}
+
+// ─── shared response shapes ─────────────────────────────────
+
+#[derive(Serialize)]
+struct OkResp {
+    ok: bool,
+}
+
+#[derive(Serialize)]
+struct MaterialStatus {
+    filename: String,
+    char_count: usize,
+    source_count: usize,
+    sources: Vec<Value>,
+}
+
+#[derive(Serialize)]
+struct DimensionsStatus {
+    count: usize,
+    ids: Vec<String>,
+}
+
+#[derive(Serialize)]
+struct GuidanceStatus {
+    char_count: usize,
+}
+
+#[derive(Serialize)]
+struct InputsStatusResp {
+    material: Option<MaterialStatus>,
+    dimensions: Option<DimensionsStatus>,
+    guidance: Option<GuidanceStatus>,
+    assessment_params: Option<Value>,
+    ready: bool,
+}
+
+// ─── inputs ─────────────────────────────────────────────────
+
+#[tauri::command]
+async fn inputs_status(state: State<'_, Arc<AppState>>) -> Result<InputsStatusResp, String> {
+    let staged = state.staged.lock().await;
+    let material = staged.material.as_ref().map(|m| MaterialStatus {
+        filename: m.filename.clone(),
+        char_count: m.content.chars().count(),
+        source_count: m.sources.as_ref().map(|s| s.len()).unwrap_or(1),
+        sources: m
+            .sources
+            .clone()
+            .unwrap_or_default()
+            .into_iter()
+            .map(|s| serde_json::to_value(s).unwrap_or(Value::Null))
+            .collect(),
+    });
+    let dimensions = staged.dimensions.as_ref().map(|d| DimensionsStatus {
+        count: d.len(),
+        ids: d.iter().map(|x| x.dim_id.clone()).collect(),
+    });
+    let guidance = staged.domain_guidance.as_ref().map(|g| GuidanceStatus {
+        char_count: g.chars().count(),
+    });
+    let ready = material.is_some() && dimensions.as_ref().map(|d| d.count > 0).unwrap_or(false);
+    let assessment_params = staged
+        .assessment_params
+        .as_ref()
+        .map(|p| serde_json::to_value(p).unwrap_or(Value::Null));
+    Ok(InputsStatusResp {
+        material,
+        dimensions,
+        guidance,
+        assessment_params,
+        ready,
+    })
+}
+
+#[tauri::command]
+async fn pick_material(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<PickResp, String> {
+    let workspace = state.workspace_dir.clone();
+    let mut staged = state.staged.lock().await;
+    Ok(inputs::run_pick_material(app, &workspace, &mut staged).await)
+}
+
+#[tauri::command]
+async fn pick_dimensions(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<PickResp, String> {
+    let workspace = state.workspace_dir.clone();
+    let mut staged = state.staged.lock().await;
+    Ok(inputs::run_pick_dimensions(app, &workspace, &mut staged).await)
+}
+
+#[tauri::command]
+async fn pick_guidance(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<PickResp, String> {
+    let workspace = state.workspace_dir.clone();
+    let mut staged = state.staged.lock().await;
+    Ok(inputs::run_pick_guidance(app, &workspace, &mut staged).await)
+}
+
+#[tauri::command]
+async fn clear_guidance(state: State<'_, Arc<AppState>>) -> Result<OkResp, String> {
+    let mut staged = state.staged.lock().await;
+    staged.domain_guidance = None;
+    Ok(OkResp { ok: true })
+}
+
+// ─── workflow ───────────────────────────────────────────────
+
+#[tauri::command]
+async fn start_workflow(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<OkResp, String> {
+    if state.workflow.running.load(Ordering::SeqCst) {
+        return Err("workflow already running".into());
+    }
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.workflow);
+    // Snapshot staged inputs so the spawned task doesn't need to hold
+    // the lock for the entire run.
+    let staged_snapshot = state.staged.lock().await.clone();
+    tokio::spawn(workflow::run_workflow(
+        app,
+        workspace,
+        runtime,
+        staged_snapshot,
+    ));
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn stop_workflow(state: State<'_, Arc<AppState>>) -> Result<OkResp, String> {
+    state.workflow.request_stop().await;
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn read_board(state: State<'_, Arc<AppState>>) -> Result<Option<Blackboard>, String> {
+    Ok(blackboard::read_blackboard(&state.blackboard_path()).await)
+}
+
+// ─── second opinion ─────────────────────────────────────────
+
+#[tauri::command]
+async fn start_second_opinion(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<OkResp, String> {
+    if state.gemini.running.load(Ordering::SeqCst) {
+        return Err("already running".into());
+    }
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.gemini);
+    tokio::spawn(gemini::run_second_opinion(app, workspace, runtime));
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn stop_second_opinion(state: State<'_, Arc<AppState>>) -> Result<OkResp, String> {
+    state.gemini.request_stop().await;
+    Ok(OkResp { ok: true })
+}
+
+// ─── overrides / export / regenerate ───────────────────────
+
+#[tauri::command]
+async fn apply_item_override(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] itemId: String,
+    r#override: Option<String>,
+) -> Result<OverrideResp, String> {
+    Ok(overrides::apply_item_override(
+        &app,
+        &state.workspace_dir,
+        &itemId,
+        r#override.as_deref(),
+    )
+    .await)
+}
+
+#[tauri::command]
+async fn export_items(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<ExportResp, String> {
+    Ok(export::run_export(app, &state.workspace_dir).await)
+}
+
+#[tauri::command]
+async fn regenerate_item(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] itemId: String,
+) -> Result<OkResp, String> {
+    if state.regen.is_busy().await {
+        return Err("another regeneration in progress".into());
+    }
+    let workspace = state.workspace_dir.clone();
+    let workflow_runtime = Arc::clone(&state.workflow);
+    let regen_runtime = Arc::clone(&state.regen);
+    tokio::spawn(regenerate::regenerate_item(
+        app,
+        workspace,
+        itemId,
+        workflow_runtime,
+        regen_runtime,
+    ));
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn regenerate_rejected(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<OkResp, String> {
+    if state.regen.is_busy().await {
+        return Err("another regeneration in progress".into());
+    }
+    let workspace = state.workspace_dir.clone();
+    let workflow_runtime = Arc::clone(&state.workflow);
+    let regen_runtime = Arc::clone(&state.regen);
+    tokio::spawn(regenerate::regenerate_rejected(
+        app,
+        workspace,
+        workflow_runtime,
+        regen_runtime,
+    ));
+    Ok(OkResp { ok: true })
+}
+
+// ─── learn (PDF + per-page translation) ────────────────────
+
+#[tauri::command]
+async fn start_paper_session(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+    url: String,
+) -> Result<SessionState, String> {
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.learn);
+    learn::start_paper_session(app, workspace, runtime, url).await
+}
+
+#[tauri::command]
+async fn translate_page(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] pageNum: u32,
+    #[allow(non_snake_case)] imageB64: String,
+) -> Result<u32, String> {
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.learn);
+    learn::translate_page(app, workspace, runtime, pageNum, imageB64).await
+}
+
+#[tauri::command]
+async fn stop_translation(state: State<'_, Arc<AppState>>) -> Result<OkResp, String> {
+    state.learn.request_stop().await;
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn close_paper_session(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<OkResp, String> {
+    let runtime = Arc::clone(&state.learn);
+    learn::close_paper_session(app, runtime).await?;
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn import_translation_as_material(
+    state: State<'_, Arc<AppState>>,
+) -> Result<MaterialInput, String> {
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.learn);
+    learn::import_as_material(workspace, runtime, &state.staged).await
+}
+
+#[tauri::command]
+async fn list_learn_sessions(
+    state: State<'_, Arc<AppState>>,
+) -> Result<Vec<LearnSessionMeta>, String> {
+    Ok(learn::list_learn_sessions(&state.workspace_dir).await)
+}
+
+#[tauri::command]
+async fn resume_learn_session(
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] sessionId: String,
+) -> Result<ResumeResp, String> {
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.learn);
+    learn::resume_learn_session(workspace, runtime, sessionId).await
+}
+
+#[tauri::command]
+async fn delete_learn_session(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] sessionId: String,
+) -> Result<OkResp, String> {
+    let workspace = state.workspace_dir.clone();
+    let runtime = Arc::clone(&state.learn);
+    learn::delete_learn_session(app, workspace, runtime, sessionId).await?;
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn import_sessions_as_material(
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] sessionIds: Vec<String>,
+) -> Result<MaterialInput, String> {
+    let workspace = state.workspace_dir.clone();
+    learn::import_sessions_as_material(workspace, &state.staged, sessionIds).await
+}
+
+#[tauri::command]
+async fn generate_dimensions(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<Vec<crate::types::Dimension>, String> {
+    let workspace = state.workspace_dir.clone();
+    learn::generate_dimensions(app, workspace, &state.staged).await
+}
+
+#[tauri::command]
+async fn get_dimensions(
+    state: State<'_, Arc<AppState>>,
+) -> Result<Vec<crate::types::Dimension>, String> {
+    Ok(learn::get_staged_dimensions(&state.staged).await)
+}
+
+#[tauri::command]
+async fn update_dimensions(
+    state: State<'_, Arc<AppState>>,
+    dimensions: Vec<crate::types::Dimension>,
+) -> Result<usize, String> {
+    learn::update_staged_dimensions(&state.workspace_dir, &state.staged, dimensions).await
+}
+
+// ─── KB raw-layer (run snapshots) ──────────────────────────
+
+#[tauri::command]
+async fn list_runs(
+    state: State<'_, Arc<AppState>>,
+) -> Result<Vec<snapshot::RunMeta>, String> {
+    Ok(snapshot::list_runs(&state.workspace_dir).await)
+}
+
+#[tauri::command]
+async fn delete_run(
+    state: State<'_, Arc<AppState>>,
+    #[allow(non_snake_case)] runId: String,
+) -> Result<OkResp, String> {
+    snapshot::delete_run(&state.workspace_dir, &runId).await?;
+    Ok(OkResp { ok: true })
+}
+
+// ─── KB wiki layer ─────────────────────────────────────────
+
+#[tauri::command]
+async fn synthesize_wiki(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<wiki::SynthesizeReport, String> {
+    let workspace = state.workspace_dir.clone();
+    wiki::synthesize_wiki(app, workspace).await
+}
+
+#[tauri::command]
+async fn get_wiki_dir() -> Result<String, String> {
+    Ok(wiki::resolve_wiki_dir().to_string_lossy().into_owned())
+}
+
+#[tauri::command]
+async fn get_mcp_setup(state: State<'_, Arc<AppState>>) -> Result<wiki::McpSetup, String> {
+    Ok(wiki::mcp_setup_info(&state.workspace_dir))
+}
+
+#[tauri::command]
+async fn list_wiki_concepts() -> Result<Vec<wiki::WikiConceptMeta>, String> {
+    wiki::list_wiki_concepts().await
+}
+
+#[tauri::command]
+async fn read_wiki_concept(slug: String) -> Result<String, String> {
+    wiki::read_wiki_concept(&slug).await
+}
+
+#[tauri::command]
+async fn write_wiki_concept(slug: String, body: String) -> Result<(), String> {
+    wiki::write_wiki_concept(&slug, &body).await
+}
+
+// ─── Chrome ext bridge ─────────────────────────────────────
+
+#[tauri::command]
+async fn get_ext_token() -> Result<String, String> {
+    ext_server::load_or_create_token()
+}
+
+#[tauri::command]
+async fn list_raw_resources() -> Result<Vec<raw_bank::RawResourceSummary>, String> {
+    Ok(raw_bank::list_resources().await)
+}
+
+#[tauri::command]
+async fn read_raw_resource(
+    #[allow(non_snake_case)] resourceType: String,
+    id: String,
+) -> Result<raw_bank::RawResourceDetail, String> {
+    raw_bank::read_resource(&resourceType, &id).await
+}
+
+#[tauri::command]
+async fn delete_raw_resource(
+    #[allow(non_snake_case)] resourceType: String,
+    id: String,
+) -> Result<OkResp, String> {
+    raw_bank::delete_resource(&resourceType, &id).await?;
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn import_image_file(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+    filename: String,
+    content_b64: String,
+) -> Result<OkResp, String> {
+    use base64::Engine;
+
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(content_b64.trim())
+        .map_err(|e| format!("base64 decode: {e}"))?;
+
+    let extension = filename
+        .rsplit('.')
+        .next()
+        .unwrap_or("")
+        .to_lowercase();
+    if !["png", "jpg", "jpeg", "webp"].contains(&extension.as_str()) {
+        return Err(format!(
+            "unsupported image extension '{extension}' (allowed: png, jpg, jpeg, webp)"
+        ));
+    }
+
+    let title = filename
+        .trim_end_matches(&format!(".{extension}"))
+        .trim_end_matches('.')
+        .to_string();
+    if title.is_empty() {
+        return Err("filename must have a non-empty stem".into());
+    }
+
+    let (dir, meta) = raw_bank::write_image(raw_bank::ImageIngest {
+        source_url: filename,
+        title,
+        bytes,
+        extension: extension.clone(),
+    })
+    .await?;
+
+    let _ = app.emit(
+        "raw:imported",
+        serde_json::json!({
+            "type": "image",
+            "id": meta.id,
+            "via": "manual-upload",
+        }),
+    );
+
+    // Background OCR — re-emits raw:imported when body.md is rewritten.
+    let app_for_ocr = app.clone();
+    let workspace = state.workspace_dir.clone();
+    let resource_id = meta.id.clone();
+    let image_path = dir.join("assets").join(format!("image.{extension}"));
+    tauri::async_runtime::spawn(async move {
+        let result = ocr_image_with_gemini(&workspace, &image_path).await;
+        let body = match result {
+            Ok(text) if !text.trim().is_empty() => text,
+            Ok(_) => "_(OCR returned empty result)_\n".to_string(),
+            Err(e) => format!("_(OCR failed: {e})_\n"),
+        };
+        let _ = tokio::fs::write(dir.join("body.md"), body).await;
+        let _ = app_for_ocr.emit(
+            "raw:imported",
+            serde_json::json!({
+                "type": "image",
+                "id": resource_id,
+                "via": "manual-upload",
+            }),
+        );
+    });
+
+    Ok(OkResp { ok: true })
+}
+
+async fn ocr_image_with_gemini(
+    workspace_dir: &std::path::Path,
+    image_path: &std::path::Path,
+) -> Result<String, String> {
+    use std::process::Stdio;
+    use tokio::io::{AsyncBufReadExt, BufReader};
+    use tokio::process::Command;
+    use tokio::time::{timeout, Duration};
+
+    let prompt = format!(
+        "請將下面這張圖片中的內容轉為 markdown 格式。\n\
+         如果是文字截圖,提取文字並保留原本的結構(標題、列表、段落)。\n\
+         如果是圖表或圖像,用一段話描述其內容。\n\
+         輸出純粹的 markdown 內容,不要包含任何 meta 說明文字。\n\
+         \n\
+         圖片:@{}",
+        image_path.to_string_lossy()
+    );
+
+    let mut child = Command::new(learn::gemini_bin())
+        .args([
+            "-y",
+            "-o",
+            "stream-json",
+            "--include-directories",
+            workspace_dir.to_str().unwrap_or("."),
+            "-p",
+            &prompt,
+        ])
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .kill_on_drop(true)
+        .spawn()
+        .map_err(|e| format!("gemini spawn failed: {e}"))?;
+
+    let stdout = child.stdout.take().ok_or("gemini stdout missing")?;
+
+    let stdout_task = tokio::spawn(async move {
+        let mut reader = BufReader::new(stdout).lines();
+        let mut accumulated = String::new();
+        while let Ok(Some(line)) = reader.next_line().await {
+            let trimmed = line.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
+            if let Ok(msg) = serde_json::from_str::<Value>(trimmed) {
+                if msg.get("type").and_then(|v| v.as_str()) == Some("message")
+                    && msg.get("role").and_then(|v| v.as_str()) == Some("assistant")
+                {
+                    if let Some(text) = msg.get("content").and_then(|v| v.as_str()) {
+                        accumulated.push_str(text);
+                    }
+                }
+            }
+        }
+        accumulated
+    });
+
+    let exit = timeout(Duration::from_secs(180), child.wait())
+        .await
+        .map_err(|_| "OCR timeout (180s)".to_string())?
+        .map_err(|e| format!("gemini wait: {e}"))?;
+
+    let text = stdout_task.await.unwrap_or_default();
+
+    if !exit.success() {
+        return Err(format!("gemini exited with code {:?}", exit.code()));
+    }
+    Ok(text)
+}
+
+#[tauri::command]
+async fn import_markdown_file(
+    app: AppHandle,
+    filename: String,
+    content: String,
+) -> Result<OkResp, String> {
+    let title = filename
+        .trim_end_matches(".md")
+        .trim_end_matches(".markdown")
+        .to_string();
+    if title.is_empty() {
+        return Err("filename must be a .md or .markdown file".into());
+    }
+    let meta = raw_bank::write_markdown(raw_bank::MarkdownIngest {
+        source_url: filename,
+        title,
+        content,
+    })
+    .await?;
+    let _ = app.emit(
+        "raw:imported",
+        serde_json::json!({
+            "type": "markdown",
+            "id": meta.id,
+            "via": "manual-upload",
+        }),
+    );
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
+async fn open_raw_dir() -> Result<OkResp, String> {
+    raw_bank::ensure_raw_root().await?;
+    let path = raw_bank::raw_root();
+    std::process::Command::new("open")
+        .arg(&path)
+        .status()
+        .map_err(|e| format!("open {}: {e}", path.display()))?;
+    Ok(OkResp { ok: true })
+}
+
+// ─── entry point ────────────────────────────────────────────
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            let workspace_dir = resolve_workspace_dir();
+            eprintln!("[ulms] workspace_dir = {}", workspace_dir.display());
+            app.manage(Arc::new(AppState {
+                workspace_dir,
+                staged: Mutex::new(StagedInputs::default()),
+                workflow: Arc::new(WorkflowRuntime::default()),
+                gemini: Arc::new(GeminiRuntime::default()),
+                regen: Arc::new(RegenerateRuntime::default()),
+                learn: Arc::new(LearnRuntime::default()),
+            }));
+
+            // Bootstrap chrome-ext bridge token + spawn the local
+            // HTTP server. Errors are non-fatal — the app still works
+            // without the ext path, just the import button becomes a
+            // no-op.
+            match ext_server::load_or_create_token() {
+                Ok(token) => {
+                    let app_for_server = app.handle().clone();
+                    ext_server::spawn_server(app_for_server, token);
+                }
+                Err(e) => eprintln!("[ulms] ext token bootstrap failed: {e}"),
+            }
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            inputs_status,
+            pick_material,
+            pick_dimensions,
+            pick_guidance,
+            clear_guidance,
+            start_workflow,
+            stop_workflow,
+            read_board,
+            start_second_opinion,
+            stop_second_opinion,
+            apply_item_override,
+            export_items,
+            regenerate_item,
+            regenerate_rejected,
+            start_paper_session,
+            translate_page,
+            stop_translation,
+            close_paper_session,
+            import_translation_as_material,
+            list_learn_sessions,
+            resume_learn_session,
+            delete_learn_session,
+            import_sessions_as_material,
+            generate_dimensions,
+            get_dimensions,
+            update_dimensions,
+            list_runs,
+            delete_run,
+            synthesize_wiki,
+            get_wiki_dir,
+            get_mcp_setup,
+            list_wiki_concepts,
+            read_wiki_concept,
+            write_wiki_concept,
+            get_ext_token,
+            list_raw_resources,
+            read_raw_resource,
+            delete_raw_resource,
+            import_markdown_file,
+            import_image_file,
+            open_raw_dir,
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}

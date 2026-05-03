@@ -1,0 +1,106 @@
+/* ============================================================
+   Primitive tokens — raw scales, no semantics.
+   Theme switches happen in semantic.css below by remapping these.
+   Naming: <family>-<step>. Steps follow Tailwind/Material density:
+   050 lightest in scale, 1000 darkest.
+   ============================================================ */
+
+:root {
+  /* ----- Navy scale ("深夜書房藍" base) -----
+     Each step ~6-10% lightness apart. */
+  --c-navy-1000: #050813;
+  --c-navy-950:  #0a0e1a;
+  --c-navy-900:  #0e1322;
+  --c-navy-850:  #11172a;
+  --c-navy-800:  #161d35;
+  --c-navy-700:  #1c2540;
+  --c-navy-600:  #283050;
+
+  /* ----- Cool white (text overlay) -----
+     Stored as RGB triplet so it composes with rgba(). */
+  --rgb-cool-white: 220, 230, 248;
+
+  /* ----- Functional accents — desaturated, low saturation by design.
+     For Quiet Tech use sparingly; status meaning only. */
+  --c-blue:        #7c9ec8;
+  --c-blue-light:  #a8c1e0;
+  --rgb-blue:      124, 158, 200;
+
+  --c-green:       #5a8a6e;
+  --c-green-light: #82b095;
+  --rgb-green:     90, 138, 110;
+
+  --c-yellow:        #b09257;
+  --c-yellow-light:  #d2b27d;
+  --rgb-yellow:      176, 146, 87;
+
+  --c-red:        #b87575;
+  --c-red-light:  #d49a9a;
+  --rgb-red:      184, 117, 117;
+
+  /* ----- Opacity scale (used for text + interaction overlays) ----- */
+  --o-04: 0.04;
+  --o-08: 0.08;
+  --o-12: 0.12;
+  --o-18: 0.18;
+  --o-38: 0.38;
+  --o-62: 0.62;
+  --o-78: 0.78;
+  --o-92: 0.92;
+
+  /* ----- Spacing scale (4px base) ----- */
+  --space-1:  4px;
+  --space-2:  6px;
+  --space-3:  8px;
+  --space-4:  10px;
+  --space-5:  14px;
+  --space-6:  20px;
+  --space-7:  32px;
+  --space-8:  48px;
+
+  /* ----- Radius scale (small only — blueprint discipline) ----- */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* ----- Border widths ----- */
+  --border-w: 1px;
+
+  /* ----- Type families ----- */
+  --font-mono: "JetBrains Mono", "SF Mono", "Berkeley Mono", Menlo,
+               Consolas, "Roboto Mono", monospace;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text",
+               "Helvetica Neue", Arial, "PingFang TC",
+               "Noto Sans TC", sans-serif;
+
+  /* ----- Type scale (px values; semantic layer maps to use-cases) ----- */
+  --fs-10: 10px;
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-15: 15px;
+  --fs-19: 19px;
+
+  /* ----- Line heights ----- */
+  --lh-tight: 1.25;
+  --lh-snug:  1.4;
+  --lh-body:  1.6;
+  --lh-read:  1.7;
+
+  /* ----- Letter spacing — wide on caps, thin on body ----- */
+  --tr-label: 0.18em;   /* UPPERCASE labels — engineering blueprint */
+  --tr-meta:  0.06em;   /* mono metadata rows                       */
+  --tr-micro: 0.03em;
+  --tr-body:  0;
+
+  /* ----- Motion (kept short, restrained) ----- */
+  --motion-fast:  0.12s;
+  --motion-base:  0.18s;
+
+  /* ----- Z-index scale ----- */
+  --z-base:    0;
+  --z-overlay: 10;
+  --z-modal:   100;
+  --z-toast:   200;
+}
