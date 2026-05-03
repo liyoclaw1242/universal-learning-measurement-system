@@ -75,7 +75,7 @@ impl LearnRuntime {
 
 // ─── helpers ────────────────────────────────────────────────
 
-fn gemini_bin() -> PathBuf {
+pub fn gemini_bin() -> PathBuf {
     use std::process::Command as StdCommand;
     if let Ok(out) = StdCommand::new("which").arg("gemini").output() {
         if out.status.success() {

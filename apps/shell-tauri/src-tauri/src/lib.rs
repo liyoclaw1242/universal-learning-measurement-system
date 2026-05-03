@@ -506,6 +506,153 @@ async fn delete_raw_resource(
 }
 
 #[tauri::command]
+async fn import_image_file(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+    filename: String,
+    content_b64: String,
+) -> Result<OkResp, String> {
+    use base64::Engine;
+
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(content_b64.trim())
+        .map_err(|e| format!("base64 decode: {e}"))?;
+
+    let extension = filename
+        .rsplit('.')
+        .next()
+        .unwrap_or("")
+        .to_lowercase();
+    if !["png", "jpg", "jpeg", "webp"].contains(&extension.as_str()) {
+        return Err(format!(
+            "unsupported image extension '{extension}' (allowed: png, jpg, jpeg, webp)"
+        ));
+    }
+
+    let title = filename
+        .trim_end_matches(&format!(".{extension}"))
+        .trim_end_matches('.')
+        .to_string();
+    if title.is_empty() {
+        return Err("filename must have a non-empty stem".into());
+    }
+
+    let (dir, meta) = raw_bank::write_image(raw_bank::ImageIngest {
+        source_url: filename,
+        title,
+        bytes,
+        extension: extension.clone(),
+    })
+    .await?;
+
+    let _ = app.emit(
+        "raw:imported",
+        serde_json::json!({
+            "type": "image",
+            "id": meta.id,
+            "via": "manual-upload",
+        }),
+    );
+
+    // Background OCR — re-emits raw:imported when body.md is rewritten.
+    let app_for_ocr = app.clone();
+    let workspace = state.workspace_dir.clone();
+    let resource_id = meta.id.clone();
+    let image_path = dir.join("assets").join(format!("image.{extension}"));
+    tauri::async_runtime::spawn(async move {
+        let result = ocr_image_with_gemini(&workspace, &image_path).await;
+        let body = match result {
+            Ok(text) if !text.trim().is_empty() => text,
+            Ok(_) => "_(OCR returned empty result)_\n".to_string(),
+            Err(e) => format!("_(OCR failed: {e})_\n"),
+        };
+        let _ = tokio::fs::write(dir.join("body.md"), body).await;
+        let _ = app_for_ocr.emit(
+            "raw:imported",
+            serde_json::json!({
+                "type": "image",
+                "id": resource_id,
+                "via": "manual-upload",
+            }),
+        );
+    });
+
+    Ok(OkResp { ok: true })
+}
+
+async fn ocr_image_with_gemini(
+    workspace_dir: &std::path::Path,
+    image_path: &std::path::Path,
+) -> Result<String, String> {
+    use std::process::Stdio;
+    use tokio::io::{AsyncBufReadExt, BufReader};
+    use tokio::process::Command;
+    use tokio::time::{timeout, Duration};
+
+    let prompt = format!(
+        "請將下面這張圖片中的內容轉為 markdown 格式。\n\
+         如果是文字截圖,提取文字並保留原本的結構(標題、列表、段落)。\n\
+         如果是圖表或圖像,用一段話描述其內容。\n\
+         輸出純粹的 markdown 內容,不要包含任何 meta 說明文字。\n\
+         \n\
+         圖片:@{}",
+        image_path.to_string_lossy()
+    );
+
+    let mut child = Command::new(learn::gemini_bin())
+        .args([
+            "-y",
+            "-o",
+            "stream-json",
+            "--include-directories",
+            workspace_dir.to_str().unwrap_or("."),
+            "-p",
+            &prompt,
+        ])
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .kill_on_drop(true)
+        .spawn()
+        .map_err(|e| format!("gemini spawn failed: {e}"))?;
+
+    let stdout = child.stdout.take().ok_or("gemini stdout missing")?;
+
+    let stdout_task = tokio::spawn(async move {
+        let mut reader = BufReader::new(stdout).lines();
+        let mut accumulated = String::new();
+        while let Ok(Some(line)) = reader.next_line().await {
+            let trimmed = line.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
+            if let Ok(msg) = serde_json::from_str::<Value>(trimmed) {
+                if msg.get("type").and_then(|v| v.as_str()) == Some("message")
+                    && msg.get("role").and_then(|v| v.as_str()) == Some("assistant")
+                {
+                    if let Some(text) = msg.get("content").and_then(|v| v.as_str()) {
+                        accumulated.push_str(text);
+                    }
+                }
+            }
+        }
+        accumulated
+    });
+
+    let exit = timeout(Duration::from_secs(180), child.wait())
+        .await
+        .map_err(|_| "OCR timeout (180s)".to_string())?
+        .map_err(|e| format!("gemini wait: {e}"))?;
+
+    let text = stdout_task.await.unwrap_or_default();
+
+    if !exit.success() {
+        return Err(format!("gemini exited with code {:?}", exit.code()));
+    }
+    Ok(text)
+}
+
+#[tauri::command]
 async fn import_markdown_file(
     app: AppHandle,
     filename: String,
@@ -617,6 +764,7 @@ pub fn run() {
             read_raw_resource,
             delete_raw_resource,
             import_markdown_file,
+            import_image_file,
             open_raw_dir,
         ])
         .run(tauri::generate_context!())

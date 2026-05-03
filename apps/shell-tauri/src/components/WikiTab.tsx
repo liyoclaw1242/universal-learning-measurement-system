@@ -300,6 +300,19 @@ function RawPane() {
             alert(`Import failed: ${e}`);
           }
         }}
+        onImageDrop={async (file) => {
+          try {
+            const dataUrl = await readAsDataUrl(file);
+            const i = dataUrl.indexOf(',');
+            const b64 = i < 0 ? '' : dataUrl.slice(i + 1);
+            await bridge.importImageFile(file.name, b64);
+            // First raw:imported lands immediately (image visible).
+            // OCR runs in the background and re-emits raw:imported
+            // when body.md is rewritten with the extracted text.
+          } catch (e) {
+            alert(`Image import failed: ${e}`);
+          }
+        }}
       />
       <RawViewer
         detail={detail}
@@ -335,6 +348,15 @@ function RawPane() {
       />
     </div>
   );
+}
+
+function readAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ''));
+    reader.onerror = () => reject(reader.error ?? new Error('FileReader failed'));
+    reader.readAsDataURL(file);
+  });
 }
 
 // raw_bank stores under plural directory names but the meta.type is

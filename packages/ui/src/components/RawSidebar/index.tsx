@@ -24,6 +24,8 @@ interface RawSidebarProps {
   onSelect: (type: string, id: string) => void;
   /** Drop a .md / .markdown file → manual-upload lane. */
   onMarkdownDrop?: (file: File) => void;
+  /** Drop a .png / .jpg / .jpeg / .webp file → image lane (OCR runs in background). */
+  onImageDrop?: (file: File) => void;
 }
 
 const GROUP_ORDER: Array<{ key: string; label: string }> = [
@@ -42,21 +44,32 @@ export default function RawSidebar({
   onFilterChange,
   onSelect,
   onMarkdownDrop,
+  onImageDrop,
 }: RawSidebarProps) {
   const [hover, setHover] = useState(false);
 
   function handleDrop(e: DragEvent<HTMLDivElement>) {
     e.preventDefault();
     setHover(false);
-    if (!onMarkdownDrop) return;
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
-    if (!/\.(md|markdown)$/i.test(file.name)) {
-      alert(`This lane only accepts .md / .markdown files (got "${file.name}").`);
+    if (/\.(md|markdown)$/i.test(file.name)) {
+      if (onMarkdownDrop) onMarkdownDrop(file);
       return;
     }
-    onMarkdownDrop(file);
+    if (/\.(png|jpe?g|webp)$/i.test(file.name)) {
+      if (onImageDrop) onImageDrop(file);
+      return;
+    }
+    alert(`Unsupported file: "${file.name}". Drop a .md or image (png/jpg/webp).`);
   }
+
+  const dropzoneEnabled = !!(onMarkdownDrop || onImageDrop);
+  const dropzoneCopy = onMarkdownDrop && onImageDrop
+    ? 'drop .md or image to import'
+    : onMarkdownDrop
+      ? 'drop .md to import'
+      : 'drop image to import';
   const trimmed = filter.trim().toLowerCase();
   const filtered = !trimmed
     ? resources
@@ -89,7 +102,7 @@ export default function RawSidebar({
         <span className="ulms-meta">
           {filtered.length} / {resources.length}
         </span>
-        {onMarkdownDrop && (
+        {dropzoneEnabled && (
           <div
             className={`raw-dropzone ${hover ? 'hover' : ''}`}
             onDragOver={(e) => {
@@ -100,7 +113,7 @@ export default function RawSidebar({
             onDrop={handleDrop}
           >
             <Upload size={12} strokeWidth={1.5} />
-            <span>drop .md to import</span>
+            <span>{dropzoneCopy}</span>
           </div>
         )}
       </div>

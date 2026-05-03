@@ -231,6 +231,63 @@ pub async fn write_youtube(input: YoutubeIngest) -> Result<RawMeta, String> {
     Ok(meta)
 }
 
+// ─── image manual upload ───────────────────────────────────
+
+pub struct ImageIngest {
+    pub source_url: String,
+    pub title: String,
+    pub bytes: Vec<u8>,
+    /// "png" | "jpg" | "jpeg" | "webp" — caller is responsible for
+    /// ensuring the bytes match.
+    pub extension: String,
+}
+
+/// Write the raw image to `assets/image.<ext>` and seed `meta.yaml`
+/// + a placeholder `body.md` ("OCR pending…"). The caller spawns the
+/// OCR job separately and rewrites body.md when it completes.
+pub async fn write_image(
+    input: ImageIngest,
+) -> Result<(std::path::PathBuf, RawMeta), String> {
+    ensure_raw_root().await?;
+    let id = slugify(&input.title);
+    validate_id(&id)?;
+
+    let dir = raw_root().join("images").join(&id);
+    fs::create_dir_all(dir.join("assets"))
+        .await
+        .map_err(|e| format!("mkdir {}/assets: {e}", dir.display()))?;
+
+    let image_filename = format!("image.{}", input.extension);
+    let image_path = dir.join("assets").join(&image_filename);
+    fs::write(&image_path, &input.bytes)
+        .await
+        .map_err(|e| format!("write {}: {e}", image_path.display()))?;
+
+    let meta = RawMeta {
+        id: id.clone(),
+        resource_type: "image".into(),
+        source_url: input.source_url,
+        title: input.title,
+        captured_at: iso8601_now(),
+        captured_via: "manual-upload".into(),
+        quizzed_in: vec![],
+        verdict_summary: None,
+        verified: false,
+        char_count: None,
+        duration_s: None,
+        channel: None,
+        caption_lang: None,
+        page_count: None,
+        author: None,
+    };
+    write_meta(&dir, &meta).await?;
+    fs::write(dir.join("body.md"), "_(OCR pending…)_\n")
+        .await
+        .map_err(|e| format!("write body.md: {e}"))?;
+
+    Ok((dir, meta))
+}
+
 // ─── markdown manual upload ────────────────────────────────
 
 pub struct MarkdownIngest {
@@ -441,6 +498,12 @@ pub async fn read_resource(
     let thumbnail_data_url = read_first_data_url(&[
         dir.join("thumbnails").join("cover.jpg"),
         dir.join("thumbnails").join("cover.png"),
+        dir.join("assets").join("cover.jpg"),
+        dir.join("assets").join("cover.png"),
+        dir.join("assets").join("image.png"),
+        dir.join("assets").join("image.jpg"),
+        dir.join("assets").join("image.jpeg"),
+        dir.join("assets").join("image.webp"),
         dir.join("image.png"),
         dir.join("image.jpg"),
         dir.join("cover.jpg"),
