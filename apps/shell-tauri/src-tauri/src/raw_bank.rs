@@ -231,6 +231,49 @@ pub async fn write_youtube(input: YoutubeIngest) -> Result<RawMeta, String> {
     Ok(meta)
 }
 
+// ─── markdown manual upload ────────────────────────────────
+
+pub struct MarkdownIngest {
+    pub source_url: String,
+    pub title: String,
+    pub content: String,
+}
+
+pub async fn write_markdown(input: MarkdownIngest) -> Result<RawMeta, String> {
+    ensure_raw_root().await?;
+    let id = slugify(&input.title);
+    validate_id(&id)?;
+
+    let dir = raw_root().join("markdown").join(&id);
+    fs::create_dir_all(&dir)
+        .await
+        .map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
+
+    let char_count = input.content.chars().count();
+    let meta = RawMeta {
+        id: id.clone(),
+        resource_type: "markdown".into(),
+        source_url: input.source_url,
+        title: input.title,
+        captured_at: iso8601_now(),
+        captured_via: "manual-upload".into(),
+        quizzed_in: vec![],
+        verdict_summary: None,
+        verified: false,
+        char_count: Some(char_count),
+        duration_s: None,
+        channel: None,
+        caption_lang: None,
+        page_count: None,
+        author: None,
+    };
+    write_meta(&dir, &meta).await?;
+    fs::write(dir.join("body.md"), &input.content)
+        .await
+        .map_err(|e| format!("write body.md: {e}"))?;
+    Ok(meta)
+}
+
 // ─── paper init (PDF Learn) ────────────────────────────────
 
 pub struct PaperIngest {

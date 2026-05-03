@@ -2,12 +2,14 @@
 // Lists resources from ~/.ulms-wiki/raw/<type>/<id>/ grouped by type
 // with a search filter. Pure presentational; host owns selection.
 
+import { useState, type DragEvent } from 'react';
 import {
   FileCode2,
   FileText,
   Image as ImageIcon,
   Newspaper,
   Search,
+  Upload,
   Youtube,
 } from 'lucide-react';
 import type { RawResourceSummary } from '../../types/home';
@@ -20,6 +22,8 @@ interface RawSidebarProps {
   loadError?: string | null;
   onFilterChange: (s: string) => void;
   onSelect: (type: string, id: string) => void;
+  /** Drop a .md / .markdown file → manual-upload lane. */
+  onMarkdownDrop?: (file: File) => void;
 }
 
 const GROUP_ORDER: Array<{ key: string; label: string }> = [
@@ -37,7 +41,22 @@ export default function RawSidebar({
   loadError,
   onFilterChange,
   onSelect,
+  onMarkdownDrop,
 }: RawSidebarProps) {
+  const [hover, setHover] = useState(false);
+
+  function handleDrop(e: DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setHover(false);
+    if (!onMarkdownDrop) return;
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    if (!/\.(md|markdown)$/i.test(file.name)) {
+      alert(`This lane only accepts .md / .markdown files (got "${file.name}").`);
+      return;
+    }
+    onMarkdownDrop(file);
+  }
   const trimmed = filter.trim().toLowerCase();
   const filtered = !trimmed
     ? resources
@@ -70,6 +89,20 @@ export default function RawSidebar({
         <span className="ulms-meta">
           {filtered.length} / {resources.length}
         </span>
+        {onMarkdownDrop && (
+          <div
+            className={`raw-dropzone ${hover ? 'hover' : ''}`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setHover(true);
+            }}
+            onDragLeave={() => setHover(false)}
+            onDrop={handleDrop}
+          >
+            <Upload size={12} strokeWidth={1.5} />
+            <span>drop .md to import</span>
+          </div>
+        )}
       </div>
       <div className="wiki-sidebar-list">
         {loadError ? (

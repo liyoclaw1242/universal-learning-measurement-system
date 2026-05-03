@@ -674,6 +674,9 @@ export const bridge = {
   async openRawDir(): Promise<void> {
     await invoke('open_raw_dir');
   },
+  async importMarkdownFile(filename: string, content: string): Promise<void> {
+    await invoke('import_markdown_file', { filename, content });
+  },
   async getMcpSetup(): Promise<McpSetup> {
     const r = (await invoke('get_mcp_setup')) as {
       mcp_binary_path: string;

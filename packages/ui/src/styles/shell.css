@@ -429,6 +429,28 @@ html, body, #root {
   border-bottom-color: var(--ulms-ink);
 }
 
+.wiki-sidebar-head .raw-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px dashed var(--ulms-line);
+  border-radius: 4px;
+  font-family: var(--ulms-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ulms-faint);
+  cursor: copy;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+}
+.wiki-sidebar-head .raw-dropzone.hover {
+  border-color: var(--ulms-blue);
+  color: var(--ulms-blue);
+  background: var(--ulms-hover-bg);
+}
+
 .wiki-sidebar-list .raw-group + .raw-group { margin-top: 4px; }
 .wiki-sidebar-list .raw-group-head {
   display: flex;

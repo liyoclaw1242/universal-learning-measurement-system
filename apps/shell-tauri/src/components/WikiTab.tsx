@@ -291,6 +291,15 @@ function RawPane() {
         loadError={loadError}
         onFilterChange={setFilter}
         onSelect={(type, id) => setSelectedKey(`${type}/${id}`)}
+        onMarkdownDrop={async (file) => {
+          try {
+            const content = await file.text();
+            await bridge.importMarkdownFile(file.name, content);
+            // raw:imported event auto-refreshes list + detail.
+          } catch (e) {
+            alert(`Import failed: ${e}`);
+          }
+        }}
       />
       <RawViewer
         detail={detail}

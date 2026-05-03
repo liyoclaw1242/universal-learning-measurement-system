@@ -26,7 +26,7 @@ use std::sync::Arc;
 
 use serde::Serialize;
 use serde_json::Value;
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 use tokio::sync::Mutex;
 
 use crate::export::ExportResp;
@@ -506,6 +506,36 @@ async fn delete_raw_resource(
 }
 
 #[tauri::command]
+async fn import_markdown_file(
+    app: AppHandle,
+    filename: String,
+    content: String,
+) -> Result<OkResp, String> {
+    let title = filename
+        .trim_end_matches(".md")
+        .trim_end_matches(".markdown")
+        .to_string();
+    if title.is_empty() {
+        return Err("filename must be a .md or .markdown file".into());
+    }
+    let meta = raw_bank::write_markdown(raw_bank::MarkdownIngest {
+        source_url: filename,
+        title,
+        content,
+    })
+    .await?;
+    let _ = app.emit(
+        "raw:imported",
+        serde_json::json!({
+            "type": "markdown",
+            "id": meta.id,
+            "via": "manual-upload",
+        }),
+    );
+    Ok(OkResp { ok: true })
+}
+
+#[tauri::command]
 async fn open_raw_dir() -> Result<OkResp, String> {
     raw_bank::ensure_raw_root().await?;
     let path = raw_bank::raw_root();
@@ -586,6 +616,7 @@ pub fn run() {
             list_raw_resources,
             read_raw_resource,
             delete_raw_resource,
+            import_markdown_file,
             open_raw_dir,
         ])
         .run(tauri::generate_context!())
