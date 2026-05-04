@@ -1,43 +1,27 @@
-// ULMS formal v1 — shell after Step 7a.
-// Inputs + workflow are now wired through the Electron IPC bridge; the
-// Zustand store holds live state updated by coordinator events.
+// ULMS Quiz — single-mode shell. Reads material from the Obsidian wiki
+// (raw/ subtree); 4-agent assessment pipeline runs locally; review +
+// regenerate + export operate on the run snapshot.
 
 import { useEffect, useMemo, useState } from 'react';
 import {
   Ribbon,
   StatusBar,
   NavRail,
-  ModeBar,
   TabBar,
   OverviewTab,
   ItemDetailTab,
   TerminalTab,
-  TranslationPanel,
   DimensionsEditor,
-  PdfReader,
-  HomeView as UiHomeView,
   WarningsTray,
   type AgentId,
   type CompetencyDimension,
-  type Mode,
   type Tab,
   type UserOverride,
 } from '@ulms/ui';
-import { convertFileSrc } from '@tauri-apps/api/core';
 import { useShellStore } from '@/state/shellStore';
-import {
-  bridge,
-  type LearnSessionMeta,
-  type McpSetup,
-  type RawResourceSummary,
-  type RunMeta,
-} from '@/state/ipcBridge';
-import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-import WikiTab from '@/components/WikiTab';
+import { bridge } from '@/state/ipcBridge';
 
 export default function App() {
-  const mode = useShellStore((s) => s.mode);
-  const setMode = useShellStore((s) => s.setMode);
   const stage = useShellStore((s) => s.stage);
   const density = useShellStore((s) => s.density);
   const activeRibbonTab = useShellStore((s) => s.activeRibbonTab);
@@ -69,7 +53,6 @@ export default function App() {
   const dismissAllWarnings = useShellStore((s) => s.dismissAllWarnings);
   const regeneratingItemId = useShellStore((s) => s.regeneratingItemId);
   const regenerateBatchRemaining = useShellStore((s) => s.regenerateBatchRemaining);
-  const learn = useShellStore((s) => s.learn);
   const [generatingDimensions, setGeneratingDimensions] = useState(false);
 
   // Derived: count of items user has rejected.
@@ -88,7 +71,6 @@ export default function App() {
   const centerTabs: Tab[] = useMemo(() => {
     return openTabIds.map<Tab>((id) => {
       if (id === 'overview') return { id, label: 'Overview' };
-      if (id === 'learn') return { id, label: 'Learn', glyph: 'cog', closable: true };
       if (id === 'dimensions-editor') return { id, label: 'Dimensions', glyph: 'cog', closable: true };
       if (id === 'term-unified') return { id, label: 'unified', glyph: 'cog', closable: true };
       if (id === 'term-gemini') return { id, label: 'gemini', glyph: 'cog', closable: true };
@@ -121,81 +103,10 @@ export default function App() {
     if (geminiRunning) openTabAction('term-gemini');
   }, [geminiRunning, openTabAction]);
 
-  // Auto-open Learn tab when a paper window is opened so the side
-  // panel for translations is immediately visible (Quiz mode only —
-  // Learn mode renders the split inline).
-  useEffect(() => {
-    if (mode === 'quiz' && learn.sessionId) openTabAction('learn');
-  }, [mode, learn.sessionId, openTabAction]);
-
-  // Auto-switch to Learn mode the moment a paper session is started
-  // (the user clicked Open paper from a NavRail in any mode).
-  useEffect(() => {
-    if (learn.sessionId && mode !== 'learn') setMode('learn');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [learn.sessionId]);
-
   return (
     <div className="app-root">
-      <ModeBar
-        mode={mode}
-        onModeChange={setMode}
-        learnHasSession={!!learn.sessionId}
-        quizRunning={session.status === 'running'}
-      />
-
-      {mode === 'home' && <HomeView setMode={setMode} learnHasSession={!!learn.sessionId} />}
-
-      {mode === 'wiki' && (
-        <div className="wiki-shell ulms-root" data-density={density}>
-          <WikiTab />
-          <StatusBar
-            session={session}
-            stage={stage}
-            onToggleStage={setStage}
-            versionLabel="ULMS · v0.2 modes"
-          />
-        </div>
-      )}
-
-      {mode === 'learn' && (
-        <div className="learn-shell ulms-root" data-density={density}>
-          <NavRail
-            stage="inputs"
-            items={[]}
-            agents={agents}
-            activeAgentId={activeAgentId}
-            learnSession={
-              learn.sessionId
-                ? {
-                    id: learn.sessionId,
-                    sourceUrl: learn.sourceUrl ?? '',
-                    captureCount: learn.captures.length,
-                    streaming: learn.streaming,
-                  }
-                : null
-            }
-            onOpenPaper={(url) =>
-              void bridge.startPaperSession(url).catch((e) => alert(`Start paper failed: ${e}`))
-            }
-          />
-          <section className="center" aria-label="main workspace">
-            <div className="tab-body">
-              <LearnSplit learn={learn} />
-            </div>
-          </section>
-          <StatusBar
-            session={session}
-            stage={stage}
-            onToggleStage={setStage}
-            versionLabel="ULMS · v0.2 modes"
-          />
-        </div>
-      )}
-
-      {mode === 'quiz' && (
-        <div className="shell ulms-root" data-density={density}>
-          <Ribbon
+      <div className="shell ulms-root" data-density={density}>
+        <Ribbon
             session={session}
             stage={stage}
             activeTab={activeRibbonTab}
@@ -280,7 +191,6 @@ export default function App() {
                 streamLog,
                 applyItemOverride,
                 regeneratingItemId,
-                learn,
               })}
             </div>
           </section>
@@ -289,10 +199,9 @@ export default function App() {
             session={session}
             stage={stage}
             onToggleStage={setStage}
-            versionLabel="ULMS · v0.2 modes"
+            versionLabel="ULMS · Quiz"
           />
-        </div>
-      )}
+      </div>
 
       <WarningsTray
         warnings={warnings}
@@ -301,192 +210,6 @@ export default function App() {
         onDismissAll={dismissAllWarnings}
       />
     </div>
-  );
-}
-
-interface HomeShellProps {
-  setMode: (m: Mode) => void;
-  learnHasSession: boolean;
-}
-
-/**
- * Thin Tauri-side shell around the @ulms/ui HomeView. Owns all state
- * + bridge invocations; pure rendering happens in HomeView.
- */
-function HomeView({ setMode, learnHasSession }: HomeShellProps) {
-  const [sessions, setSessions] = useState<LearnSessionMeta[]>([]);
-  const [runs, setRuns] = useState<RunMeta[]>([]);
-  const [rawImports, setRawImports] = useState<RawResourceSummary[]>([]);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [synthesizing, setSynthesizing] = useState(false);
-  const [synthResult, setSynthResult] = useState<{
-    written: number;
-    skipped: string[];
-    wikiDir: string;
-  } | null>(null);
-  const [mcpSetup, setMcpSetup] = useState<McpSetup | null>(null);
-  const [mcpOpen, setMcpOpen] = useState(false);
-  const [mcpCopied, setMcpCopied] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([bridge.listLearnSessions(), bridge.listRuns(), bridge.listRawResources()])
-      .then(([s, r, raws]) => {
-        if (cancelled) return;
-        setSessions(s);
-        setRuns(r);
-        setRawImports(raws);
-      })
-      .catch((e) => {
-        if (!cancelled) setLoadError(String(e));
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // Live-refresh raw imports list whenever the chrome-ext bridge POSTs
-  // a new resource. The HTTP server emits 'raw:imported' on success.
-  useEffect(() => {
-    let unlisten: UnlistenFn | null = null;
-    let cancelled = false;
-    listen<unknown>('raw:imported', () => {
-      bridge
-        .listRawResources()
-        .then((rs) => {
-          if (!cancelled) setRawImports(rs);
-        })
-        .catch(() => {});
-    }).then((fn) => {
-      if (cancelled) {
-        fn();
-      } else {
-        unlisten = fn;
-      }
-    });
-    return () => {
-      cancelled = true;
-      if (unlisten) unlisten();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!mcpOpen || mcpSetup) return;
-    bridge
-      .getMcpSetup()
-      .then(setMcpSetup)
-      .catch(() => {});
-  }, [mcpOpen, mcpSetup]);
-
-  const importableCount = sessions.filter((s) => s.captureCount > 0).length;
-
-  return (
-    <UiHomeView
-      learnHasSession={learnHasSession}
-      learnSessions={sessions}
-      runs={runs}
-      rawImports={rawImports}
-      loadError={loadError}
-      importableCount={importableCount}
-      synthResult={synthResult}
-      isSynthesizing={synthesizing}
-      mcpSetup={mcpSetup}
-      isMcpOpen={mcpOpen}
-      isMcpCopied={mcpCopied}
-      onModeChange={setMode}
-      onResumeLearnSession={async (id) => {
-        try {
-          await bridge.resumeLearnSession(id);
-          setMode('learn');
-        } catch (e) {
-          alert(`Resume failed: ${e}`);
-        }
-      }}
-      onDeleteLearnSession={async (id, label) => {
-        if (
-          !confirm(
-            `Delete session "${label}"? PDF + page captures + notes.md will be removed.`,
-          )
-        ) {
-          return;
-        }
-        try {
-          await bridge.deleteLearnSession(id);
-          setSessions((prev) => prev.filter((s) => s.id !== id));
-        } catch (e) {
-          alert(`Delete failed: ${e}`);
-        }
-      }}
-      onDeleteRun={async (id, label) => {
-        if (!confirm(`Delete run "${label}"? Snapshot files will be removed.`)) return;
-        try {
-          await bridge.deleteRun(id);
-          setRuns((prev) => prev.filter((r) => r.id !== id));
-        } catch (e) {
-          alert(`Delete failed: ${e}`);
-        }
-      }}
-      onImportAll={async () => {
-        const ids = sessions.filter((s) => s.captureCount > 0).map((s) => s.id);
-        if (ids.length === 0) {
-          alert('No translated pages to import yet.');
-          return;
-        }
-        try {
-          await bridge.importSessionsAsMaterial(ids);
-          setMode('quiz');
-        } catch (e) {
-          alert(`Import failed: ${e}`);
-        }
-      }}
-      onSynthesizeWiki={async () => {
-        setSynthesizing(true);
-        setSynthResult(null);
-        try {
-          const r = await bridge.synthesizeWiki();
-          setSynthResult({
-            written: r.conceptsWritten,
-            skipped: r.skippedHumanEdited,
-            wikiDir: r.wikiDir,
-          });
-        } catch (e) {
-          alert(`Synthesize failed: ${e}`);
-        } finally {
-          setSynthesizing(false);
-        }
-      }}
-      onMcpToggleOpen={setMcpOpen}
-      onMcpCopy={async (snippet) => {
-        try {
-          await navigator.clipboard.writeText(snippet);
-          setMcpCopied(true);
-          setTimeout(() => setMcpCopied(false), 1500);
-        } catch {
-          // Fallback if clipboard API blocked
-        }
-      }}
-      onOpenRawDir={async () => {
-        try {
-          await bridge.openRawDir();
-        } catch (e) {
-          alert(`Open failed: ${e}`);
-        }
-      }}
-      onDeleteRawImport={async (type, id, label) => {
-        if (!confirm(`Delete raw resource "${label}"? Folder will be removed.`)) return;
-        try {
-          await bridge.deleteRawResource(type, id);
-          setRawImports((prev) => prev.filter((r) => !(r.type === type && r.id === id)));
-        } catch (e) {
-          alert(`Delete failed: ${e}`);
-        }
-      }}
-      onActivateRawImport={(r) => {
-        if (r.sourceUrl && /^https?:\/\//.test(r.sourceUrl)) {
-          window.open(r.sourceUrl, '_blank', 'noopener,noreferrer');
-        }
-      }}
-    />
   );
 }
 
@@ -504,12 +227,8 @@ function renderTabBody(
     streamLog: ReturnType<typeof useShellStore.getState>['streamLog'];
     applyItemOverride: (itemId: string, override: UserOverride) => void;
     regeneratingItemId: ReturnType<typeof useShellStore.getState>['regeneratingItemId'];
-    learn: ReturnType<typeof useShellStore.getState>['learn'];
   },
 ) {
-  if (activeId === 'learn') {
-    return <LearnSplit learn={ctx.learn} />;
-  }
   if (activeId === 'dimensions-editor') {
     return <DimensionsEditorTab />;
   }
@@ -579,10 +298,6 @@ function EmptyBody({ label }: { label: string }) {
   );
 }
 
-interface LearnSplitProps {
-  learn: ReturnType<typeof useShellStore.getState>['learn'];
-}
-
 function DimensionsEditorTab() {
   const closeTab = useShellStore((s) => s.closeTab);
   const setActiveCenterTab = useShellStore((s) => s.setActiveCenterTab);
@@ -634,43 +349,3 @@ function DimensionsEditorTab() {
   );
 }
 
-function LearnSplit({ learn }: LearnSplitProps) {
-  const setCurrentPage = useShellStore((s) => s._setLearnCurrentPage);
-  const setTotalPages = useShellStore((s) => s._setLearnTotalPages);
-  const pdfUrl = useMemo(
-    () => (learn.pdfPath ? convertFileSrc(learn.pdfPath) : null),
-    [learn.pdfPath],
-  );
-  const translatedPages = useMemo(
-    () => new Set(learn.captures.filter((c) => c.text.length > 0).map((c) => c.index)),
-    [learn.captures],
-  );
-  return (
-    <div className="learn-split">
-      <PdfReader
-        pdfUrl={pdfUrl}
-        currentPage={learn.currentPage}
-        isStreaming={learn.streaming}
-        translatedPages={translatedPages}
-        onCurrentPageChange={setCurrentPage}
-        onTotalPagesChange={setTotalPages}
-        onTranslatePage={(pageNum, b64) => bridge.translatePage(pageNum, b64)}
-      />
-      <TranslationPanel
-        sourceUrl={learn.sourceUrl}
-        currentPage={learn.currentPage}
-        totalPages={learn.totalPages}
-        streaming={learn.streaming}
-        captures={learn.captures}
-        imported={learn.imported}
-        onStop={() => void bridge.stopTranslation()}
-        onImport={() =>
-          void bridge.importTranslationAsMaterial().catch((e) =>
-            alert(`Import failed: ${e}`),
-          )
-        }
-        onNextPage={() => setCurrentPage(Math.min(learn.totalPages, learn.currentPage + 1))}
-      />
-    </div>
-  );
-}

@@ -1,12 +1,12 @@
 [package]
-name = "ulms-shell-tauri"
+name = "ulms-quiz"
 version = "0.1.0"
-description = "ULMS shell — Tauri spike"
+description = "ULMS Quiz — 4-agent assessment pipeline"
 edition = "2021"
 rust-version = "1.77"
 
 [lib]
-name = "ulms_shell_tauri_lib"
+name = "ulms_quiz_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

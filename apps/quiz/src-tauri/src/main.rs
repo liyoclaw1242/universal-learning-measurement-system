@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    ulms_shell_tauri_lib::run()
+    ulms_quiz_lib::run()
 }

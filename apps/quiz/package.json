@@ -1,8 +1,8 @@
 {
-  "name": "@ulms/shell-tauri",
+  "name": "@ulms/quiz",
   "version": "0.1.0",
   "private": true,
-  "description": "ULMS shell — Tauri port of @ulms/shell",
+  "description": "ULMS Quiz — 4-agent assessment pipeline. Reads material from the Obsidian wiki, writes runs.",
   "type": "module",
   "scripts": {
     "dev": "vite",
