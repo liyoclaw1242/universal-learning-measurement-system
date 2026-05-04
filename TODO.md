@@ -55,10 +55,14 @@ shared LLM-maintained knowledge base under
 
 ---
 
-## Phase 1 — Foundation: wiki schema + maintainer
+## ✅ Phases 1–4 shipped
 
-**Goal:** an empty wiki layout following Karpathy's pattern, plus a
-running claude session that can ingest a single raw resource end-to-end.
+All four phases completed in one push (commits 0bb2ab2, 690eb61,
+04d0df9, this commit). The remaining items below describe what was
+intentionally deferred from the rename + carve-out and what's still
+left to make the Quiz app fully wiki-aware.
+
+## Phase 1 — Foundation: wiki schema + maintainer  ✅
 
 - [ ] **`<vault>/ULMS/CLAUDE.md`** — the schema. Defines:
   - Layout: `index.md`, `log.md`, `sources/`, `concepts/`, `entities/`, `synthesis/`, `raw/`.

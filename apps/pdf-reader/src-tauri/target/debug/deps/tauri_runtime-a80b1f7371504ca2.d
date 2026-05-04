@@ -1,9 +1,0 @@
-/Users/liyoclaw/Projects/universal-learning-measurement-system/apps/pdf-reader/src-tauri/target/debug/deps/tauri_runtime-a80b1f7371504ca2.d: /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/lib.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/dpi.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/monitor.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/webview.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/window.rs
-
-/Users/liyoclaw/Projects/universal-learning-measurement-system/apps/pdf-reader/src-tauri/target/debug/deps/libtauri_runtime-a80b1f7371504ca2.rmeta: /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/lib.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/dpi.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/monitor.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/webview.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/window.rs
-
-/Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/lib.rs:
-/Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/dpi.rs:
-/Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/monitor.rs:
-/Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/webview.rs:
-/Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/window.rs:

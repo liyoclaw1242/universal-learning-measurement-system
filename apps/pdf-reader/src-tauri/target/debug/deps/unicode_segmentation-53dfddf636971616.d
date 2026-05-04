@@ -1,9 +1,0 @@
-/Users/liyoclaw/Projects/universal-learning-measurement-system/apps/pdf-reader/src-tauri/target/debug/deps/unicode_segmentation-53dfddf636971616.d: /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/lib.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/grapheme.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/sentence.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/word.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/tables.rs
-
-/Users/liyoclaw/Projects/universal-learning-measurement-system/apps/pdf-reader/src-tauri/target/debug/deps/libunicode_segmentation-53dfddf636971616.rmeta: /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/lib.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/grapheme.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/sentence.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/word.rs /Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/tables.rs
-
-/Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/lib.rs:
-/Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/grapheme.rs:
-/Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/sentence.rs:
-/Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/word.rs:
-/Users/liyoclaw/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unicode-segmentation-1.13.2/src/tables.rs:

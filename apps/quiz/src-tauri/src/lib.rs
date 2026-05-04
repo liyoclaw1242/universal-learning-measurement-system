@@ -41,19 +41,14 @@ use crate::workflow::WorkflowRuntime;
 // ─── shared state ───────────────────────────────────────────
 
 /// Resolves the workspace dir (where blackboard.json + .claude/skills/
-/// live). Override via ULMS_WORKSPACE_DIR; default points at the
-/// existing apps/shell/workspace so the Tauri shell shares state with
-/// the Electron shell during the migration.
+/// + runs/ live). Override via ULMS_WORKSPACE_DIR; default points at
+/// apps/quiz/workspace/ alongside this crate.
 fn resolve_workspace_dir() -> PathBuf {
     let raw = if let Ok(d) = std::env::var("ULMS_WORKSPACE_DIR") {
         PathBuf::from(d)
     } else {
         let manifest = env!("CARGO_MANIFEST_DIR");
-        PathBuf::from(manifest)
-            .join("..")
-            .join("..")
-            .join("shell")
-            .join("workspace")
+        PathBuf::from(manifest).join("..").join("workspace")
     };
     // Canonicalize so downstream paths don't contain `..` segments —
     // the Tauri asset protocol scope matcher rejects URLs with `..`.

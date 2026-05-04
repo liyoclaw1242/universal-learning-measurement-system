@@ -1,9 +1,0 @@
-{
-  "extends": "../tsconfig.node.json",
-  "compilerOptions": {
-    "outDir": "../out",
-    "noEmit": false,
-    "types": ["node", "electron"]
-  },
-  "include": ["./**/*.ts"]
-}
