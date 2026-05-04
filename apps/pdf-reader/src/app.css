@@ -1,0 +1,113 @@
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  background: var(--ulms-canvas);
+  color: var(--ulms-ink);
+  font-family: var(--ulms-font-sans);
+  font-size: 13px;
+}
+
+.reader-shell {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100%;
+  min-height: 0;
+}
+
+.reader-hdr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: var(--ulms-border);
+}
+.reader-hdr .brand {
+  font-family: var(--ulms-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--ulms-muted);
+}
+.reader-hdr .url-input {
+  flex: 1;
+  font-family: var(--ulms-font-mono);
+  font-size: 12px;
+  background: var(--ulms-canvas-2);
+  border: 1px solid var(--ulms-line);
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: var(--ulms-ink);
+  outline: none;
+}
+.reader-hdr .url-input:focus { border-color: var(--ulms-line-strong); }
+.reader-hdr button {
+  font-family: var(--ulms-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--ulms-ink);
+  border: 1px solid var(--ulms-line-strong);
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.reader-hdr button:hover:not(:disabled) {
+  background: var(--ulms-hover-bg);
+  border-color: var(--ulms-ink-2);
+}
+
+.reader-body {
+  display: grid;
+  grid-template-columns: 220px 1fr 480px;
+  min-height: 0;
+}
+
+.reader-recents {
+  border-right: var(--ulms-border);
+  overflow-y: auto;
+  padding: 12px 14px;
+}
+.reader-recents h3 {
+  margin: 0 0 8px;
+  font-family: var(--ulms-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ulms-faint);
+  font-weight: 500;
+}
+.reader-recents .empty {
+  font-style: italic;
+  color: var(--ulms-faint);
+  font-size: 12px;
+}
+.reader-recents .row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--ulms-line-soft);
+  cursor: pointer;
+}
+.reader-recents .row:hover { background: var(--ulms-hover-bg); }
+.reader-recents .row.active { background: var(--ulms-active-bg); }
+.reader-recents .row .title { font-size: 12px; color: var(--ulms-ink); word-break: break-word; }
+.reader-recents .row .meta { font-family: var(--ulms-font-mono); font-size: 10px; color: var(--ulms-muted); }
+
+.reader-pdf, .reader-translate {
+  min-width: 0;
+  min-height: 0;
+}
+.reader-pdf {
+  border-right: var(--ulms-border);
+}
+
+.reader-ftr {
+  border-top: var(--ulms-border);
+  padding: 6px 16px;
+  font-family: var(--ulms-font-mono);
+  font-size: 10px;
+  color: var(--ulms-faint);
+  display: flex;
+  justify-content: space-between;
+}
